@@ -5,6 +5,8 @@ results into a Firehose database.
 
 ## Architecture
 
+Note: we may substitute fedmsg by rabbitMQ, since it supports queues.
+
 ### kiskadee package
 
 #### monitor
