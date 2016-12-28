@@ -3,6 +3,13 @@
 kiskadee is a continuous static analysis tool which writes the analyses
 results into a Firehose database.
 
+## Dependencies
+
+In order to install kiskadee dependencies, just run `pip install -e .`
+
+To install docker package, you will need libffi package(in Debian you will
+have to install libffi-dev package).
+
 ## Architecture
 
 Note: we may substitute fedmsg by rabbitMQ, since it supports queues.
