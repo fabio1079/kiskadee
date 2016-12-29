@@ -1,0 +1,4 @@
+[submodule "kiskadee/debian_runner"]
+	path = kiskadee/debian_runner
+	url = git@github.com:tcc-unb-fga/debile.git
+	branch = docker_dev_mode
