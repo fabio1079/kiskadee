@@ -1,5 +1,0 @@
-setuptools
-fedmsg
-nose
-sqlalchemy
-psycopg2
