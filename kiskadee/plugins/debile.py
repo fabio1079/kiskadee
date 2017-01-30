@@ -1,14 +1,10 @@
+import tempfile
+import shutil
 from subprocess import call
 import os
 import docker
-message = 'message structure goes here'
 
-# Debile submodule
-runner_name = 'debian_runner'
-
-base_docker_dir = '/contrib/clemux/docker'
-runner_dir = runner_name + base_docker_dir
-
+DEBILE_DATA = '/srv/debile/incoming/UploadQueue/'
 
 class Runner():
 
@@ -69,7 +65,9 @@ class Runner():
     def run_slave(self):
             print('Starting debile slave')
             self.slave = self.containers().run("debile-slave-pkg",
-                                               "tail -f /dev/null",
+                                               "debile-slave --config " +
+                                               "/etc/debile/slave.yaml " +
+                                               "--auth simple",
                                                links={'debile-http': 'debile-http',
                                                       'debile-master': 'debile-master'},
                                                name='debile-slave',
@@ -77,13 +75,11 @@ class Runner():
 
     def run_pg(self):
             self.pg = self.containers().run("clemux/debile-pg",
-                                            "tail -f /dev/null",
                                             name='debile-pg',
                                             ports={'5432': '5432'},
                                             detach=True)
     def run_data(self):
             self.pg = self.containers().run("clemux/debile-data",
-                                            "tail -f /dev/null",
                                             name='debile-data',
                                             detach=True)
 
@@ -96,14 +92,47 @@ class Runner():
                                               detach=True)
 
     def upload(self):
-        print(self.slave.exec_run("debile-upload --dist=unstable " +
-                                  "--source=mutt --version=1.7.1-5 " +
-                                  "--group=default"))
+        self.slave.exec_run("debile-upload --dist=unstable " +
+                            "--source=tmux --version=2.3-4 " +
+                            "--group=default")
+        self.get_firehose()
 
     def containers(self):
         return self.client.containers
+
+    def report(self):
+        self.__init_db()
+        self.__incoming()
+        self.slave.exec_run("debile-slave --config " +
+                           "/etc/debile/slave.yaml --auth simple",
+                           detach=True)
+
+    def __incoming(self):
+        self.master.exec_run("debile-incoming --config " +
+                             "/etc/debile/master.yaml --group default " +
+                             "--no-dud /srv/debile/incoming/UploadQueue/",
+                             detach=True)
+
+    def __init_db(self):
+        self.master.exec_run("debile-master-init --config " +
+                             "/etc/debile/master.yaml " +
+                             "/etc/debile/debile.yaml",
+                             detach=True)
+    # TODO: Remove tempdir after retrieve firehose
+    def get_firehose(self):
+        tempdir = tempfile.mkdtemp()
+        firehose_file = 'tmux_2.3-4_amd64.4.firehose.xml'
+        abs_firehose_file = tempdir + '/' + 'tmux_2.3-4_amd64.4.firehose.xml'
+        kiskadee_report = tempfile.NamedTemporaryFile(delete=False, prefix=tempdir)
+        call(['docker', 'cp', 'debile-master:%s%s' % (DEBILE_DATA, firehose_file), tempdir])
+        with open(abs_firehose_file, 'rw+') as f:
+            line = f.readline()
+            kiskadee_report.write(line)
+
+        return kiskadee_report
 
 if __name__ == "__main__":
     debile = Runner()
     debile.check()
     debile.upload()
+    # debile.report()
