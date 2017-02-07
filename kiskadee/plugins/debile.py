@@ -17,7 +17,7 @@ class Runner():
         self.http = None
 
     def watch(self):
-        pass
+        return  {'source': 'ranger', 'version': '1.7.1-1'}
 
     def callback(self):
         pass
@@ -25,7 +25,7 @@ class Runner():
     def container_id(self):
         call(['docker', 'ps -aqf "name=debile-pg"'], shell=True)
 
-    def retrieve_container(self, container_name):
+    def setup_container(self, container_name):
         try:
             container = self.containers().get('debile-%s' % container_name)
             setattr(self, container_name, container)
@@ -44,12 +44,11 @@ class Runner():
             print('Container already runnin')
             return container
 
-    def check(self):
+    def docker_setup(self):
         containers = ['data', 'pg', 'http',
                       'master', 'slave']
         for container in containers:
-            self.retrieve_container(container)
-            self.start_container(container)
+            self.setup_container(container)
 
     def run_master(self):
             print('Starting debile master')
@@ -92,20 +91,17 @@ class Runner():
                                               detach=True)
 
     def upload(self):
+        data = self.watch()
         self.slave.exec_run("debile-upload --dist=unstable " +
-                            "--source=tmux --version=2.3-4 " +
-                            "--group=default")
-        self.get_firehose()
+                            " --source=%s" % data['source'] +
+                            " --version=%s" % data['version'] +
+                            " --group=default")
+        self.__incoming()
+        # self.__check_builded_job(data)
 
     def containers(self):
         return self.client.containers
 
-    def report(self):
-        self.__init_db()
-        self.__incoming()
-        self.slave.exec_run("debile-slave --config " +
-                           "/etc/debile/slave.yaml --auth simple",
-                           detach=True)
 
     def __incoming(self):
         self.master.exec_run("debile-incoming --config " +
@@ -113,11 +109,12 @@ class Runner():
                              "--no-dud /srv/debile/incoming/UploadQueue/",
                              detach=True)
 
-    def __init_db(self):
+    def init_db(self):
         self.master.exec_run("debile-master-init --config " +
                              "/etc/debile/master.yaml " +
                              "/etc/debile/debile.yaml",
                              detach=True)
+
     # TODO: Remove tempdir after retrieve firehose
     def get_firehose(self):
         tempdir = tempfile.mkdtemp()
@@ -131,8 +128,12 @@ class Runner():
 
         return kiskadee_report
 
+    def __check_builded_job(self, data):
+        while True:
+            print("checking %s build" %s data['source'])
+
 if __name__ == "__main__":
     debile = Runner()
-    debile.check()
+    debile.docker_setup()
+    debile.init_db()
     debile.upload()
-    # debile.report()
