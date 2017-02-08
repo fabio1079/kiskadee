@@ -17,7 +17,7 @@ class Runner():
         self.http = None
 
     def watch(self):
-        return  {'source': 'ranger', 'version': '1.7.1-1'}
+        return  {'source': 'rofi', 'version': '1.3.1-2'}
 
     def callback(self):
         pass
@@ -29,19 +29,19 @@ class Runner():
         try:
             container = self.containers().get('debile-%s' % container_name)
             setattr(self, container_name, container)
-            self.start_container(container)
+            self.start_container(container, container_name)
         except Exception:
             print("Something went wrong and " +
                   "container was not properly started")
             method_call = getattr(self, "run_%s" % container_name)
             method_call()
 
-    def start_container(self, container):
+    def start_container(self, container, container_name):
         try:
             container.start()
             return container
         except Exception:
-            print('Container already runnin')
+            print('Container %s already runnin' % container_name)
             return container
 
     def docker_setup(self):
@@ -52,15 +52,20 @@ class Runner():
 
     def run_master(self):
             print('Starting debile master')
-            self.__init_db()
-            self.containers().run("debile-master-pkg",
-                                                "debile-master --config " +
-                                                "/etc/debile/master.yaml " +
-                                                "--auth simple",
+            self.master = self.containers().run("debile-master-pkg",
+                                                "tail -f /dev/null",
                                                 name='debile-master',
                                                 links={'debile-pg': 'debile-pg'},
                                                 volumes_from=['debile-data'],
                                                 detach=True)
+            self.master.exec_run(self.__init_db())
+            self.master.exec_run(self.__init_master_loop(), detach=True, stream=True)
+
+    def __init_master_loop(self):
+        return "debile-master --config /etc/debile/master.yaml --auth simple "
+
+    def __init_db(self):
+        return "debile-master-init --config /etc/debile/master.yaml /etc/debile/debile.yaml"
 
     def run_slave(self):
             print('Starting debile slave')
@@ -110,11 +115,6 @@ class Runner():
                              "--no-dud /srv/debile/incoming/UploadQueue/",
                              detach=True)
 
-    def __init_db(self):
-        self.master.exec_run("debile-master-init --config " +
-                             "/etc/debile/master.yaml " +
-                             "/etc/debile/debile.yaml",
-                             detach=True)
 
     # TODO: Remove tempdir after retrieve firehose
     def get_firehose(self):
