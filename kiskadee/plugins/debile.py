@@ -52,7 +52,8 @@ class Runner():
 
     def run_master(self):
             print('Starting debile master')
-            self.master = self.containers().run("debile-master-pkg",
+            self.__init_db()
+            self.containers().run("debile-master-pkg",
                                                 "debile-master --config " +
                                                 "/etc/debile/master.yaml " +
                                                 "--auth simple",
@@ -109,7 +110,7 @@ class Runner():
                              "--no-dud /srv/debile/incoming/UploadQueue/",
                              detach=True)
 
-    def init_db(self):
+    def __init_db(self):
         self.master.exec_run("debile-master-init --config " +
                              "/etc/debile/master.yaml " +
                              "/etc/debile/debile.yaml",
@@ -130,10 +131,9 @@ class Runner():
 
     def __check_builded_job(self, data):
         while True:
-            print("checking %s build" %s data['source'])
+            print("checking %s build" % data['source'])
 
 if __name__ == "__main__":
     debile = Runner()
     debile.docker_setup()
-    debile.init_db()
     debile.upload()
