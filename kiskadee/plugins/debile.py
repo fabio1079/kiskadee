@@ -53,7 +53,7 @@ class Runner():
     def run_master(self):
             print('Starting debile master')
             self.master = self.containers().run("debile-master-pkg",
-                                                "tail -f /dev/null",
+                                                "tail -f /tmp/debile/debile_master_log",
                                                 name='debile-master',
                                                 links={'debile-pg': 'debile-pg'},
                                                 volumes_from=['debile-data'],
@@ -62,10 +62,10 @@ class Runner():
             self.master.exec_run(self.__init_master_loop(), detach=True, stream=True)
 
     def __init_master_loop(self):
-        return "debile-master --config /etc/debile/master.yaml --auth simple "
+        return "/bin/bash -c 'debile-master --config /etc/debile/master.yaml --auth simple &> /tmp/debile/debile_master_log'"
 
     def __init_db(self):
-        return "debile-master-init --config /etc/debile/master.yaml /etc/debile/debile.yaml"
+        return "/bin/bash -c 'debile-master-init --config /etc/debile/master.yaml /etc/debile/debile.yaml  &> /tmp/debile/debile_master_log'"
 
     def run_slave(self):
             print('Starting debile slave')
