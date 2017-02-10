@@ -3,6 +3,8 @@ import shutil
 from subprocess import call
 import os
 import docker
+import psycopg2
+
 
 DEBILE_DATA = '/srv/debile/incoming/UploadQueue/'
 
@@ -17,7 +19,7 @@ class Runner():
         self.http = None
 
     def watch(self):
-        return  {'source': 'rofi', 'version': '1.3.1-2'}
+        return  {'source': 'mutt', 'version': '1.7.2-1'}
 
     def callback(self):
         pass
@@ -60,6 +62,7 @@ class Runner():
                                                 detach=True)
             self.master.exec_run(self.__init_db())
             self.master.exec_run(self.__init_master_loop(), detach=True, stream=True)
+            self.__update_slave_ip()
 
     def __init_master_loop(self):
         return "/bin/bash -c 'debile-master --config /etc/debile/master.yaml --auth simple &> /tmp/debile/debile_master_log'"
@@ -79,18 +82,19 @@ class Runner():
                                                detach=True)
 
     def run_pg(self):
+            print('Starting debile pg')
             self.pg = self.containers().run("clemux/debile-pg",
                                             name='debile-pg',
                                             ports={'5432': '5432'},
                                             detach=True)
     def run_data(self):
-            self.pg = self.containers().run("clemux/debile-data",
-                                            name='debile-data',
-                                            detach=True)
+            print('Starting debile data')
+            self.data = self.containers().run("clemux/debile-data",
+                                            name='debile-data')
 
     def run_http(self):
+            print('Starting debile http')
             self.http = self.containers().run("clemux/debile-http",
-                                              "tail -f /dev/null",
                                               name='debile-http',
                                               volumes_from=['debile-data'],
                                               ports={'80': '80'},
@@ -98,6 +102,7 @@ class Runner():
 
     def upload(self):
         data = self.watch()
+        print('Uploading %s version %s' % (data['source'], data['version']))
         self.slave.exec_run("debile-upload --dist=unstable " +
                             " --source=%s" % data['source'] +
                             " --version=%s" % data['version'] +
@@ -110,9 +115,7 @@ class Runner():
 
 
     def __incoming(self):
-        self.master.exec_run("debile-incoming --config " +
-                             "/etc/debile/master.yaml --group default " +
-                             "--no-dud /srv/debile/incoming/UploadQueue/",
+        self.master.exec_run("/bin/bash -c 'debile-incoming --config /etc/debile/master.yaml --group default --no-dud /srv/debile/incoming/UploadQueue/ &> /tmp/debile/debile_master_log'",
                              detach=True)
 
 
@@ -132,6 +135,14 @@ class Runner():
     def __check_builded_job(self, data):
         while True:
             print("checking %s build" % data['source'])
+
+    def __update_slave_ip(self):
+        conn = psycopg2.connect("dbname='debile' user='debile' host='localhost'")
+        cur = conn.cursor()
+        cur.execute("update builders SET ip='172.17.0.5' where id=1;")
+        conn.commit()
+        cur.close()
+        conn.close()
 
 if __name__ == "__main__":
     debile = Runner()
