@@ -31,12 +31,12 @@ Note: we may substitute fedmsg by rabbitMQ, since it supports queues.
 * listen to fedmsg and compare messages with plugin messages
   * on matches, run plugin callback()
 * write callback status on fedmsg (so monitor knows when to update redis)
-* when callback() responds: send file to loader
+* when callback() responds: send file to converter
 
 We think kubernetes may be a good idea for each plugin run. Not sure if
 possible.
 
-#### loader
+#### converter
 
 * receives file from runner
 * checks if is a valid firehose file

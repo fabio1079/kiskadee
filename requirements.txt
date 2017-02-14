@@ -1,1 +1,4 @@
+setuptools
 fedmsg
+nose
+redis
