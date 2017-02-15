@@ -8,7 +8,7 @@ import psycopg2
 
 DEBILE_DATA = '/srv/debile/incoming/UploadQueue/'
 
-class Runner():
+class Interface():
 
     def __init__(self):
         self.client = docker.from_env()
@@ -144,7 +144,7 @@ class Runner():
         cur.close()
         conn.close()
 
-if __name__ == "__main__":
-    debile = Runner()
+def setup():
+    debile = Interface()
     debile.docker_setup()
-    debile.upload()
+    # debile.upload()
