@@ -24,7 +24,7 @@ setup(name='kiskadee',
       install_requires=[
           'fedmsg',
           'docker',  # do we need docker here?
-          'redis',
+          'sqlalchemy',
           ],
       test_suite='nose.collector',
       tests_require=['nose']

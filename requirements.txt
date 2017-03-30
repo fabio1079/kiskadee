@@ -1,4 +1,5 @@
 setuptools
 fedmsg
 nose
-redis
+sqlalchemy
+psycopg2

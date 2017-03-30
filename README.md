@@ -19,6 +19,7 @@ Note: we may substitute fedmsg by rabbitMQ, since it supports queues.
 #### monitor
   
 * load database packages and versions into redis
+  * Redis information is stored as "pluginName:package":"version"
 * loads all plugins watch() functions
 * load all repositories package versions with the watch() functions 
 * compares repository versions against db versions in redis
