@@ -9,5 +9,5 @@ def main():
     # TODO: Make this code more generic, in order to enable
     # run the same setup code to several plugins. Maybe create a
     # interface that define the behavior of the plugins.
-    from kiskadee.plugins.debile import debile
-    debile.setup()
+    from kiskadee.plugins.debian import debian
+    debian.init()

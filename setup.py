@@ -28,7 +28,8 @@ setup(
                 'fedmsg',
                 'docker',  # do we need docker here?
                 'redis',
-                'psycopg2'
+                'psycopg2',
+                'firehose'
                 ],
             test_suite='nose.collector',
             tests_require=['nose']
