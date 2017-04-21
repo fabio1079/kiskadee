@@ -10,4 +10,4 @@ def main():
     # run the same setup code to several plugins. Maybe create a
     # interface that define the behavior of the plugins.
     from kiskadee.plugins.debian import debian
-    debian.init()
+    debian.watch()

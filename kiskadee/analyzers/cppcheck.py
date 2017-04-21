@@ -9,15 +9,35 @@
 from firehose.model import Issue, Message, File, Location, Point
 import tempfile
 import os
+from subprocess import check_output
+import subprocess
+import pdb
 
 
 def cppcheck(source_dir):
     """ Run Cppcheck on source code, inside source_dir
     :source_dir: Absolute path to source code
-    :returns: Cppcheck report
+    :returns: Write cppcheck report inside kiskadee/reports directory
     """
+    report_directory = os.path.join(os.path.abspath("."), "reports/")
+    try:
+        os.mkdir(report_directory)
+    except OSError:
+        pass
+
+    report_file = "cppcheck_report.xml"
     os.chdir(source_dir)
-    run_command([ 'cppcheck', '-j8', '--enable=all', '--xml-version=2', '.'])
+    pipes = subprocess.Popen([ 'cppcheck', '-j8', '--enable=all', 
+                               '--xml-version=2', '.'], 
+                               stdout=subprocess.PIPE, 
+                               stderr=subprocess.PIPE)
+
+    std_out, std_err = pipes.communicate()
+
+    f = open(report_directory + report_file, 'w')
+    f.write(std_err.decode('utf-8'))
+    f.close
+    
 
 
 def to_firehose(report):
