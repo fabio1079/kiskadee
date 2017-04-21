@@ -9,7 +9,6 @@
 from firehose.model import Issue, Message, File, Location, Point
 import tempfile
 import os
-from subprocess import check_output
 
 
 def cppcheck(source_dir):
@@ -27,17 +26,6 @@ def to_firehose(report):
     :returns: Firehose report
     """
     pass
-
-
-def run_command(arg1):
-    """TODO: Docstring for run_command.
-
-    :arg1: TODO
-    :returns: TODO
-
-    """
-    pass
-
 
 def version():
     try:
