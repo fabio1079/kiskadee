@@ -29,7 +29,8 @@ setup(
                 'docker',  # do we need docker here?
                 'redis',
                 'psycopg2',
-                'firehose'
+                'firehose',
+                'sqlalchemy'
                 ],
             test_suite='nose.collector',
             tests_require=['nose']

@@ -13,21 +13,21 @@ import tempfile
 from shutil import copy2
 import pdb
 
-def watch():
+def watch(requested_source):
     """Monitor Debian repositories
 
     :returns: I not know yet, for now will return
     only the path to a source package, that will
     be analyzed by some analyzer.
     """
-    requested_pkg_path = sys.argv[1]
-    extracted_pkg_path = extract_source_package(requested_pkg_path)
-    plugins().cppcheck(extracted_pkg_path)
+    extracts_path = extracted_source_path()
+    extract_source(requested_source, extracts_path)
+    analyzers().cppcheck(extracts_path)
 
 
 
 
-def download_source_package(pkg_name, pkg_version):
+def download_source(pkg_name, pkg_version):
     """Download packages from some debian mirror.
 
     :pkg_name: package name (a.g mutt)
@@ -38,29 +38,47 @@ def download_source_package(pkg_name, pkg_version):
     find a better place (module) to this method.
     """
 
-def extract_source_package(pkg_dir):
+def extract_source(source, path):
     """Extract the source code to a randomic dir.
 
-    :arg1: the absolute tar.gz directory of the downloaded package. 
+    :arg1: The source code (tar.gz) that will be analyzed
     :returns: the randomic path to the extracted package.
 
     """
 
-    absolute_pkg_dir = os.path.abspath(pkg_dir)
-    extraction_dir = tempfile.mkdtemp()
-    copy2(absolute_pkg_dir, extraction_dir)
-    abs_tar_path = extraction_dir + '/' + pkg_dir
-    pkg_tarfile = tarfile.open(abs_tar_path)
-    pkg_tarfile.extractall(extraction_dir)
+    copy_source(source, path)
+    abs_tar_path = path + '/' + os.path.basename(source)
+    source_tarfile = tarfile.open(abs_tar_path)
+    source_tarfile.extractall(path)
     os.remove(abs_tar_path)
-    return extraction_dir
+
+def copy_source(source, path):
+    """Copy the source code to a proper directory
+
+    :arg1: source file
+    """
+
+    source_path = abs_source_path(source)
+    copy2(source_path, path)
+
+
+def abs_source_path(source):
+    """Returns de absolute path to the source
+
+    :arg1: source
+    :returns: path
+    """
+    return os.path.abspath(source)
 
 
 
+def extracted_source_path():
+    """Create a temporary directory
+    """
+    return tempfile.mkdtemp()
 
 
-
-def plugins():
+def analyzers():
     """ Read wich plugins will be run on the source code
 
     :returns: List of plugins to run on source code.

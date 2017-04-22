@@ -26,6 +26,9 @@ def cppcheck(source_dir):
         pass
 
     report_file = "cppcheck_report.xml"
+    initial_dir =os.getcwd()
+    # TODO: Use 'with' to change to the extracted
+    # source directory, instead of os.getcwd()
     os.chdir(source_dir)
     pipes = subprocess.Popen([ 'cppcheck', '-j8', '--enable=all', 
                                '--xml-version=2', '.'], 
@@ -37,6 +40,7 @@ def cppcheck(source_dir):
     f = open(report_directory + report_file, 'w')
     f.write(std_err.decode('utf-8'))
     f.close
+    os.chdir(initial_dir)
     
 
 
