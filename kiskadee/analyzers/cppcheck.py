@@ -12,7 +12,6 @@ from subprocess import check_output
 import subprocess
 import pdb
 import shutil
-from kiskadee.helpers import to_firehose
 
 
 def cppcheck(source_dir):
@@ -32,7 +31,7 @@ def cppcheck(source_dir):
 
     os.chdir(initial_dir)
     _, std_err = pipes.communicate()
-    return to_firehose(std_err, 'cppcheck')
+    return std_err
 
 
 def version():

@@ -12,6 +12,7 @@ import tarfile
 import tempfile
 from shutil import copy2
 import pdb
+from kiskadee.helpers import to_firehose
 
 def watch(requested_source):
     """Monitor Debian repositories
@@ -22,7 +23,8 @@ def watch(requested_source):
     """
     extracts_path = extracted_source_path()
     extract_source(requested_source, extracts_path)
-    analyzers().cppcheck(extracts_path)
+    analyzer_output = analyzers().cppcheck(extracts_path)
+    to_firehose(analyzer_output, 'cppcheck')
 
 
 def download_source(pkg_name, pkg_version):
@@ -66,7 +68,6 @@ def abs_source_path(source):
     :returns: path
     """
     return os.path.abspath(source)
-
 
 
 def extracted_source_path():

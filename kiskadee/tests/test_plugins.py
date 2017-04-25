@@ -55,5 +55,4 @@ class TestDebianPlugin(TestCase):
         debian_plugin.extract_source(source, path)
         debian_plugin.analyzers().cppcheck(path)
         files = os.listdir('reports')
-        self.assertTrue('cppcheck_report.xml' in files)
-
+        self.assertTrue('firehose_cppcheck_report.xml' in files)

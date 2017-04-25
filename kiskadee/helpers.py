@@ -12,13 +12,14 @@ import shutil
 import tempfile
 import os
 
-def to_firehose(report, analyzer):
+def to_firehose(bytes_input, analyzer):
     """ Parser the analyzer report to Firehose format
-    :report: The analyzer report
-    :returns: create a firehose report inside reports directory
+    :bytes_input: The analyzer report, as a byte string
+    :returns: A xml.etree.ElementTree object, representing the firehose report
     """
 
-    simple_report_file = "simple_cppcheck_report.xml"
+    tempdir = tempfile.mkdtemp()
+    tmp_report_file = "tmp_%s_report.xml" % analyzer
     firehose_report_file = "firehose_%s_report.xml" % analyzer
     report_directory = os.path.join(os.path.abspath("."), "reports/")
 
@@ -27,18 +28,21 @@ def to_firehose(report, analyzer):
     except OSError:
         pass
 
-    tempdir = tempfile.mkdtemp()
-    f = open(tempdir + simple_report_file, 'w')
-    f.write(report.decode('UTF-8'))
+    file_to_parse = os.path.join(tempdir, tmp_report_file)
+    f = open(file_to_parse, 'w')
+    f.write(bytes_input.decode('UTF-8'))
     f.close()
 
     analyzer_module = import_analyzer_module(analyzer)
 
     if (analyzer_module):
-        tree_analysis = analyzer_module.parse_file(tempdir + simple_report_file).to_xml()
-        tree_analysis.write((report_directory  + firehose_report_file), encoding='UTF-8')
+        analyzer_report_file = report_directory  + firehose_report_file
+        firehose_tree = analyzer_module.parse_file(file_to_parse).to_xml()
+        firehose_tree.write(analyzer_report_file, encoding='UTF-8')
 
     shutil.rmtree(tempdir)
+
+    return firehose_tree
 
 def import_analyzer_module(analyzer):
     """ Import a firehose parser
