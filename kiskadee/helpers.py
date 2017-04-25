@@ -7,16 +7,47 @@
 # DEALINGS IN THE SOFTWARE.
 
 from subprocess import check_output
+from importlib import import_module
+import shutil
+import tempfile
+import os
 
-def run_command(command):
-    """TODO: Docstring for run_command.
-
-    :arg1: command to run
-    :returns: TODO
-
+def to_firehose(report, analyzer):
+    """ Parser the analyzer report to Firehose format
+    :report: The analyzer report
+    :returns: create a firehose report inside reports directory
     """
-    try:
-        check_output(command)
-    except Exception:
-        print("Cannot run command %s " % command)
 
+    simple_report_file = "simple_cppcheck_report.xml"
+    firehose_report_file = "firehose_%s_report.xml" % analyzer
+    report_directory = os.path.join(os.path.abspath("."), "reports/")
+
+    try:
+        os.mkdir(report_directory)
+    except OSError:
+        pass
+
+    tempdir = tempfile.mkdtemp()
+    f = open(tempdir + simple_report_file, 'w')
+    f.write(report.decode('UTF-8'))
+    f.close()
+
+    analyzer_module = import_analyzer_module(analyzer)
+
+    if (analyzer_module):
+        tree_analysis = analyzer_module.parse_file(tempdir + simple_report_file).to_xml()
+        tree_analysis.write((report_directory  + firehose_report_file), encoding='UTF-8')
+
+    shutil.rmtree(tempdir)
+
+def import_analyzer_module(analyzer):
+    """ Import a firehose parser
+
+    analyzer: The name of the parser that will be imported
+    :returns: Some firehose parser
+    """
+
+    try:
+        return import_module("firehose.parsers.%s" % (analyzer))
+    except ImportError:
+        print("ERROR: Firehose parser %s not found" % analyzer)

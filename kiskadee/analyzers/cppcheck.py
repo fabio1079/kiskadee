@@ -6,13 +6,13 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from firehose.parsers.cppcheck import parse_file
 import tempfile
 import os
 from subprocess import check_output
 import subprocess
 import pdb
-from io import BytesIO
+import shutil
+from kiskadee.helpers import to_firehose
 
 
 def cppcheck(source_dir):
@@ -21,7 +21,7 @@ def cppcheck(source_dir):
     :returns: Write cppcheck report inside kiskadee/reports directory
     """
 
-    initial_dir =os.getcwd()
+    initial_dir = os.getcwd()
     # TODO: Use 'with' to change to the extracted
     # source directory, instead of os.getcwd()
     os.chdir(source_dir)
@@ -32,34 +32,7 @@ def cppcheck(source_dir):
 
     os.chdir(initial_dir)
     _, std_err = pipes.communicate()
-    return to_firehose(std_err)
-
-
-def to_firehose(report):
-    """ Parser the analyzer report to Firehose format
-    :report: The analyzer report
-    :returns: create a firehose report inside reports directory
-    """
-
-    simple_report_file = "simple_cppcheck_report.xml"
-    firehose_report_file = "firehose_cppcheck_report.xml"
-    report_directory = os.path.join(os.path.abspath("."), "reports/")
-
-    try:
-        os.mkdir(report_directory)
-    except OSError:
-        pass
-
-    try:
-        f = open(report_directory + simple_report_file, 'w')
-        f.write(report.decode('UTF-8'))
-        f.close()
-    except IOError:
-        print("File %s not found", simple_report_file)
-
-    tree_analysis = parse_file(report_directory + simple_report_file).to_xml()
-    tree_analysis.write((report_directory  + firehose_report_file), encoding='UTF-8')
-    
+    return to_firehose(std_err, 'cppcheck')
 
 
 def version():

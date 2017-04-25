@@ -25,8 +25,6 @@ def watch(requested_source):
     analyzers().cppcheck(extracts_path)
 
 
-
-
 def download_source(pkg_name, pkg_version):
     """Download packages from some debian mirror.
 
@@ -41,9 +39,8 @@ def download_source(pkg_name, pkg_version):
 def extract_source(source, path):
     """Extract the source code to a randomic dir.
 
-    :arg1: The source code (tar.gz) that will be analyzed
-    :returns: the randomic path to the extracted package.
-
+    :source: The source code (tar.gz) that will be analyzed.
+    :path: The path where the tar.gz is located.
     """
 
     copy_source(source, path)
