@@ -1,7 +1,11 @@
+import queue
+
+analysis_queue = queue.Queue
+
+
 def enqueue(package):
-    pass
+    analysis_queue.put(package)
 
 
 def dequeue():
-    # return package
-    pass
+    return analysis_queue.get()
