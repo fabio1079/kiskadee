@@ -16,7 +16,7 @@ class TestHelpers(TestCase):
         debian_plugin = kiskadee.plugins.debian
         source = 'kiskadee/tests/test_source/test_source.tar.gz'
         path = debian_plugin.extracted_source_path()
-        debian_plugin.extract_source(source, path)
+        debian_plugin.uncompress_tar_gz(source, path)
         cls.analyzer_report = debian_plugin.analyzers().cppcheck(path)
 
 

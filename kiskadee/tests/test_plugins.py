@@ -13,6 +13,7 @@ class TestPlugins(TestCase):
         plugins_path = path.join('kiskadee', 'plugins')
         plugins_pkg_files = [f for f in listdir(plugins_path) if
                              path.isfile(path.join(plugins_path, f))]
+        plugins_pkg_files.remove('config.json')
         plugins_pkg_files.remove('__init__.py')
         for plugin in plugins_pkg_files:
             plugin_name, file_ext = path.splitext(plugin)
@@ -37,11 +38,11 @@ class TestDebianPlugin(TestCase):
         self.assertTrue('test_source.tar.gz' in files)
         shutil.rmtree(path)
 
-    def test_extract_source(self):
+    def test_uncompress_tar_gz(self):
         source = 'kiskadee/tests/test_source/test_source.tar.gz'
         path = self.debian_plugin.extracted_source_path()
         self.debian_plugin.copy_source(source, path)
-        self.debian_plugin.extract_source(source, path)
+        self.debian_plugin.uncompress_tar_gz(source, path)
         files = os.listdir(path)
         self.assertTrue('source' in files)
         shutil.rmtree(path)
@@ -50,7 +51,7 @@ class TestDebianPlugin(TestCase):
         source = 'kiskadee/tests/test_source/test_source.tar.gz'
         path = self.debian_plugin.extracted_source_path()
         self.debian_plugin.copy_source(source, path)
-        self.debian_plugin.extract_source(source, path)
+        self.debian_plugin.uncompress_tar_gz(source, path)
         self.debian_plugin.analyzers().cppcheck(path)
         files = os.listdir('reports')
         self.assertTrue('firehose_cppcheck_report.xml' in files)
