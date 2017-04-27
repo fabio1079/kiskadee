@@ -3,6 +3,7 @@ message = 'message structure goes here'
 
 def watch():
     print("watch function")
+    return {}
 
 
 def callback():

@@ -22,4 +22,4 @@ class TestMonitor(TestCase):
         monitor.sync_analyses()
 
     def test_monitor(self):
-        monitor.monitor_repository()
+        monitor.monitor()

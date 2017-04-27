@@ -14,8 +14,10 @@ from shutil import copy2
 import pdb
 from kiskadee.helpers import to_firehose
 
+
 def watch():
-    pass
+    print("debian watch function")
+    return {}
 
 # Former watch(); this is actually analyzing the packages
 def analyze(requested_source):

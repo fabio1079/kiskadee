@@ -1,6 +1,8 @@
 import kiskadee.model
 import kiskadee.queue
 
+running = True
+
 
 def sync_analyses():
     """enqueues package versions without analyses in the db for analysis"""
@@ -13,15 +15,16 @@ def sync_analyses():
     pass
 
 
-# how to receive messages and enqueue?
-# use decorators to keep runing the function and enqueuing stuff?
-def monitor_repository():
+def monitor():
     plugins = kiskadee.load_plugins()
     for plugin in plugins:
-        plugin.watch()
+        packages = plugin.watch()
+        for package in packages:
+            kiskadee.queue.enqueue(package)
 
 
-# This function should move somewhere else and be called by
-# the watch function
-def enqueue_new_package(package_version):
-    kiskadee.queue.enqueue(package_version)
+if __name__ == "__main__":
+    # TODO: improve with start/stop system
+    while running:
+        monitor()
+    # cleanup goes here
