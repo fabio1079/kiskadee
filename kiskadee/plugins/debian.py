@@ -13,8 +13,10 @@ import tempfile
 from shutil import copy2
 import pdb
 from kiskadee.helpers import to_firehose
+from kiskadee.monitor import watcher
 
 
+@watcher
 def watch():
     print("debian watch function")
     return {}
