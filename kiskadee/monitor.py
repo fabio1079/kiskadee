@@ -2,7 +2,6 @@ import kiskadee.model
 import kiskadee.queue
 
 running = True
-watchers = []  # functions decorated with watcher()
 
 
 def sync_analyses():
@@ -17,18 +16,17 @@ def sync_analyses():
 
 
 def monitor():
-    kiskadee.load_plugins()
-    for watch in watchers:
-        watch()
+    plugins = kiskadee.load_plugins()
+    for plugin in plugins:
+        plugin.watch()
 
 
-def watcher(watch):
-    watchers.append(watch)
-
+def watcher(func):
     def wrapper(*args, **kwargs):
-        packages = watch(*args, **kwargs)
+        packages = func(*args, **kwargs)
         for package in packages:
             kiskadee.queue.enqueue(package)
+        return packages
     return wrapper
 
 if __name__ == "__main__":
