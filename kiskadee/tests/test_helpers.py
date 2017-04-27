@@ -1,6 +1,5 @@
 from unittest import TestCase
 import kiskadee
-from kiskadee.plugins.debian import debian as debian_plugin
 from kiskadee.helpers import to_firehose
 import importlib
 import sys
@@ -13,6 +12,8 @@ class TestHelpers(TestCase):
     def setUpClass(cls):
         """ Prepare environment to run tests
         """
+        plugins = kiskadee.load_plugins()
+        debian_plugin = kiskadee.plugins.debian
         source = 'kiskadee/tests/test_source/test_source.tar.gz'
         path = debian_plugin.extracted_source_path()
         debian_plugin.extract_source(source, path)

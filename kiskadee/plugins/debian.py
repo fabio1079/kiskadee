@@ -14,7 +14,11 @@ from shutil import copy2
 import pdb
 from kiskadee.helpers import to_firehose
 
-def watch(requested_source):
+def watch():
+    pass
+
+# Former watch(); this is actually analyzing the packages
+def analyze(requested_source):
     """Monitor Debian repositories
 
     :returns: I not know yet, for now will return

@@ -13,13 +13,15 @@ def sync_analyses():
     pass
 
 
+# how to receive messages and enqueue?
+# use decorators to keep runing the function and enqueuing stuff?
 def monitor_repository():
-    pass
-    # for plugin in plugins:
-    #   #  plugin.watch() # background?
-    # how to receive messages and enqueue?
-    # use decorators to jeep runing the function and enqueuing stuff?
+    plugins = kiskadee.load_plugins()
+    for plugin in plugins:
+        plugin.watch()
 
 
+# This function should move somewhere else and be called by
+# the watch function
 def enqueue_new_package(package_version):
     kiskadee.queue.enqueue(package_version)

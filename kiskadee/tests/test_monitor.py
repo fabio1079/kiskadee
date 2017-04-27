@@ -20,3 +20,6 @@ class TestMonitor(TestCase):
 
     def test_sync_analyses(self):
         monitor.sync_analyses()
+
+    def test_monitor(self):
+        monitor.monitor_repository()
