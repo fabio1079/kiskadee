@@ -18,6 +18,7 @@ import json
 import urllib.request
 import pdb
 from subprocess import check_output
+from deb822 import Sources
 
 plugin_data = {}
 
@@ -32,7 +33,8 @@ def setup():
     sources_gz_dir = download_sources_gz(url)
     uncompress_gz(sources_gz_dir, plugin_data['meta'])
     # Next steps
-    # packages = sources_gz_to_dict(sources_gz_dir)
+    packages = sources_gz_to_dict(sources_gz_dir)
+    print(packages)
     # save_or_update_pkgs(packages)
 
 
@@ -51,7 +53,7 @@ def load_config(plugin):
 @watcher
 def watch():
     #print("debian watch function")
-    # setup()
+    setup()
     return {}
 
 # Former watch(); this is actually analyzing the packages
@@ -190,7 +192,16 @@ def sources_gz_to_dict(path):
     :returns: A dictionary representing the Packages.gz file
 
     """
-    pass
+
+    debian_sources = []
+    sources = os.path.join(path, 'Sources')
+    pdb.set_trace()
+    f = open(sources)
+    for src in Sources.iter_paragraphs(f):
+        pkg = {'name': src["Package"], 'version': src["Version"]}
+        debian_sources.append(pkg)
+
+    return debian_sources
 
 
 def uncompress_gz(path, in_file):

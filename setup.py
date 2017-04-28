@@ -30,7 +30,9 @@ setup(
                 'redis',
                 'psycopg2',
                 'firehose',
-                'sqlalchemy'
+                'sqlalchemy',
+                'python-debian',
+                'chardet'
                 ],
             test_suite='nose.collector',
             tests_require=['nose']
