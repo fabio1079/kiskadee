@@ -6,20 +6,16 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import sys
 import os
 import tarfile
 import tempfile
 from shutil import copy2
-import pdb
 from kiskadee.helpers import to_firehose, load_config
 from kiskadee.monitor import watcher
 import urllib.request
-import pdb
 from subprocess import check_output
 from deb822 import Sources
 
-plugin_data = {}
 
 def setup():
     """First step to initiate the plugin life cicle.
@@ -38,8 +34,8 @@ def setup():
 
 @watcher
 def watch():
-    #print("debian watch function")
     return {}
+
 
 # Former watch(); this is actually analyzing the packages
 def analyze(requested_source):
@@ -56,17 +52,6 @@ def analyze(requested_source):
     to_firehose(analyzer_output, 'cppcheck')
 
 
-def download_source(pkg_name, pkg_version):
-    """Download packages from some debian mirror.
-
-    :pkg_name: package name (a.g mutt)
-    :pkg_version: package version (a.g 1.7.5-1)
-    :returns: path to downloaded source package
-
-    OBS: Other plugins may have this behavior,
-    find a better place (module) to this method.
-    """
-
 def uncompress_tar_gz(source, path):
     """Extract the source code to a randomic dir.
 
@@ -79,6 +64,7 @@ def uncompress_tar_gz(source, path):
     source_tarfile = tarfile.open(abs_tar_path)
     source_tarfile.extractall(path)
     os.remove(abs_tar_path)
+
 
 def copy_source(source, path):
     """Copy the source code to a proper directory
@@ -104,6 +90,7 @@ def extracted_source_path():
     """
     return tempfile.mkdtemp()
 
+
 def whoami():
     """
     :returns: The plugin name
@@ -111,12 +98,14 @@ def whoami():
     """
     return 'debian'
 
+
 def download_source(dsc_url):
     """Download packages from some debian mirror.
 
     :dsc_url: the url that points to some package's dsc file.
     :returns: path to downloaded source package
     """
+
 
 def source_dsc_url(source_mirror, packages_gz_dict):
     """ Mount the dsc url required by dget tool to download the
@@ -130,12 +119,13 @@ def source_dsc_url(source_mirror, packages_gz_dict):
 
     """
 
+
 def sources_gz_url(data):
     """ Mount the Sources.gz url"""
     mirror = data['mirror']
     release = data['release']
 
-    return ("%s/dists/%s/main/source/Sources.gz" % (mirror, release))
+    return "%s/dists/%s/main/source/Sources.gz" % (mirror, release)
 
 
 def download_sources_gz(url):
@@ -160,16 +150,6 @@ def download_sources_gz(url):
     return temp_dir
 
 
-
-
-def save_or_update_pkgs(list_of_packages):
-    """Save new packages in database. If the package already exists,
-    update it.
-
-    :list_of_packages: A array with all the Packages.gz packages
-    """
-    pass
-
 def sources_gz_to_dict(path):
     """Converts the Packages.gz file to a dictionary
 
@@ -180,8 +160,8 @@ def sources_gz_to_dict(path):
 
     debian_sources = []
     sources = os.path.join(path, 'Sources')
-    f = open(sources)
-    for src in Sources.iter_paragraphs(f):
+    sources_file = open(sources)
+    for src in Sources.iter_paragraphs(sources_file):
         pkg = {'name': src["Package"], 'version': src["Version"]}
         debian_sources.append(pkg)
 
@@ -197,31 +177,6 @@ def uncompress_gz(path, in_file):
     compressed_file_path = os.path.join(path, in_file)
     check_output(['gzip', '-d', compressed_file_path])
     return path
-
-
-def copy_source(source, path):
-    """Copy the source code to a proper directory
-
-    :arg1: source file
-    """
-
-    source_path = abs_source_path(source)
-    copy2(source_path, path)
-
-
-def abs_source_path(source):
-    """Returns de absolute path to the source
-
-    :arg1: source
-    :returns: path
-    """
-    return os.path.abspath(source)
-
-
-def extracted_source_path():
-    """Create a temporary directory
-    """
-    return tempfile.mkdtemp()
 
 
 def analyzers():
