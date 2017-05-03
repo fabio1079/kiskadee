@@ -1,10 +1,11 @@
 from unittest import TestCase
 import kiskadee
-from kiskadee.helpers import to_firehose
+from kiskadee.helpers import to_firehose, load_config
 import importlib
 import sys
 import os
 import xml.etree.ElementTree as ET
+import shutil
 
 class TestHelpers(TestCase):
 
@@ -18,6 +19,7 @@ class TestHelpers(TestCase):
         path = debian_plugin.extracted_source_path()
         debian_plugin.uncompress_tar_gz(source, path)
         cls.analyzer_report = debian_plugin.analyzers().cppcheck(path)
+        shutil.rmtree(path)
 
 
     def test_parse_cppcheck_report(self):
@@ -28,3 +30,14 @@ class TestHelpers(TestCase):
         self.assertEqual(generator.get('name'), 'cppcheck')
         self.assertIsNotNone(results)
         self.assertIsNotNone(root_tree.find('metadata'))
+
+
+    def test_load_config(self):
+        inexistent_plugin = 'windows'
+        self.assertEquals(load_config(inexistent_plugin), {})
+        existent_plugin = 'debian'
+        data = load_config(existent_plugin)
+        self.assertIn('mirror', data)
+        self.assertIn('release', data)
+
+

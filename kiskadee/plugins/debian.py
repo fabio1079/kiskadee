@@ -12,9 +12,8 @@ import tarfile
 import tempfile
 from shutil import copy2
 import pdb
-from kiskadee.helpers import to_firehose
+from kiskadee.helpers import to_firehose, load_config
 from kiskadee.monitor import watcher
-import json
 import urllib.request
 import pdb
 from subprocess import check_output
@@ -32,28 +31,14 @@ def setup():
     url = sources_gz_url(plugin_data)
     sources_gz_dir = download_sources_gz(url)
     uncompress_gz(sources_gz_dir, plugin_data['meta'])
-    # Next steps
     packages = sources_gz_to_dict(sources_gz_dir)
-    print(packages)
+    return packages
     # save_or_update_pkgs(packages)
-
-
-def load_config(plugin):
-    """Read the plugin config
-    :plugin: The name of the plugin
-    :returns: A dict with the plugin configuration
-    """
-
-    config_path = 'kiskadee/plugins/config.json'
-    f = open(config_path, 'r')
-    data = json.load(f)
-    return data[plugin]
 
 
 @watcher
 def watch():
     #print("debian watch function")
-    setup()
     return {}
 
 # Former watch(); this is actually analyzing the packages
@@ -195,7 +180,6 @@ def sources_gz_to_dict(path):
 
     debian_sources = []
     sources = os.path.join(path, 'Sources')
-    pdb.set_trace()
     f = open(sources)
     for src in Sources.iter_paragraphs(f):
         pkg = {'name': src["Package"], 'version': src["Version"]}

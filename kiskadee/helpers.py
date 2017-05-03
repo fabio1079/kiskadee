@@ -11,6 +11,7 @@ from importlib import import_module
 import shutil
 import tempfile
 import os
+import json
 
 def to_firehose(bytes_input, analyzer):
     """ Parser the analyzer report to Firehose format
@@ -55,3 +56,20 @@ def import_analyzer_module(analyzer):
         return import_module("firehose.parsers.%s" % (analyzer))
     except ImportError:
         print("ERROR: Firehose parser %s not found" % analyzer)
+
+def load_config(plugin):
+    """Read the plugin config
+    :plugin: The name of the plugin
+    :returns: A dict with the plugin configuration
+    """
+
+    config_path = 'kiskadee/plugins/config.json'
+    f = open(config_path, 'r')
+    try:
+        data = json.load(f)
+        return data[plugin]
+        f.close()
+    except KeyError:
+        f.close()
+        return {}
+
