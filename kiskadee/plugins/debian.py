@@ -15,6 +15,7 @@ from kiskadee.monitor import watcher
 import urllib.request
 from subprocess import check_output
 from deb822 import Sources
+PLUGIN_DATA = load_config('debian')
 
 
 def setup():
@@ -22,18 +23,16 @@ def setup():
     If your plugin does not requires some initial setup
     behavior, leave this method blank.
     """
-
-    plugin_data = load_config(whoami())
-    url = sources_gz_url(plugin_data)
+    url = sources_gz_url()
     sources_gz_dir = download_sources_gz(url)
-    uncompress_gz(sources_gz_dir, plugin_data['meta'])
-    packages = sources_gz_to_dict(sources_gz_dir)
-    return packages
-    # save_or_update_pkgs(packages)
+    uncompress_gz(sources_gz_dir)
+    packages = sources_gz_to_list(sources_gz_dir)
+    print(download_source(packages[0]))
 
 
 @watcher
 def watch():
+    #setup()
     return {}
 
 
@@ -45,7 +44,6 @@ def analyze(requested_source):
     only the path to a source package, that will
     be analyzed by some analyzer.
     """
-
     extracts_path = extracted_source_path()
     uncompress_tar_gz(requested_source, extracts_path)
     analyzer_output = analyzers().cppcheck(extracts_path)
@@ -91,39 +89,38 @@ def extracted_source_path():
     return tempfile.mkdtemp()
 
 
-def whoami():
-    """
-    :returns: The plugin name
-
-    """
-    return 'debian'
-
-
-def download_source(dsc_url):
-    """Download packages from some debian mirror.
-
-    :dsc_url: the url that points to some package's dsc file.
-    :returns: path to downloaded source package
-    """
+def download_source(source_data):
+    """Download packages from some debian mirror."""
+    
+    temp_dir = tempfile.mkdtemp()
+    initial_dir = os.getcwd()
+    os.chdir(temp_dir)
+    url = dsc_url(source_data)
+    check_output(['dget', url])
+    os.chdir(initial_dir)
+    return temp_dir
 
 
-def source_dsc_url(source_mirror, packages_gz_dict):
+def dsc_url(source_data):
     """ Mount the dsc url required by dget tool to download the
     source of a debian package.
-
-    :source_mirror: Some Debian mirror, defined on the config.json file
-    :packages_gz_to_dict: A dictionary representing the Packages.gz file
-    :returns: A url that points to the .dsc file of the source code,
-
     (a.g dget http://ftp.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc)
 
     """
 
+    name = source_data['name']
+    version = source_data['version']
+    directory = source_data['directory']
+    mirror = PLUGIN_DATA['mirror']
+    return ''.join([mirror, '/', directory, '/', name, '_', version, '.dsc'])
 
-def sources_gz_url(data):
+
+
+
+def sources_gz_url():
     """ Mount the Sources.gz url"""
-    mirror = data['mirror']
-    release = data['release']
+    mirror = PLUGIN_DATA['mirror']
+    release = PLUGIN_DATA['release']
 
     return "%s/dists/%s/main/source/Sources.gz" % (mirror, release)
 
@@ -150,7 +147,7 @@ def download_sources_gz(url):
     return temp_dir
 
 
-def sources_gz_to_dict(path):
+def sources_gz_to_list(path):
     """Converts the Packages.gz file to a dictionary
 
     :path: The path to the Packages.gz file
@@ -162,19 +159,17 @@ def sources_gz_to_dict(path):
     sources = os.path.join(path, 'Sources')
     sources_file = open(sources)
     for src in Sources.iter_paragraphs(sources_file):
-        pkg = {'name': src["Package"], 'version': src["Version"]}
+        pkg = {'name': src["Package"], 
+                'version': src["Version"],
+                'directory': src['Directory']}
         debian_sources.append(pkg)
 
     return debian_sources
 
 
-def uncompress_gz(path, in_file):
-    """Extract Some .gz file
-    :returns: The path to the extracted file
-
-    """
-
-    compressed_file_path = os.path.join(path, in_file)
+def uncompress_gz(path):
+    """Extract Some .gz file"""
+    compressed_file_path = os.path.join(path, PLUGIN_DATA['meta'])
     check_output(['gzip', '-d', compressed_file_path])
     return path
 

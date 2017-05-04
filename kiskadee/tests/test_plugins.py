@@ -40,6 +40,7 @@ class TestDebianPlugin(TestCase):
     def setUp(self):
         plugins = kiskadee.load_plugins()
         self.debian_plugin = kiskadee.plugins.debian
+        self.data = self.debian_plugin.PLUGIN_DATA
 
     def test_generate_randomfile(self):
         path = self.debian_plugin.extracted_source_path()
@@ -74,10 +75,9 @@ class TestDebianPlugin(TestCase):
         self.assertTrue('firehose_cppcheck_report.xml' in files)
 
     def test_mount_sources_gz_url(self):
-        data = load_config('debian')
-        mirror = data['mirror']
-        release = data['release']
-        url = self.debian_plugin.sources_gz_url(data)
+        mirror = self.data['mirror']
+        release = self.data['release']
+        url = self.debian_plugin.sources_gz_url()
         expected_url = "%s/dists/%s/main/source/Sources.gz" % (mirror, release)
         self.assertEqual(url, expected_url)
 
@@ -86,10 +86,9 @@ class TestDebianPlugin(TestCase):
         """ TODO: Think a better aproach to run this test. Maybe consider
         this test as a integration test, and no unit """
 
-        data = load_config('debian')
-        mirror = data['mirror']
-        release = data['release']
-        url = self.debian_plugin.sources_gz_url(data)
+        mirror = self.data['mirror']
+        release = self.data['release']
+        url = self.debian_plugin.sources_gz_url()
         if is_connected():
             path = self.debian_plugin.download_sources_gz(url)
             files = os.listdir(path)
@@ -97,13 +96,11 @@ class TestDebianPlugin(TestCase):
             self.assertTrue('Sources' in files)
 
     def test_create_a_dict_with_sources_gz(self):
-        data = load_config('debian')
         source = 'kiskadee/tests/test_source/Sources.gz'
         temp_dir = tempfile.mkdtemp()
         self.debian_plugin.copy_source(source, temp_dir)
-        sources_gz_dir = self.debian_plugin.uncompress_gz(temp_dir,
-                                                          data['meta'])
-        packages = self.debian_plugin.sources_gz_to_dict(sources_gz_dir)
+        sources_gz_dir = self.debian_plugin.uncompress_gz(temp_dir)
+        packages = self.debian_plugin.sources_gz_to_list(sources_gz_dir)
         self.assertTrue(isinstance(packages, list))
         self.assertTrue(isinstance(packages[0], dict))
         self.assertIn('name', packages[0])
