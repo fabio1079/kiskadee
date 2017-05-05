@@ -91,7 +91,7 @@ def extracted_source_path():
 
 def download_source(source_data):
     """Download packages from some debian mirror."""
-    
+
     temp_dir = tempfile.mkdtemp()
     initial_dir = os.getcwd()
     os.chdir(temp_dir)
@@ -159,7 +159,7 @@ def sources_gz_to_list(path):
     sources = os.path.join(path, 'Sources')
     sources_file = open(sources)
     for src in Sources.iter_paragraphs(sources_file):
-        pkg = {'name': src["Package"], 
+        pkg = {'name': src["Package"],
                 'version': src["Version"],
                 'directory': src['Directory']}
         debian_sources.append(pkg)

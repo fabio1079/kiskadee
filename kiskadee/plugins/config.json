@@ -1,6 +1,6 @@
 {
     "debian": {
-        "mirror":"ftp://ftp.us.debian.org/debian",
+        "mirror":"http://ftp.us.debian.org/debian",
         "release": "sid",
         "meta": "Sources.gz"
         }

@@ -38,7 +38,6 @@ class TestPlugins(TestCase):
 class TestDebianPlugin(TestCase):
 
     def setUp(self):
-        plugins = kiskadee.load_plugins()
         self.debian_plugin = kiskadee.plugins.debian
         self.data = self.debian_plugin.PLUGIN_DATA
 
@@ -106,3 +105,11 @@ class TestDebianPlugin(TestCase):
         self.assertIn('name', packages[0])
         self.assertIn('version', packages[0])
         shutil.rmtree(temp_dir)
+
+    def test_mount_dsc_url(self):
+        expected_dsc_url = "http://ftp.us.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc"
+        sample_package = {'name': '0ad', 
+                          'version': '0.0.21-2',
+                          'directory': 'pool/main/0/0ad'}
+        url = self.debian_plugin.dsc_url(sample_package)
+        self.assertEqual(expected_dsc_url, url)
