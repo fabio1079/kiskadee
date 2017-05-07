@@ -1,6 +1,6 @@
 import queue
 
-analysis_queue = queue.Queue
+analysis_queue = queue.Queue()
 
 
 def enqueue(package):
@@ -9,3 +9,6 @@ def enqueue(package):
 
 def dequeue():
     return analysis_queue.get()
+
+def done():
+    analysis_queue.task_done()

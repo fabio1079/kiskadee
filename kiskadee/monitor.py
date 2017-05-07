@@ -1,5 +1,8 @@
 import kiskadee.model
-import kiskadee.queue
+from kiskadee.queue import dequeue, enqueue, done
+import threading
+from threading import Thread
+from multiprocessing import Process
 
 running = True
 
@@ -18,10 +21,16 @@ def sync_analyses():
 def monitor():
     plugins = kiskadee.load_plugins()
     for plugin in plugins:
+        plugin_name = plugin.whoami()
+        print("Collecting data for %s plugin \n" % plugin_name)
+        consumer_queue = Thread(target=save_or_update_pkgs,
+                                args=(plugin_name,))
+        consumer_queue.daemon = True
+        consumer_queue.start()
         plugin.watch()
 
 
-def watcher(func):
+def enqueue_source(func):
     def wrapper(*args, **kwargs):
         packages = func(*args, **kwargs)
         for package in packages:
@@ -29,8 +38,29 @@ def watcher(func):
         return packages
     return wrapper
 
-if __name__ == "__main__":
+
+def enqueue_pkg(func):
+    def wrapper(*args, **kwargs):
+        package = func(*args, **kwargs)
+        enqueue(package)
+
+    return wrapper
+
+
+def save_or_update_pkgs(plugin_name):
+    queue_file = "%s_queue_output" % plugin_name
+    print("Writing output in %s file" % queue_file)
+    with open(queue_file, '+w') as target:
+        while True:
+            pkg = dequeue()
+            # In the future we will use some logging tool to do this.
+            target.write("dequed package: %s \n" % str(pkg))
+            done()
+
+def daemon():
     # TODO: improve with start/stop system
-    while running:
-        monitor()
+    p = Process(target=monitor)
+    p.daemon = True
+    p.start()
+    p.join()
     # cleanup goes here

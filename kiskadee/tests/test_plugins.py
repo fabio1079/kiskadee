@@ -9,6 +9,7 @@ from os import path, listdir
 import shutil
 import socket
 import tempfile
+from kiskadee.queue import dequeue
 
 
 def is_connected():
@@ -99,11 +100,14 @@ class TestDebianPlugin(TestCase):
         temp_dir = tempfile.mkdtemp()
         self.debian_plugin.copy_source(source, temp_dir)
         sources_gz_dir = self.debian_plugin.uncompress_gz(temp_dir)
-        packages = self.debian_plugin.sources_gz_to_list(sources_gz_dir)
-        self.assertTrue(isinstance(packages, list))
-        self.assertTrue(isinstance(packages[0], dict))
-        self.assertIn('name', packages[0])
-        self.assertIn('version', packages[0])
+        self.debian_plugin.queue_sources_gz_pkgs(sources_gz_dir)
+        some_pkg = dequeue()
+        self.assertTrue(isinstance(some_pkg, dict))
+        self.assertIn('name', some_pkg)
+        self.assertIn('version', some_pkg)
+        self.assertIn('plugin', some_pkg)
+        self.assertIn('meta', some_pkg)
+        self.assertIn('directory', some_pkg['meta'])
         shutil.rmtree(temp_dir)
 
     def test_mount_dsc_url(self):

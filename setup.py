@@ -23,7 +23,7 @@ setup(
             packages=find_packages(),
             include_package_data=False,
             entry_points={'console_scripts': [
-                'kiskadee = kiskadee.cli:main']},
+                'kiskadee = kiskadee.monitor:daemon']},
             install_requires=[
                 'fedmsg',
                 'docker',  # do we need docker here?

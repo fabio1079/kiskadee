@@ -11,14 +11,19 @@ import tarfile
 import tempfile
 from shutil import copy2
 from kiskadee.helpers import to_firehose, load_config
-from kiskadee.monitor import watcher
+from kiskadee.monitor import enqueue_source, enqueue_pkg
+import kiskadee
 import urllib.request
 from subprocess import check_output
 from deb822 import Sources
-PLUGIN_DATA = load_config('debian')
+
+def whoami():
+    return 'debian'
+
+PLUGIN_DATA = load_config(whoami())
 
 
-def setup():
+def sources():
     """First step to initiate the plugin life cicle.
     If your plugin does not requires some initial setup
     behavior, leave this method blank.
@@ -26,14 +31,39 @@ def setup():
     url = sources_gz_url()
     sources_gz_dir = download_sources_gz(url)
     uncompress_gz(sources_gz_dir)
-    packages = sources_gz_to_list(sources_gz_dir)
-    print(download_source(packages[0]))
+    queue_sources_gz_pkgs(sources_gz_dir)
 
 
-@watcher
+def queue_sources_gz_pkgs(path):
+    sources = os.path.join(path, 'Sources')
+    with open(sources) as sources_file:
+        for src in Sources.iter_paragraphs(sources_file):
+            create_package_dict(src)
+
+@enqueue_pkg
+def create_package_dict(src):
+    pkg = {'name': src["Package"],
+           'version': src["Version"],
+           'plugin': kiskadee.plugins.debian,
+           'meta': { 'directory': src['Directory']}
+           }
+    return pkg
+
+
+@enqueue_source
+def download_source(source_data):
+    """Download packages from some debian mirror."""
+
+    temp_dir = tempfile.mkdtemp()
+    initial_dir = os.getcwd()
+    os.chdir(temp_dir)
+    url = dsc_url(source_data)
+    check_output(['dget', url])
+    os.chdir(initial_dir)
+    return temp_dir
+
 def watch():
-    #setup()
-    return {}
+    sources()
 
 
 # Former watch(); this is actually analyzing the packages
@@ -89,17 +119,6 @@ def extracted_source_path():
     return tempfile.mkdtemp()
 
 
-def download_source(source_data):
-    """Download packages from some debian mirror."""
-
-    temp_dir = tempfile.mkdtemp()
-    initial_dir = os.getcwd()
-    os.chdir(temp_dir)
-    url = dsc_url(source_data)
-    check_output(['dget', url])
-    os.chdir(initial_dir)
-    return temp_dir
-
 
 def dsc_url(source_data):
     """ Mount the dsc url required by dget tool to download the
@@ -145,26 +164,6 @@ def download_sources_gz(url):
 
     os.chdir(initial_dir)
     return temp_dir
-
-
-def sources_gz_to_list(path):
-    """Converts the Packages.gz file to a dictionary
-
-    :path: The path to the Packages.gz file
-    :returns: A dictionary representing the Packages.gz file
-
-    """
-
-    debian_sources = []
-    sources = os.path.join(path, 'Sources')
-    sources_file = open(sources)
-    for src in Sources.iter_paragraphs(sources_file):
-        pkg = {'name': src["Package"],
-                'version': src["Version"],
-                'directory': src['Directory']}
-        debian_sources.append(pkg)
-
-    return debian_sources
 
 
 def uncompress_gz(path):
