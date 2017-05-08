@@ -25,9 +25,7 @@ setup(
             entry_points={'console_scripts': [
                 'kiskadee = kiskadee.monitor:daemon']},
             install_requires=[
-                'fedmsg',
-                'docker',  # do we need docker here?
-                'redis',
+                'docker',
                 'psycopg2',
                 'firehose',
                 'sqlalchemy',
