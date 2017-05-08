@@ -23,17 +23,6 @@ def whoami():
 PLUGIN_DATA = load_config(whoami())
 
 
-def sources():
-    """First step to initiate the plugin life cicle.
-    If your plugin does not requires some initial setup
-    behavior, leave this method blank.
-    """
-    url = sources_gz_url()
-    sources_gz_dir = download_sources_gz(url)
-    uncompress_gz(sources_gz_dir)
-    queue_sources_gz_pkgs(sources_gz_dir)
-
-
 def queue_sources_gz_pkgs(path):
     sources = os.path.join(path, 'Sources')
     with open(sources) as sources_file:
@@ -63,7 +52,15 @@ def download_source(source_data):
     return temp_dir
 
 def watch():
-    sources()
+    """ Starts the continuing monitoring process of Debian
+    Repositories. Each package monitored by the plugin will be
+    queued using the enqueue_pkg decorator. """
+
+    url = sources_gz_url()
+    sources_gz_dir = download_sources_gz(url)
+    uncompress_gz(sources_gz_dir)
+    queue_sources_gz_pkgs(sources_gz_dir)
+
 
 
 # Former watch(); this is actually analyzing the packages
@@ -148,7 +145,7 @@ def download_sources_gz(url):
     """Download and Extract the Sources.gz file, from some Debian Mirror.
 
     :data: The config.json file as a dict
-    :returns: The path to the Packages.gz file
+    :returns: The path to the Sources.gz file
 
     """
 
@@ -169,7 +166,7 @@ def download_sources_gz(url):
 def uncompress_gz(path):
     """Extract Some .gz file"""
     compressed_file_path = os.path.join(path, PLUGIN_DATA['meta'])
-    check_output(['gzip', '-d', compressed_file_path])
+    check_output(['gzip', '-d', '-k', '-f', compressed_file_path])
     return path
 
 

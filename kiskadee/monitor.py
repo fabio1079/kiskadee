@@ -1,5 +1,6 @@
 import kiskadee.model
-from kiskadee.queue import dequeue, enqueue, done
+from kiskadee.queue import analysis_enqueue, package_dequeue, \
+        package_enqueue
 import threading
 from threading import Thread
 from multiprocessing import Process
@@ -32,18 +33,16 @@ def monitor():
 
 def enqueue_source(func):
     def wrapper(*args, **kwargs):
-        packages = func(*args, **kwargs)
-        for package in packages:
-            kiskadee.queue.enqueue(package)
-        return packages
+        sources = func(*args, **kwargs)
+        for source in sources:
+            analysis_enqueue(source)
     return wrapper
 
 
 def enqueue_pkg(func):
     def wrapper(*args, **kwargs):
         package = func(*args, **kwargs)
-        enqueue(package)
-
+        package_enqueue(package)
     return wrapper
 
 
@@ -52,10 +51,11 @@ def save_or_update_pkgs(plugin_name):
     print("Writing output in %s file" % queue_file)
     with open(queue_file, '+w') as target:
         while True:
-            pkg = dequeue()
+            pkg = package_dequeue()
             # In the future we will use some logging tool to do this.
             target.write("dequed package: %s \n" % str(pkg))
-            done()
+            # Database stuff here.
+            package_dequeue()
 
 def daemon():
     # TODO: improve with start/stop system

@@ -63,7 +63,7 @@ def load_config(plugin):
     :returns: A dict with the plugin configuration
     """
 
-    config_path = 'kiskadee/plugins/config.json'
+    config_path = get_config()
     f = open(config_path, 'r')
     try:
         data = json.load(f)
@@ -73,3 +73,5 @@ def load_config(plugin):
         f.close()
         return {}
 
+def get_config():
+    return 'kiskadee/plugins/config.json'

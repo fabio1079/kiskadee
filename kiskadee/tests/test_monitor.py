@@ -3,6 +3,9 @@ from kiskadee import monitor
 from kiskadee import model
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import kiskadee
+from kiskadee.queue import analysis_enqueue, package_dequeue, \
+        package_enqueue
 
 
 class TestMonitor(TestCase):
@@ -21,5 +24,12 @@ class TestMonitor(TestCase):
     def test_sync_analyses(self):
         monitor.sync_analyses()
 
-    def test_monitor(self):
-        monitor.monitor()
+    def test_dequeue_package(self):
+        def mock_download_source_gz(url):
+            return 'kiskadee/tests/test_source'
+        plugins = kiskadee.load_plugins()
+        for plugin in plugins:
+            plugin.download_sources_gz = mock_download_source_gz
+            plugin.watch()
+            pkg = package_dequeue()
+            self.assertTrue(isinstance(pkg, dict))

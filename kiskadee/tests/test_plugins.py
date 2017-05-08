@@ -9,7 +9,7 @@ from os import path, listdir
 import shutil
 import socket
 import tempfile
-from kiskadee.queue import dequeue
+from kiskadee.queue import package_dequeue
 
 
 def is_connected():
@@ -101,7 +101,7 @@ class TestDebianPlugin(TestCase):
         self.debian_plugin.copy_source(source, temp_dir)
         sources_gz_dir = self.debian_plugin.uncompress_gz(temp_dir)
         self.debian_plugin.queue_sources_gz_pkgs(sources_gz_dir)
-        some_pkg = dequeue()
+        some_pkg = package_dequeue()
         self.assertTrue(isinstance(some_pkg, dict))
         self.assertIn('name', some_pkg)
         self.assertIn('version', some_pkg)
@@ -112,7 +112,7 @@ class TestDebianPlugin(TestCase):
 
     def test_mount_dsc_url(self):
         expected_dsc_url = "http://ftp.us.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc"
-        sample_package = {'name': '0ad', 
+        sample_package = {'name': '0ad',
                           'version': '0.0.21-2',
                           'directory': 'pool/main/0/0ad'}
         url = self.debian_plugin.dsc_url(sample_package)
