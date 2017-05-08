@@ -25,7 +25,7 @@ setup(
             entry_points={'console_scripts': [
                 'kiskadee = kiskadee.monitor:daemon']},
             install_requires=[
-                'docker',
+                'docker==2.0.0',
                 'psycopg2',
                 'firehose',
                 'sqlalchemy',
