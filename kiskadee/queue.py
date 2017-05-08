@@ -12,3 +12,6 @@ def dequeue():
 
 def done():
     analysis_queue.task_done()
+
+def is_empty():
+    return analysis_queue.empty()
