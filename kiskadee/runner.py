@@ -1,3 +1,6 @@
+import os
+import shutil
+import tarfile
 import kiskadee.queue
 import kiskadee.analyzers
 import kiskadee.model
@@ -17,15 +20,20 @@ def analyze(package):
         plugin: the plugin module itself
         name: the package name
         version: the package version
+        path: plugin default path for packages
     """
-    # get source of specific version
-    sources = package['plugin'].get_sources(package['name'], package['version'])
-    # get list of analyzers
-    # this list should come from a config file. if we have a class for the plugins to inherit from,
-    # we can get this superclass to read the global config file for each specific plugin
+    # TODO: Base dir must be set in kiskadee config file as the directory that holds all packages to be analyzed
+    base_dir = '/tmp/kiskadee'
+    sources = os.path.join(base_dir, package['plugin'].__name__, package['name'], package['version'])
+    shutil.rmtree(sources)
+    if not os.path.exists(sources):
+        os.makedirs(sources)
+
+    compressed_sources = package['plugin'].get_sources(package['name'], package['version'])
+    with tarfile.open(fileobj=compressed_sources) as tarball:
+        tarball.extractall(path=sources)
+
     analyzers = package['plugin'].analyzers
-    # run each analyzer
     for analyzer in analyzers:
-        # run container/have thread waiting for analysis OR container itself should store result!
-        kiskadee.analyzers.run(analyzer, sources)
-    # store analysis in DB (another function?)
+        analysis = kiskadee.analyzers.run(analyzer, sources)
+        # TODO: store analysis in DB
