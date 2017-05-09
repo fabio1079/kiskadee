@@ -30,7 +30,8 @@ setup(
                 'firehose',
                 'sqlalchemy',
                 'python-debian',
-                'chardet'
+                'chardet',
+                'ipython'
                 ],
             test_suite='nose.collector',
             tests_require=['nose']

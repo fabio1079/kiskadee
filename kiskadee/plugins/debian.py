@@ -16,12 +16,9 @@ import kiskadee
 import urllib.request
 from subprocess import check_output
 from deb822 import Sources
+from time import sleep
 
-def whoami():
-    return 'debian'
-
-PLUGIN_DATA = load_config(whoami())
-
+PLUGIN_DATA = load_config('debian')
 
 def queue_sources_gz_pkgs(path):
     sources = os.path.join(path, 'Sources')
@@ -29,14 +26,14 @@ def queue_sources_gz_pkgs(path):
         for src in Sources.iter_paragraphs(sources_file):
             create_package_dict(src)
 
+
 @enqueue_pkg
 def create_package_dict(src):
-    pkg = {'name': src["Package"],
+    return {'name': src["Package"],
            'version': src["Version"],
            'plugin': kiskadee.plugins.debian,
            'meta': { 'directory': src['Directory']}
            }
-    return pkg
 
 
 @enqueue_source
@@ -56,10 +53,12 @@ def watch():
     Repositories. Each package monitored by the plugin will be
     queued using the enqueue_pkg decorator. """
 
-    url = sources_gz_url()
-    sources_gz_dir = download_sources_gz(url)
-    uncompress_gz(sources_gz_dir)
-    queue_sources_gz_pkgs(sources_gz_dir)
+    while True:
+        url = sources_gz_url()
+        sources_gz_dir = download_sources_gz(url)
+        uncompress_gz(sources_gz_dir)
+        queue_sources_gz_pkgs(sources_gz_dir)
+        sleep(PLUGIN_DATA.get('schedule') * 60)
 
 
 
@@ -97,17 +96,8 @@ def copy_source(source, path):
     :arg1: source file
     """
 
-    source_path = abs_source_path(source)
+    source_path = os.path.abspath(source)
     copy2(source_path, path)
-
-
-def abs_source_path(source):
-    """Returns de absolute path to the source
-
-    :arg1: source
-    :returns: path
-    """
-    return os.path.abspath(source)
 
 
 def extracted_source_path():
@@ -177,5 +167,4 @@ def analyzers():
 
     """
     import kiskadee.analyzers.cppcheck as cppcheck
-
     return cppcheck

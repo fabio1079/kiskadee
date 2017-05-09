@@ -2,6 +2,7 @@
     "debian": {
         "mirror":"http://ftp.us.debian.org/debian",
         "release": "sid",
-        "meta": "Sources.gz"
+        "meta": "Sources.gz",
+        "schedule": 0.1
         }
 }

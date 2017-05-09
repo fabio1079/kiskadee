@@ -74,4 +74,4 @@ def load_config(plugin):
         return {}
 
 def get_config():
-    return 'kiskadee/plugins/config.json'
+    return 'kiskadee/config.json'

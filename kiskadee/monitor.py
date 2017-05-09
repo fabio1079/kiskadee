@@ -22,13 +22,16 @@ def sync_analyses():
 def monitor():
     plugins = kiskadee.load_plugins()
     for plugin in plugins:
-        plugin_name = plugin.whoami()
+        plugin_name = plugin.__name__.split('.')[len(__name__.split('.')) - 1]
         print("Collecting data for %s plugin \n" % plugin_name)
         consumer_queue = Thread(target=save_or_update_pkgs,
                                 args=(plugin_name,))
         consumer_queue.daemon = True
         consumer_queue.start()
-        plugin.watch()
+        plugin_thread = Thread(target=plugin.watch)
+        plugin_thread.daemon = True
+        plugin_thread.start()
+        plugin_thread.join()
 
 
 def enqueue_source(func):
@@ -51,11 +54,9 @@ def save_or_update_pkgs(plugin_name):
     print("Writing output in %s file" % queue_file)
     with open(queue_file, '+w') as target:
         while True:
-            pkg = package_dequeue()
             # In the future we will use some logging tool to do this.
-            target.write("dequed package: %s \n" % str(pkg))
+            target.write("dequed package: %s \n" % str(package_dequeue()))
             # Database stuff here.
-            package_dequeue()
 
 def daemon():
     # TODO: improve with start/stop system
