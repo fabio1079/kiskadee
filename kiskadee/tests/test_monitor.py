@@ -27,9 +27,10 @@ class TestMonitor(TestCase):
     def test_dequeue_package(self):
         def mock_download_source_gz(url):
             return 'kiskadee/tests/test_source'
+        
         plugins = kiskadee.load_plugins()
         for plugin in plugins:
             plugin.download_sources_gz = mock_download_source_gz
-            plugin.watch()
+            plugin.collect_pkgs()
             pkg = package_dequeue()
             self.assertTrue(isinstance(pkg, dict))

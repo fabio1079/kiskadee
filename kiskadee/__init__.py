@@ -13,7 +13,6 @@ kiskadee_plugins = []
 plugins_path = path.join(my_path, 'plugins')
 plugins_pkg_files = [f for f in listdir(plugins_path) if
                      path.isfile(path.join(plugins_path, f))]
-plugins_pkg_files.remove('config.json')
 plugins_pkg_files.remove('__init__.py')
 for plugin in plugins_pkg_files:
     plugin_name, file_ext = path.splitext(plugin)
