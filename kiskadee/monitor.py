@@ -4,8 +4,7 @@ from kiskadee.queue import analysis_enqueue, package_dequeue, \
 import threading
 from threading import Thread
 from multiprocessing import Process
-
-running = True
+from kiskadee.model import Package, Plugin, Version, session
 
 
 def sync_analyses():
@@ -22,10 +21,11 @@ def sync_analyses():
 def monitor():
     plugins = kiskadee.load_plugins()
     for plugin in plugins:
-        plugin_name = plugin.__name__.split('.')[len(__name__.split('.')) - 1]
-        print("Collecting data for %s plugin \n" % plugin_name)
+        name = plugin_name(plugin)
+        create_plugin(name, plugin)
+        print("Starting %s plugin" % name)
         consumer_queue = Thread(target=save_or_update_pkgs,
-                                args=(plugin_name,))
+                                args=(name,))
         consumer_queue.daemon = True
         consumer_queue.start()
         plugin_thread = Thread(target=plugin.watch)
@@ -55,8 +55,21 @@ def save_or_update_pkgs(plugin_name):
     with open(queue_file, '+w') as target:
         while True:
             # In the future we will use some logging tool to do this.
-            target.write("dequed package: %s \n" % str(package_dequeue()))
+            pkg = package_dequeue()
+            target.write("dequed package: %s \n" % str(pkg))
+
             # Database stuff here.
+
+def plugin_name(plugin):
+    return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
+
+def create_plugin(name, plugin):
+    if not session.query(Plugin).filter(Plugin.name==name).first():
+        _plugin = Plugin(name=name,
+                target=plugin.PLUGIN_DATA['target'],
+                description=plugin.PLUGIN_DATA['description'])
+        session.add(_plugin)
+        session.commit()
 
 def daemon():
     # TODO: improve with start/stop system

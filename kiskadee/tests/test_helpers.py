@@ -37,7 +37,9 @@ class TestHelpers(TestCase):
         self.assertEquals(load_config(inexistent_plugin), {})
         existent_plugin = 'debian'
         data = load_config(existent_plugin)
-        self.assertIn('mirror', data)
+        self.assertIn('target', data)
         self.assertIn('release', data)
+        self.assertIn('description', data)
+        self.assertIn('schedule', data)
 
 

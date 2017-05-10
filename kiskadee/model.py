@@ -1,5 +1,8 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, UnicodeText, UniqueConstraint, Sequence, Unicode, ForeignKey, Boolean, orm
+from sqlalchemy import Column, Integer, UnicodeText, UniqueConstraint,\
+                       Sequence, Unicode, ForeignKey, Boolean, orm,\
+                       create_engine
+
 
 Base = declarative_base()
 
@@ -19,7 +22,7 @@ class Plugin(Base):
     __tablename__ = 'plugins'
     id = Column(Integer, Sequence('plugins_id_seq', optional=True), primary_key=True)
     name = Column(Unicode(255), nullable=False, unique=True)
-    upstream = Column(Unicode(255), nullable=False)
+    target = Column(Unicode(255), nullable=False)
     description = Column(UnicodeText)
     packages = orm.relationship('Package', backref='plugins')
 
@@ -34,3 +37,9 @@ class Version(Base):
     __table_args__ = (
             UniqueConstraint('number', 'package_id'),
             )
+
+engine = create_engine('postgresql://kiskadee@localhost/kiskadee_dev')
+Base.metadata.create_all(engine)
+Base.metadata.bind = engine
+DBSession = orm.sessionmaker(bind=engine)
+session = DBSession()

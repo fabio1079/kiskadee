@@ -74,7 +74,7 @@ class TestDebianPlugin(TestCase):
         self.assertTrue('firehose_cppcheck_report.xml' in files)
 
     def test_mount_sources_gz_url(self):
-        mirror = self.data['mirror']
+        mirror = self.data['target']
         release = self.data['release']
         url = self.debian_plugin.sources_gz_url()
         expected_url = "%s/dists/%s/main/source/Sources.gz" % (mirror, release)
@@ -85,7 +85,7 @@ class TestDebianPlugin(TestCase):
         """ TODO: Think a better aproach to run this test. Maybe consider
         this test as a integration test, and no unit """
 
-        mirror = self.data['mirror']
+        mirror = self.data['target']
         release = self.data['release']
         url = self.debian_plugin.sources_gz_url()
         if is_connected():

@@ -121,15 +121,13 @@ def dsc_url(source_data):
     name = source_data['name']
     version = source_data['version']
     directory = source_data['directory']
-    mirror = PLUGIN_DATA['mirror']
+    mirror = PLUGIN_DATA['target']
     return ''.join([mirror, '/', directory, '/', name, '_', version, '.dsc'])
-
-
 
 
 def sources_gz_url():
     """ Mount the Sources.gz url"""
-    mirror = PLUGIN_DATA['mirror']
+    mirror = PLUGIN_DATA['target']
     release = PLUGIN_DATA['release']
 
     return "%s/dists/%s/main/source/Sources.gz" % (mirror, release)

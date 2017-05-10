@@ -11,7 +11,7 @@ class TestModel(TestCase):
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         model.Base.metadata.create_all(self.engine)
-        self.plugin = model.Plugin(name='kiskadee-plugin', upstream='university')
+        self.plugin = model.Plugin(name='kiskadee-plugin', target='university')
         self.package = model.Package(name='python-kiskadee')
         self.version = model.Version(number='1.0-rc1', has_analysis=False)
         self.plugin.packages.append(self.package)
@@ -39,7 +39,7 @@ class TestModel(TestCase):
     def test_add_plugin(self):
         plugins = self.session.query(model.Plugin).all()
         self.assertEqual(len(plugins), 1)
-        self.session.add(model.Plugin(name='foo', upstream='bar'))
+        self.session.add(model.Plugin(name='foo', target='bar'))
         plugins = self.session.query(model.Plugin).all()
         self.assertEqual(len(plugins), 2)
 
