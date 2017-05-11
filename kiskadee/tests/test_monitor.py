@@ -4,8 +4,8 @@ from kiskadee import model
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import kiskadee
-from kiskadee.queue import analysis_enqueue, package_dequeue, \
-        package_enqueue
+from kiskadee.queue import enqueue_analysis, dequeue_package, \
+        enqueue_package
 
 
 class TestMonitor(TestCase):
@@ -32,5 +32,5 @@ class TestMonitor(TestCase):
         for plugin in plugins:
             plugin.download_sources_gz = mock_download_source_gz
             plugin.collect()
-            pkg = package_dequeue()
+            pkg = dequeue_package()
             self.assertTrue(isinstance(pkg, dict))

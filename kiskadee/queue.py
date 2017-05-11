@@ -1,30 +1,32 @@
 import queue
 
-analysis_queue = queue.Queue()
-package_queue = queue.Queue()
+analyses_queue = queue.Queue()
+packages_queue = queue.Queue()
 
 
-def analysis_enqueue(package):
-    analysis_queue.put(package)
+def enqueue_analysis(package):
+    analyses_queue.put(package)
 
 
-def analysis_dequeue():
-    return analysis_queue.get()
+def dequeue_analysis():
+    return analyses_queue.get()
 
 
 def analysis_done():
-    analysis_queue.task_done()
+    analyses_queue.task_done()
+
 
 def is_empty():
-    return analysis_queue.empty()
-
-def package_enqueue(package):
-    package_queue.put(package)
+    return analyses_queue.empty()
 
 
-def package_dequeue():
-    return package_queue.get()
+def enqueue_package(package):
+    packages_queue.put(package)
+
+
+def dequeue_package():
+    return packages_queue.get()
 
 
 def package_done():
-    package_queue.task_done()
+    packages_queue.task_done()

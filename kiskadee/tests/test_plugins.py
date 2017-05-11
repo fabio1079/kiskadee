@@ -9,7 +9,7 @@ from os import path, listdir
 import shutil
 import socket
 import tempfile
-from kiskadee.queue import package_dequeue
+from kiskadee.queue import dequeue_package
 
 
 def is_connected():
@@ -100,7 +100,7 @@ class TestDebianPlugin(TestCase):
         self.debian_plugin.copy_source(source, temp_dir)
         sources_gz_dir = self.debian_plugin.uncompress_gz(temp_dir)
         self.debian_plugin.queue_sources_gz_pkgs(sources_gz_dir)
-        some_pkg = package_dequeue()
+        some_pkg = dequeue_package()
         self.assertTrue(isinstance(some_pkg, dict))
         self.assertIn('name', some_pkg)
         self.assertIn('version', some_pkg)
