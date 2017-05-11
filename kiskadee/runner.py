@@ -11,7 +11,7 @@ running = True
 def runner():
     while running:
         if not kiskadee.queue.is_empty():
-            package = kiskadee.queue.dequeue()
+            package = kiskadee.queue.dequeue_analysis()
             analyze(package)
 
 
