@@ -17,16 +17,22 @@ def sync_analyses():
     # we could also empty the queue in the very begining of this task
     pass
 
+
 def initialize():
-    start(monitor);
+    """ Starts all the threads involves with the monitoring process.
+    This includes all the plugins, that queuing packages in the packages_queue,
+    and the monitor() method, that retrieve  packages from the packages_queue,
+    and makes the necessary database operations """
+
+    _start(monitor)
     plugins = kiskadee.load_plugins()
     for plugin in plugins:
-        name = plugin_name(plugin)
-        create_plugin(name, plugin)
-        start(plugin.watch)
+        name = _plugin_name(plugin)
+        _create_plugin(name, plugin)
+        _start(plugin.watch)
 
 
-def start(module):
+def _start(module):
     module_as_a_thread = Thread(target=module)
     module_as_a_thread.daemon = True
     module_as_a_thread.start()
@@ -34,13 +40,19 @@ def start(module):
 
 
 def monitor():
+    """ Decorator to add the behavior of
+    queue in the enqueue_package,
+    some random value. """
     while True:
         if not kiskadee.queue.packages_queue.empty():
             pkg = dequeue_package()
-            save_or_update_pkgs(pkg)
+            _save_or_update_pkgs(pkg)
 
 
 def enqueue_source(func):
+    """ Decorator to add the behavior of
+    queue in the enqueue_analysis,
+    some random value. """
     def wrapper(*args, **kwargs):
         sources = func(*args, **kwargs)
         for source in sources:
@@ -49,14 +61,17 @@ def enqueue_source(func):
 
 
 def enqueue_pkg(func):
+    """ Decorator to add the behavior of
+    queue in the enqueue_package,
+    some random value. """
     def wrapper(*args, **kwargs):
         package = func(*args, **kwargs)
         enqueue_package(package)
     return wrapper
 
 
-def save_or_update_pkgs(pkg):
-    name = plugin_name(pkg['plugin'])
+def _save_or_update_pkgs(pkg):
+    name = _plugin_name(pkg['plugin'])
     queue_file = "%s_queue_output" % name
     print("Writing output in %s file" % queue_file)
     _plugin = session.query(Plugin).filter(Plugin.name==name).first()
@@ -75,10 +90,12 @@ def save_or_update_pkgs(pkg):
 
             session.commit()
 
-def plugin_name(plugin):
+
+def _plugin_name(plugin):
     return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
 
-def create_plugin(name, plugin):
+
+def _create_plugin(name, plugin):
     if not session.query(Plugin).filter(Plugin.name==name).first():
         _plugin = Plugin(name=name,
                 target=plugin.PLUGIN_DATA['target'],
@@ -86,7 +103,9 @@ def create_plugin(name, plugin):
         session.add(_plugin)
         session.commit()
 
+
 def daemon():
+    """ Entry point to the monitor module """
     # TODO: improve with start/stop system
     p = Process(target=initialize)
     p.daemon = True
