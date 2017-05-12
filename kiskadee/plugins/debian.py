@@ -11,7 +11,7 @@ import tarfile
 import tempfile
 from shutil import copy2
 from kiskadee.helpers import to_firehose, load_config
-from kiskadee.monitor import enqueue_source, enqueue_pkg
+from kiskadee.helpers import enqueue_source, enqueue_pkg
 import kiskadee
 import urllib.request
 from subprocess import check_output

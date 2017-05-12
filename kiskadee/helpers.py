@@ -12,6 +12,8 @@ import shutil
 import tempfile
 import os
 import json
+from kiskadee.queue import enqueue_analysis, \
+        enqueue_package
 
 def to_firehose(bytes_input, analyzer):
     """ Parser the analyzer report to Firehose format
@@ -75,3 +77,25 @@ def load_config(plugin):
 
 def get_config():
     return 'kiskadee/config.json'
+
+
+def enqueue_source(func):
+    """ Decorator to add the behavior of
+    queue in the enqueue_analysis,
+    some random value. """
+    def wrapper(*args, **kwargs):
+        sources = func(*args, **kwargs)
+        for source in sources:
+            enqueue_analysis(source)
+    return wrapper
+
+
+def enqueue_pkg(func):
+    """ Decorator to add the behavior of
+    queue in the enqueue_package,
+    some random value. """
+    def wrapper(*args, **kwargs):
+        package = func(*args, **kwargs)
+        enqueue_package(package)
+    return wrapper
+

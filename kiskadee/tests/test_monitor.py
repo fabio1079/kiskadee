@@ -1,5 +1,5 @@
 from unittest import TestCase
-from kiskadee import monitor
+from kiskadee.monitor import Monitor
 from kiskadee import model
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -16,13 +16,14 @@ class TestMonitor(TestCase):
         self.session = Session()
         # model.metadata.create_all(self.engine)
         model.Base.metadata.create_all(self.engine)
+        self.monitor = Monitor()
 
     def tearDown(self):
         # model.metadata.drop_all(self.engine)
         model.Base.metadata.drop_all(self.engine)
 
     def test_sync_analyses(self):
-        monitor.sync_analyses()
+        self.monitor.sync_analyses()
 
     def test_dequeue_package(self):
         def mock_download_source_gz(url):
