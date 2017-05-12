@@ -14,6 +14,9 @@ plugins_path = path.join(my_path, 'plugins')
 plugins_pkg_files = [f for f in listdir(plugins_path) if
                      path.isfile(path.join(plugins_path, f))]
 plugins_pkg_files.remove('__init__.py')
+if '__init__.pyc' in plugins_pkg_files:
+    plugins_pkg_files.remove('__init__.pyc')
+print(plugins_pkg_files)
 for plugin in plugins_pkg_files:
     plugin_name, file_ext = path.splitext(plugin)
     kiskadee_plugins.append(plugin_name)

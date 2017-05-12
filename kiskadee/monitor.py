@@ -68,7 +68,6 @@ class Monitor:
     def _save_or_update_pkgs(self, pkg):
         name = self._plugin_name(pkg['plugin'])
         queue_file = "%s_queue_output" % name
-        print("Writing output in %s file" % queue_file)
         _plugin = self.session.query(Plugin).filter(Plugin.name==name).first()
         if _plugin:
             if not self.session.query(Package).filter(Package.name==pkg['name']).first():
@@ -79,6 +78,7 @@ class Monitor:
                                 has_analysis=False)
                 _package.versions.append(_version)
                 self.session.add(_package)
+                print("Writing output in %s file" % queue_file)
                 with open(queue_file, 'w+') as target:
                     # In the future we will use some logging tool to do this.
                     target.write("dequed package: %s \n" % str(pkg))
@@ -88,7 +88,6 @@ class Monitor:
 
     def _plugin_name(self, plugin):
         return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
-
 
     def _create_plugin(self, name, plugin):
         if not self.session.query(Plugin).filter(Plugin.name==name).first():
