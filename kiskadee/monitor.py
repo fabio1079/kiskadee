@@ -17,21 +17,27 @@ def sync_analyses():
     # we could also empty the queue in the very begining of this task
     pass
 
-
-def monitor():
+def initialize():
+    start(monitor);
     plugins = kiskadee.load_plugins()
     for plugin in plugins:
         name = plugin_name(plugin)
         create_plugin(name, plugin)
-        print("Starting %s plugin" % name)
-        consumer_queue = Thread(target=save_or_update_pkgs,
-                                args=(name,))
-        consumer_queue.daemon = True
-        consumer_queue.start()
-        plugin_thread = Thread(target=plugin.watch)
-        plugin_thread.daemon = True
-        plugin_thread.start()
-        plugin_thread.join()
+        start(plugin.watch)
+
+
+def start(module):
+    module_as_a_thread = Thread(target=module)
+    module_as_a_thread.daemon = True
+    module_as_a_thread.start()
+    module_as_a_thread.join()
+
+
+def monitor():
+    while True:
+        if not kiskadee.queue.packages_queue.empty():
+            pkg = dequeue_package()
+            save_or_update_pkgs(pkg)
 
 
 def enqueue_source(func):
@@ -49,16 +55,25 @@ def enqueue_pkg(func):
     return wrapper
 
 
-def save_or_update_pkgs(plugin_name):
-    queue_file = "%s_queue_output" % plugin_name
+def save_or_update_pkgs(pkg):
+    name = plugin_name(pkg['plugin'])
+    queue_file = "%s_queue_output" % name
     print("Writing output in %s file" % queue_file)
-    with open(queue_file, '+w') as target:
-        while True:
-            # In the future we will use some logging tool to do this.
-            pkg = dequeue_package()
-            target.write("dequed package: %s \n" % str(pkg))
+    _plugin = session.query(Plugin).filter(Plugin.name==name).first()
+    if _plugin:
+        if not session.query(Package).filter(Package.name==pkg['name']).first():
+            _package = Package(name=pkg['name'],
+                               plugin_id=_plugin.id)
+            _version = Version(number=pkg['version'],
+                               package_id=_package.id,
+                               has_analysis=False)
+            _package.versions.append(_version)
+            session.add(_package)
+            with open(queue_file, 'w+') as target:
+                # In the future we will use some logging tool to do this.
+                target.write("dequed package: %s \n" % str(pkg))
 
-            # Database stuff here.
+            session.commit()
 
 def plugin_name(plugin):
     return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
@@ -73,7 +88,7 @@ def create_plugin(name, plugin):
 
 def daemon():
     # TODO: improve with start/stop system
-    p = Process(target=monitor)
+    p = Process(target=initialize)
     p.daemon = True
     p.start()
     p.join()
