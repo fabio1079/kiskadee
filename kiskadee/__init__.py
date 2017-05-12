@@ -22,12 +22,10 @@ _plugins_path = os.path.join(_my_path, 'plugins')
 _plugins_pkg_files = [f for f in os.listdir(_plugins_path) if
                       os.path.isfile(os.path.join(_plugins_path, f))]
 _plugins_pkg_files.remove('__init__.py')
-if '__init__.pyc' in _plugins_pkg_files:
-    _plugins_pkg_files.remove('__init__.pyc')
-print(_plugins_pkg_files)
 for plugin in _plugins_pkg_files:
     plugin_name, file_ext = os.path.splitext(plugin)
-    kiskadee_plugins_list.append(plugin_name)
+    if file_ext == '.py':  # We don't want pyc files when running with python 2
+        kiskadee_plugins_list.append(plugin_name)
 
 
 def load_plugins():
