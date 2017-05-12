@@ -22,8 +22,7 @@ def analyze(package):
         version: the package version
         path: plugin default path for packages
     """
-    # TODO: Base dir must be set in kiskadee config file as the directory that holds all packages to be analyzed
-    base_dir = '/tmp/kiskadee'
+    base_dir = kiskadee.config['analyses']['path']
     sources = os.path.join(base_dir, package['plugin'].__name__, package['name'], package['version'])
     shutil.rmtree(sources)
     if not os.path.exists(sources):
