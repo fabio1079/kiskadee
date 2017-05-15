@@ -9,6 +9,6 @@ __pycache__
 /*.egg-info
 .eggs
 reports
-*queue_output
+kiskadee.log
 tags
 kiskadee/tests/test_source/Sources

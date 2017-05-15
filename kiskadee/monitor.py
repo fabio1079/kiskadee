@@ -6,6 +6,7 @@ from multiprocessing import Process
 from kiskadee.model import Package, Plugin, Version, Base
 from kiskadee.database import Database
 from kiskadee.helpers import _start
+import logging
 
 
 class Monitor:
@@ -14,6 +15,7 @@ class Monitor:
         self.engine = None
         self.session = None
         self.running = True
+        self.logger = logging.getLogger()
 
 
     def sync_analyses(self):
@@ -33,17 +35,14 @@ class Monitor:
         and the monitor() method, that retrieve  packages from the packages_queue,
         and makes the necessary database operations """
 
-        try:
-            database = Database()
-            self.engine = database.engine
-            self.session = database.session
-            _start(self.monitor, False)
-            plugins = kiskadee.load_plugins()
-            for plugin in plugins:
-                self._save_plugin(name, plugin)
-                _start(plugin.watch, True)
-        except Exception:
-            print("Database not found")
+        database = Database()
+        self.engine = database.engine
+        self.session = database.session
+        _start(self.monitor, False)
+        plugins = kiskadee.load_plugins()
+        for plugin in plugins:
+            self._save_plugin(plugin)
+            _start(plugin.watch, True)
 
     def monitor(self):
         """ Continuosly check new packages and save it in db """
@@ -57,13 +56,14 @@ class Monitor:
     def dequeue(self):
         """ dequeue packages from packages_queue """
         if not kiskadee.queue.packages_queue.empty():
-            return dequeue_package()
+            pkg = dequeue_package()
+            self.logger.debug("Dequed Package: %s"  % str(pkg))
+            return pkg
         return {}
 
 
     def _save_or_update_pkgs(self, pkg):
         name = self._plugin_name(pkg['plugin'])
-        queue_file = "%s_queue_output" % name
         _plugin = self.session.query(Plugin).filter(Plugin.name==name).first()
         if _plugin:
             if not self.session.query(Package).filter(Package.name==pkg['name']).first():
@@ -74,11 +74,8 @@ class Monitor:
                                 has_analysis=False)
                 _package.versions.append(_version)
                 self.session.add(_package)
-                print("Writing output in %s file" % queue_file)
-                with open(queue_file, 'w+') as target:
-                    # In the future we will use some logging tool to do this.
-                    target.write("dequed package: %s \n" % str(pkg))
 
+                self.logger.debug("Saving package in db: %s"  % str(pkg))
                 self.session.commit()
 
 
@@ -87,6 +84,7 @@ class Monitor:
 
     def _save_plugin(self, plugin):
         name = self._plugin_name(plugin)
+        self.logger.debug("Saving %s plugin in database" % name)
         if not self.session.query(Plugin).filter(Plugin.name==name).first():
             _plugin = Plugin(name=name,
                     target=plugin.PLUGIN_DATA['target'],

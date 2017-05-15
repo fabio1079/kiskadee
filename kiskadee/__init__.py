@@ -12,6 +12,11 @@ On the following variables and a functions are exported:
 import os
 import importlib
 import configparser
+import logging
+
+
+_file = open('kiskadee.log', mode='w+')
+logging.basicConfig(stream=_file, level='DEBUG')
 
 _my_path = os.path.dirname(os.path.realpath(__file__))
 
