@@ -1,9 +1,0 @@
-{
-    "debian": {
-        "target":"http://ftp.us.debian.org/debian",
-        "description": "A plugin to monitor Debian Repositories",
-        "release": "sid",
-        "meta": "Sources.gz",
-        "schedule": 0.1
-        }
-}

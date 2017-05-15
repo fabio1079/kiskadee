@@ -1,8 +1,6 @@
 from unittest import TestCase
 import unittest
 import kiskadee
-from kiskadee.helpers import load_config
-import importlib
 import sys
 import os
 from os import path, listdir

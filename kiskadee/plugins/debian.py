@@ -10,7 +10,7 @@ import os
 import tarfile
 import tempfile
 from shutil import copy2
-from kiskadee.helpers import to_firehose, load_config
+from kiskadee.helpers import to_firehose
 from kiskadee.helpers import enqueue_source, enqueue_pkg
 import kiskadee
 import urllib.request
@@ -18,7 +18,7 @@ from subprocess import check_output
 from deb822 import Sources
 from time import sleep
 
-PLUGIN_DATA = load_config('debian')
+PLUGIN_DATA = kiskadee.config['debian_plugin']
 running = True
 
 def queue_sources_gz_pkgs(path):

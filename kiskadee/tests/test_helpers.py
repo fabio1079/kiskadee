@@ -1,6 +1,6 @@
 from unittest import TestCase
 import kiskadee
-from kiskadee.helpers import to_firehose, load_config
+from kiskadee.helpers import to_firehose
 import importlib
 import sys
 import os
@@ -30,16 +30,4 @@ class TestHelpers(TestCase):
         self.assertEqual(generator.get('name'), 'cppcheck')
         self.assertIsNotNone(results)
         self.assertIsNotNone(root_tree.find('metadata'))
-
-
-    def test_load_config(self):
-        inexistent_plugin = 'windows'
-        self.assertEquals(load_config(inexistent_plugin), {})
-        existent_plugin = 'debian'
-        data = load_config(existent_plugin)
-        self.assertIn('target', data)
-        self.assertIn('release', data)
-        self.assertIn('description', data)
-        self.assertIn('schedule', data)
-
 

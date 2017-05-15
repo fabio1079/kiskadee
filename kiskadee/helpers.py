@@ -11,7 +11,6 @@ from importlib import import_module
 import shutil
 import tempfile
 import os
-import json
 from kiskadee.queue import enqueue_analysis, \
         enqueue_package
 from threading import Thread
@@ -59,25 +58,6 @@ def import_analyzer_module(analyzer):
         return import_module("firehose.parsers.%s" % (analyzer))
     except ImportError:
         print("ERROR: Firehose parser %s not found" % analyzer)
-
-def load_config(plugin):
-    """Read the plugin config
-    :plugin: The name of the plugin
-    :returns: A dict with the plugin configuration
-    """
-
-    config_path = get_config()
-    f = open(config_path, 'r')
-    try:
-        data = json.load(f)
-        return data[plugin]
-        f.close()
-    except KeyError:
-        f.close()
-        return {}
-
-def get_config():
-    return 'kiskadee/config.json'
 
 
 def enqueue_source(func):
