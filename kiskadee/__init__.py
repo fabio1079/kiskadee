@@ -13,10 +13,10 @@ import os
 import importlib
 import configparser
 import logging
+import sys
+import pdb
 
 
-_file = open('kiskadee.log', mode='w+')
-logging.basicConfig(stream=_file, level='DEBUG')
 
 _my_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -67,3 +67,24 @@ elif len(_read) == 2 or _read[0] == _sys_config_file:
 else:
     # log _read[0] loaded
     pass
+
+
+log_file = config['DEFAULT']['log_file']
+if log_file != 'stdout':
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    _warning = logging.FileHandler(sys.stdout)
+    _warning.setLevel(logging.WARNING)
+    _info = logging.FileHandler(sys.stdout)
+    _info.setLevel(logging.INFO)
+    root.addHandler(_warning)
+    root.addHandler(_info)
+else:
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    _warning = logging.StreamHandler(sys.stdout)
+    _warning.setLevel(logging.WARNING)
+    _info = logging.StreamHandler(sys.stdout)
+    _info.setLevel(logging.INFO)
+    root.addHandler(_warning)
+    root.addHandler(_info)
