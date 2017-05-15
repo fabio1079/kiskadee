@@ -19,6 +19,7 @@ from deb822 import Sources
 from time import sleep
 
 PLUGIN_DATA = load_config('debian')
+running = True
 
 def queue_sources_gz_pkgs(path):
     sources = os.path.join(path, 'Sources')
@@ -61,7 +62,7 @@ def watch():
     Repositories. Each package monitored by the plugin will be
     queued using the enqueue_pkg decorator. """
 
-    while True:
+    while running:
         collect()
         sleep(PLUGIN_DATA.get('schedule') * 60)
 

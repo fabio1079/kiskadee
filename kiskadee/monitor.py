@@ -2,10 +2,10 @@ import kiskadee.model
 from kiskadee.queue import enqueue_analysis, dequeue_package, \
         enqueue_package
 import threading
-from threading import Thread
 from multiprocessing import Process
 from kiskadee.model import Package, Plugin, Version, Base
 from kiskadee.database import Database
+from kiskadee.helpers import _start
 
 
 class Monitor:
@@ -13,6 +13,7 @@ class Monitor:
     def __init__(self):
         self.engine = None
         self.session = None
+        self.running = True
 
 
     def sync_analyses(self):
@@ -36,33 +37,28 @@ class Monitor:
             database = Database()
             self.engine = database.engine
             self.session = database.session
-            self._start(self.monitor, False)
+            _start(self.monitor, False)
             plugins = kiskadee.load_plugins()
             for plugin in plugins:
-                name = self._plugin_name(plugin)
-                self._create_plugin(name, plugin)
-                self._start(plugin.watch, True)
+                self._save_plugin(name, plugin)
+                _start(plugin.watch, True)
         except Exception:
             print("Database not found")
 
-
-
-    def _start(self, module, joinable=False):
-        module_as_a_thread = Thread(target=module)
-        module_as_a_thread.daemon = True
-        module_as_a_thread.start()
-        if joinable:
-            module_as_a_thread.join()
-
-
     def monitor(self):
-        """ Continuous dequeue packages from packages_queue """
+        """ Continuosly check new packages and save it in db """
         Base.metadata.create_all(self.engine)
         Base.metadata.bind = self.engine
-        while True:
-            if not kiskadee.queue.packages_queue.empty():
-                pkg = dequeue_package()
+        while self.running:
+            pkg = self.dequeue()
+            if pkg:
                 self._save_or_update_pkgs(pkg)
+
+    def dequeue(self):
+        """ dequeue packages from packages_queue """
+        if not kiskadee.queue.packages_queue.empty():
+            return dequeue_package()
+        return {}
 
 
     def _save_or_update_pkgs(self, pkg):
@@ -89,7 +85,8 @@ class Monitor:
     def _plugin_name(self, plugin):
         return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
 
-    def _create_plugin(self, name, plugin):
+    def _save_plugin(self, plugin):
+        name = self._plugin_name(plugin)
         if not self.session.query(Plugin).filter(Plugin.name==name).first():
             _plugin = Plugin(name=name,
                     target=plugin.PLUGIN_DATA['target'],

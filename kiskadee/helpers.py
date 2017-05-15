@@ -14,6 +14,7 @@ import os
 import json
 from kiskadee.queue import enqueue_analysis, \
         enqueue_package
+from threading import Thread
 
 def to_firehose(bytes_input, analyzer):
     """ Parser the analyzer report to Firehose format
@@ -98,4 +99,12 @@ def enqueue_pkg(func):
         package = func(*args, **kwargs)
         enqueue_package(package)
     return wrapper
+
+
+def _start(module, joinable=False, timeout=None):
+    module_as_a_thread = Thread(target=module)
+    module_as_a_thread.daemon = True
+    module_as_a_thread.start()
+    if joinable or timeout:
+        module_as_a_thread.join(timeout)
 
