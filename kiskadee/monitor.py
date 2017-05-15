@@ -7,6 +7,7 @@ from kiskadee.model import Package, Plugin, Version, Base
 from kiskadee.database import Database
 from kiskadee.helpers import _start
 import logging
+import pdb
 
 
 class Monitor:
@@ -15,7 +16,7 @@ class Monitor:
         self.engine = None
         self.session = None
         self.running = True
-        self.logger = logging.getLogger()
+        self.logger = kiskadee.logger
 
 
     def sync_analyses(self):
@@ -51,7 +52,7 @@ class Monitor:
         while self.running:
             pkg = self.dequeue()
             if pkg:
-                self._save_or_update_pkgs(pkg)
+                self._save_or_update_pkg(pkg)
 
     def dequeue(self):
         """ dequeue packages from packages_queue """
@@ -62,21 +63,32 @@ class Monitor:
         return {}
 
 
-    def _save_or_update_pkgs(self, pkg):
-        name = self._plugin_name(pkg['plugin'])
-        _plugin = self.session.query(Plugin).filter(Plugin.name==name).first()
+    def _save_or_update_pkg(self, pkg):
+        _name = self._plugin_name(pkg['plugin'])
+        _plugin = self._query(Plugin).filter(Plugin.name==_name).first()
         if _plugin:
-            if not self.session.query(Package).filter(Package.name==pkg['name']).first():
-                _package = Package(name=pkg['name'],
-                                plugin_id=_plugin.id)
-                _version = Version(number=pkg['version'],
-                                package_id=_package.id,
-                                has_analysis=False)
-                _package.versions.append(_version)
-                self.session.add(_package)
+            if not self._query(Package).\
+                    filter(Package.name==pkg['name']).first():
+                self._save_pkg(pkg, _plugin)
+            else:
+                self._update_pkg_version(pkg)
 
-                self.logger.debug("Saving package in db: %s"  % str(pkg))
-                self.session.commit()
+
+    def _save_pkg(self, pkg, _plugin):
+        _package = Package(name=pkg['name'],
+                        plugin_id=_plugin.id)
+        _version = Version(number=pkg['version'],
+                        package_id=_package.id,
+                        has_analysis=False)
+        _package.versions.append(_version)
+        self.session.add(_package)
+        self.logger.info("Saving package in db: %s"  % str(pkg))
+        self.session.commit()
+
+
+    def _update_pkg_version(self, pkg):
+        return {}
+
 
 
     def _plugin_name(self, plugin):
@@ -92,6 +104,8 @@ class Monitor:
             self.session.add(_plugin)
             self.session.commit()
 
+    def _query(self, arg):
+        return self.session.query(arg)
 
 def daemon():
     """ Entry point to the monitor module """

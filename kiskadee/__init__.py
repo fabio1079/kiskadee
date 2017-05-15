@@ -17,7 +17,6 @@ import sys
 import pdb
 
 
-
 _my_path = os.path.dirname(os.path.realpath(__file__))
 
 # Handle plugin system
@@ -70,21 +69,32 @@ else:
 
 
 log_file = config['DEFAULT']['log_file']
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 if log_file != 'stdout':
-    root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
-    _warning = logging.FileHandler(sys.stdout)
-    _warning.setLevel(logging.WARNING)
-    _info = logging.FileHandler(sys.stdout)
-    _info.setLevel(logging.INFO)
-    root.addHandler(_warning)
-    root.addHandler(_info)
+    _warning = logging.FileHandler(log_file, mode='w+')
+    _info = logging.FileHandler(log_file, mode='w+')
+    _debug = logging.FileHandler(log_file, mode='w+')
+
+    _debug.setFormatter(formatter)
+    _warning.setFormatter(formatter)
+    _info.setFormatter(formatter)
+
 else:
-    root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
+    _debug = logging.StreamHandler(sys.stdout)
     _warning = logging.StreamHandler(sys.stdout)
-    _warning.setLevel(logging.WARNING)
     _info = logging.StreamHandler(sys.stdout)
-    _info.setLevel(logging.INFO)
-    root.addHandler(_warning)
-    root.addHandler(_info)
+
+    _debug.setFormatter(formatter)
+    _warning.setFormatter(formatter)
+    _info.setFormatter(formatter)
+
+
+_debug.setLevel(logging.DEBUG)
+_warning.setLevel(logging.WARNING)
+_info.setLevel(logging.INFO)
+
+logger.addHandler(_debug)
+logger.addHandler(_warning)
+logger.addHandler(_info)
