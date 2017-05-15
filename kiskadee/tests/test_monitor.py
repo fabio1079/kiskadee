@@ -43,7 +43,7 @@ class TestMonitor(TestCase):
         def mock_download_source_gz(url):
             return 'kiskadee/tests/test_source'
 
-        def mock_save_or_update_pkgs(pkg):
+        def mock_save_or_update_pkg(pkg):
             return {}
 
         debian_plugin = kiskadee.plugins.debian
@@ -74,7 +74,7 @@ class TestMonitor(TestCase):
                'plugin': kiskadee.plugins.debian,
                'meta': { 'directory': 'pool/main/c/curl'}
               }
-        self.monitor._save_or_update_pkgs(pkg)
+        self.monitor._save_or_update_pkg(pkg)
         _pkgs = self.monitor.session.query(Package).all()
         self.assertEqual(len(_pkgs), 1)
         self.assertEqual(_pkgs[0].name, 'curl')
@@ -87,7 +87,7 @@ class TestMonitor(TestCase):
                'plugin': kiskadee.plugins.debian,
                'meta': { 'directory': 'pool/main/c/curl'}
               }
-        self.monitor._save_or_update_pkgs(pkg)
+        self.monitor._save_or_update_pkg(pkg)
         _pkgs = self.monitor.session.query(Package).all()
         _version = _pkgs[0].versions[0].number
         self.assertEqual(_version, '1.5-1')
