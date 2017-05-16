@@ -25,9 +25,6 @@ class TestMonitor(TestCase):
         # model.metadata.drop_all(self.engine)
         model.Base.metadata.drop_all(self.monitor.engine)
 
-    def test_sync_analyses(self):
-        self.monitor.sync_analyses()
-
     def test_dequeue_package_values(self):
         def mock_download_source_gz(url):
             return 'kiskadee/tests/test_source'
