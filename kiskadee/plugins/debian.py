@@ -67,20 +67,6 @@ def watch():
         sleep(PLUGIN_DATA.get('schedule') * 60)
 
 
-# Former watch(); this is actually analyzing the packages
-def analyze(requested_source):
-    """Monitor Debian repositories
-
-    :returns: I not know yet, for now will return
-    only the path to a source package, that will
-    be analyzed by some analyzer.
-    """
-    extracts_path = extracted_source_path()
-    uncompress_tar_gz(requested_source, extracts_path)
-    analyzer_output = analyzers().cppcheck(extracts_path)
-    to_firehose(analyzer_output, 'cppcheck')
-
-
 def uncompress_tar_gz(source, path):
     """Extract the source code to a randomic dir.
 
@@ -161,13 +147,3 @@ def uncompress_gz(path):
     compressed_file_path = os.path.join(path, PLUGIN_DATA['meta'])
     check_output(['gzip', '-d', '-k', '-f', compressed_file_path])
     return path
-
-
-def analyzers():
-    """ Read wich plugins will be run on the source code
-
-    :returns: List of plugins to run on source code.
-
-    """
-    import kiskadee.analyzers.cppcheck as cppcheck
-    return cppcheck
