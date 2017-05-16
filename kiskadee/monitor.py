@@ -1,6 +1,6 @@
 import kiskadee.model
 from kiskadee.queue import enqueue_analysis, dequeue_package, \
-        enqueue_package
+        enqueue_package, package_done
 import threading
 from multiprocessing import Process
 from kiskadee.model import Package, Plugin, Version, Base
@@ -47,6 +47,7 @@ class Monitor:
         """ dequeue packages from packages_queue """
         if not kiskadee.queue.packages_queue.empty():
             pkg = dequeue_package()
+            package_done()
             self.logger.debug("Dequed Package: %s"  % str(pkg))
             return pkg
         return {}

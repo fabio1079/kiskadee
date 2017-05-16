@@ -9,7 +9,7 @@ from kiskadee.queue import enqueue_analysis, dequeue_package, \
 from kiskadee.helpers import _start
 from time import sleep
 from kiskadee.model import Package, Plugin, Version, Base
-
+import kiskadee.queue
 
 class TestMonitor(TestCase):
 
@@ -18,43 +18,39 @@ class TestMonitor(TestCase):
         self.monitor.engine = create_engine('sqlite:///:memory:')
         Session = sessionmaker(bind=self.monitor.engine)
         self.monitor.session = Session()
-        # model.metadata.create_all(self.engine)
         model.Base.metadata.create_all(self.monitor.engine)
+        self.pkg1 = {'name': 'curl',
+                'version': '7.52.1-5',
+                'plugin': kiskadee.plugins.debian,
+                'meta': { 'directory': 'pool/main/c/curl'}
+                }
+
+        self.pkg2 = {'name': 'urlscan',
+                'version': '0.8.2',
+                'plugin': kiskadee.plugins.debian,
+                'meta': { 'directory': 'pool/main/u/urlscan'}
+                }
+
+        self.pkg3 = {'name': 'curl',
+                'version': '7.52.2-5',
+                'plugin': kiskadee.plugins.debian,
+                'meta': { 'directory': 'pool/main/c/curl'}
+                }
 
     def tearDown(self):
         # model.metadata.drop_all(self.engine)
         model.Base.metadata.drop_all(self.monitor.engine)
 
-    def test_dequeue_package_values(self):
-        def mock_download_source_gz(url):
-            return 'kiskadee/tests/test_source'
-
-        plugins = kiskadee.load_plugins()
-        for plugin in plugins:
-            plugin.download_sources_gz = mock_download_source_gz
-            plugin.collect()
-            pkg = dequeue_package()
-            self.assertTrue(isinstance(pkg, dict))
-
-    def test_save_dequeued_pkg(self):
-        def mock_download_source_gz(url):
-            return 'kiskadee/tests/test_source'
-
-        def mock_save_or_update_pkg(pkg):
-            return {}
-
-        debian_plugin = kiskadee.plugins.debian
-        debian_plugin.download_sources_gz = mock_download_source_gz
-        debian_plugin.collect()
-        pkg = self.monitor.dequeue()
-        self.assertTrue(isinstance(pkg, dict))
+    def test_dequeue_package(self):
+        enqueue_package(self.pkg1)
+        _pkg = self.monitor.dequeue()
+        self.assertTrue(isinstance(_pkg, dict))
 
     def test_return_plugin_name(self):
-
         plugin = kiskadee.plugins.debian
         self.assertEqual(self.monitor._plugin_name(plugin), 'debian')
 
-    def test_save_plugin(self):
+    def test_save_some_plugin(self):
         plugin = kiskadee.plugins.debian
         self.monitor._save_plugin(plugin)
         _plugins = self.monitor.session.query(Plugin).all()
@@ -66,25 +62,48 @@ class TestMonitor(TestCase):
     def test_save_package(self):
         plugin = kiskadee.plugins.debian
         self.monitor._save_plugin(plugin)
-        pkg = {'name': 'curl',
-               'version': '1.5-1',
-               'plugin': kiskadee.plugins.debian,
-               'meta': { 'directory': 'pool/main/c/curl'}
-              }
-        self.monitor._save_or_update_pkg(pkg)
+        enqueue_package(self.pkg1)
+        enqueue_package(self.pkg2)
+
+        _pkg = self.monitor.dequeue()
+        self.monitor._save_or_update_pkg(_pkg)
         _pkgs = self.monitor.session.query(Package).all()
         self.assertEqual(len(_pkgs), 1)
-        self.assertEqual(_pkgs[0].name, 'curl')
+        self.assertEqual(_pkgs[0].name, _pkg['name'])
+
+        _pkg = self.monitor.dequeue()
+        self.monitor._save_or_update_pkg(_pkg)
+        _pkgs = self.monitor.session.query(Package).all()
+        self.assertEqual(len(_pkgs), 2)
+        self.assertEqual(_pkgs[1].name, _pkg['name'])
 
     def test_save_version(self):
         plugin = kiskadee.plugins.debian
         self.monitor._save_plugin(plugin)
-        pkg = {'name': 'curl',
-               'version': '1.5-1',
-               'plugin': kiskadee.plugins.debian,
-               'meta': { 'directory': 'pool/main/c/curl'}
-              }
-        self.monitor._save_or_update_pkg(pkg)
+        self.monitor._save_or_update_pkg(self.pkg1)
         _pkgs = self.monitor.session.query(Package).all()
         _version = _pkgs[0].versions[0].number
-        self.assertEqual(_version, '1.5-1')
+        self.assertEqual(_version, self.pkg1['version'])
+
+    def test_update_version(self):
+        plugin = kiskadee.plugins.debian
+        self.monitor._save_plugin(plugin)
+        enqueue_package(self.pkg1)
+        enqueue_package(self.pkg3)
+
+        _pkg = self.monitor.dequeue()
+        self.monitor._save_or_update_pkg(_pkg)
+
+        _pkg = self.monitor.dequeue()
+        self.monitor._save_or_update_pkg(_pkg)
+
+        _pkgs = self.monitor.session.query(Package).all()
+        self.assertEqual(len(_pkgs), 1)
+
+        _pkg_versions = self.monitor._query(Package).\
+                filter(Package.name==_pkg['name']).first().versions
+
+        _first_version = _pkg_versions[0].number
+        _current_version = _pkg_versions[-1].number
+        self.assertEqual(self.pkg1['version'], _first_version)
+        self.assertEqual(_pkg['version'], _current_version)

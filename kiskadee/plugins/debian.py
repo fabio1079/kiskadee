@@ -50,20 +50,16 @@ def download_source(source_data):
     return temp_dir
 
 
-def collect():
-    url = sources_gz_url()
-    sources_gz_dir = download_sources_gz(url)
-    uncompress_gz(sources_gz_dir)
-    queue_sources_gz_pkgs(sources_gz_dir)
-
-
 def watch():
     """ Starts the continuing monitoring process of Debian
     Repositories. Each package monitored by the plugin will be
     queued using the enqueue_pkg decorator. """
 
     while running:
-        collect()
+        url = sources_gz_url()
+        sources_gz_dir = download_sources_gz(url)
+        uncompress_gz(sources_gz_dir)
+        queue_sources_gz_pkgs(sources_gz_dir)
         sleep(PLUGIN_DATA.get('schedule') * 60)
 
 
