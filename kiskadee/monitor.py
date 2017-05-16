@@ -7,6 +7,7 @@ from kiskadee.model import Package, Plugin, Version, Base
 from kiskadee.database import Database
 from kiskadee.helpers import _start
 import logging
+import semver
 import pdb
 
 
@@ -75,7 +76,18 @@ class Monitor:
 
 
     def _update_pkg_version(self, pkg):
-        return {}
+        _pkg = self._query(Package).filter(Package.name==pkg['name']).first()
+        current_pkg_version = _pkg.versions[-1].number
+
+        if semver.compare(pkg['version'], current_pkg_version) == 1:
+            _new_version = Version(number=pkg['version'],
+                            package_id=_pkg.id,
+                            has_analysis=False)
+            _pkg.versions.append(_new_version)
+            self.session.add(_pkg)
+            self.session.commit()
+        else:
+            return {}
 
 
 
