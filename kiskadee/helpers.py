@@ -6,14 +6,13 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from subprocess import check_output
 from importlib import import_module
 import shutil
 import tempfile
 import os
 from kiskadee.queue import enqueue_analysis, \
         enqueue_package
-from threading import Thread
+
 
 def to_firehose(bytes_input, analyzer):
     """ Parser the analyzer report to Firehose format
@@ -39,13 +38,14 @@ def to_firehose(bytes_input, analyzer):
     analyzer_module = import_analyzer_module(analyzer)
 
     if (analyzer_module):
-        analyzer_report_file = report_directory  + firehose_report_file
+        analyzer_report_file = report_directory + firehose_report_file
         firehose_tree = analyzer_module.parse_file(file_to_parse).to_xml()
         firehose_tree.write(analyzer_report_file, encoding='UTF-8')
 
     shutil.rmtree(tempdir)
 
     return firehose_tree
+
 
 def import_analyzer_module(analyzer):
     """ Import a firehose parser
@@ -79,12 +79,3 @@ def enqueue_pkg(func):
         package = func(*args, **kwargs)
         enqueue_package(package)
     return wrapper
-
-
-def _start(module, joinable=False, timeout=None):
-    module_as_a_thread = Thread(target=module)
-    module_as_a_thread.daemon = True
-    module_as_a_thread.start()
-    if joinable or timeout:
-        module_as_a_thread.join(timeout)
-

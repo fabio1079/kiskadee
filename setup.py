@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='kiskadee',
-    version='0.1',
+    version='0.1.dev0',
     description='Continuous static analysis tool',
     long_description='Continuous static analysis tool \
             which writes the analyses \
@@ -29,9 +29,9 @@ setup(
                 'psycopg2',
                 'firehose',
                 'sqlalchemy',
+                'semver',
                 'python-debian',
-                'chardet',
-                'ipython'
+                'chardet'
                 ],
             test_suite='nose.collector',
             tests_require=['nose']

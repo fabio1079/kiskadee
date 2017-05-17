@@ -14,7 +14,6 @@ import importlib
 import configparser
 import logging
 import sys
-import pdb
 
 
 _my_path = os.path.dirname(os.path.realpath(__file__))

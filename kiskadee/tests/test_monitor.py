@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 import kiskadee
 from kiskadee.queue import enqueue_analysis, dequeue_package, \
         enqueue_package
-from kiskadee.helpers import _start
+from kiskadee.monitor import _start
 from time import sleep
 from kiskadee.model import Package, Plugin, Version, Base
 import kiskadee.queue
