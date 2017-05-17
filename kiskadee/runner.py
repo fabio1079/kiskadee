@@ -1,11 +1,6 @@
 import os
 import shutil
-import tarfile
-import kiskadee.queue
-import kiskadee.analyzers
-import kiskadee.model
-import kiskadee.helpers
-import kiskadee.database
+import kiskadee
 
 running = True
 
@@ -39,8 +34,7 @@ def analyze(package):
 
     compressed_sources = package['plugin'].get_sources(package['name'],
                                                        package['version'])
-    with tarfile.open(fileobj=compressed_sources) as tarball:
-        tarball.extractall(path=sources)
+    shutil.unpack_archive(compressed_sources, sources)
 
     analyzers = package['plugin'].analyzers
     reports = []
@@ -48,4 +42,5 @@ def analyze(package):
         analysis = kiskadee.analyzers.run(analyzer, sources)
         firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
         reports.append(firehose_report)
+    # TODO: remove compressed files and uncompressed files after the analysis
     return reports
