@@ -17,6 +17,7 @@ import urllib.request
 from subprocess import check_output
 from deb822 import Sources
 from time import sleep
+from kiskadee.helpers import chdir
 
 PLUGIN_DATA = kiskadee.config['debian_plugin']
 running = True
@@ -41,13 +42,11 @@ def create_package_dict(src):
 def download_source(source_data):
     """Download packages from some debian mirror."""
 
-    temp_dir = tempfile.mkdtemp()
-    initial_dir = os.getcwd()
-    os.chdir(temp_dir)
-    url = dsc_url(source_data)
-    check_output(['dget', url])
-    os.chdir(initial_dir)
-    return temp_dir
+    path = tempfile.mkdtemp()
+    with chdir(path):
+        url = dsc_url(source_data)
+        check_output(['dget', url])
+        return path
 
 
 def watch():
@@ -124,18 +123,13 @@ def download_sources_gz(url):
 
     """
 
-    temp_dir = tempfile.mkdtemp()
-
-    initial_dir = os.getcwd()
-    os.chdir(temp_dir)
-    in_file = urllib.request.urlopen(url)
-    data = in_file.read()
-
-    with open('Sources.gz', 'wb') as info:
-        info.write(data)
-
-    os.chdir(initial_dir)
-    return temp_dir
+    path = tempfile.mkdtemp()
+    with chdir(path):
+        in_file = urllib.request.urlopen(url)
+        data = in_file.read()
+        with open('Sources.gz', 'wb') as info:
+            info.write(data)
+    return path
 
 
 def uncompress_gz(path):

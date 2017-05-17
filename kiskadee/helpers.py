@@ -12,6 +12,7 @@ import tempfile
 import os
 from kiskadee.queue import enqueue_analysis, \
         enqueue_package
+from contextlib import contextmanager
 
 
 def to_firehose(bytes_input, analyzer):
@@ -31,9 +32,8 @@ def to_firehose(bytes_input, analyzer):
         pass
 
     file_to_parse = os.path.join(tempdir, tmp_report_file)
-    f = open(file_to_parse, 'w')
-    f.write(bytes_input.decode('UTF-8'))
-    f.close()
+    with open(file_to_parse) as f:
+        f.write(bytes_input.decode('UTF-8'))
 
     analyzer_module = import_analyzer_module(analyzer)
 
@@ -79,3 +79,10 @@ def enqueue_pkg(func):
         package = func(*args, **kwargs)
         enqueue_package(package)
     return wrapper
+
+@contextmanager
+def chdir(path):
+    initial_dir = os.getcwd()
+    os.chdir(path)
+    yield
+    os.chdir(initial_dir)
