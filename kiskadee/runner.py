@@ -1,6 +1,9 @@
 import os
 import shutil
 import kiskadee
+import kiskadee.queue
+import kiskadee.analyzers
+import kiskadee.helpers
 
 running = True
 
@@ -13,6 +16,7 @@ def runner():
             package = kiskadee.queue.dequeue_analysis()
             analysis_reports = analyze(package)
             # TODO: save reports in DB
+            print(analysis_reports)
 
 
 def analyze(package):

@@ -1,4 +1,7 @@
 import kiskadee
+import kiskadee.database
+import kiskadee.runner
+import kiskadee.queue
 import threading
 from multiprocessing import Process
 from kiskadee.model import Package, Plugin, Version, Base
@@ -27,6 +30,8 @@ class Monitor:
         for plugin in plugins:
             self._save_plugin(plugin)
             _start(plugin.watch, True)
+        # Start runner
+        _start(kiskadee.runner.runner, True)
 
     def monitor(self):
         """ Continuosly check new packages and save it in db """
