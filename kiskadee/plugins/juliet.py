@@ -3,6 +3,7 @@ import urllib.request
 import shutil
 import os.path
 import tempfile
+import sys
 
 
 class Plugin(kiskadee.plugins.Plugin):
@@ -20,5 +21,9 @@ class Plugin(kiskadee.plugins.Plugin):
         """SAMATE does not provide a proper API to inspect new Juliet versions.
         It should not matter, since Juliet does not receive updates frequently.
         """
-        # TODO: enqueue juliet
-        pass
+        juliet = {}
+        juliet['plugin'] = sys.modules['__name__']
+        juliet['name'] = 'juliet'
+        juliet['version'] = '1.2'
+        # this should be queued to the other queue first
+        kiskadee.queue.analysis_enqueue(juliet)

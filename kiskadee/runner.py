@@ -32,11 +32,12 @@ def analyze(package):
     if not os.path.exists(sources):
         os.makedirs(sources)
 
-    compressed_sources = package['plugin'].get_sources(package['name'],
-                                                       package['version'])
+    plugin = package['plugin'].Plugin()
+    compressed_sources = plugin.get_sources(package['name'],
+                                            package['version'])
     shutil.unpack_archive(compressed_sources, sources)
 
-    analyzers = package['plugin'].analyzers
+    analyzers = plugin.analyzers
     reports = []
     for analyzer in analyzers:
         analysis = kiskadee.analyzers.run(analyzer, sources)
