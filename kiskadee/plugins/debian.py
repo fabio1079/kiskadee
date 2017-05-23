@@ -7,21 +7,23 @@
 # DEALINGS IN THE SOFTWARE.
 
 import os
-import tarfile
 import tempfile
-from kiskadee.helpers import to_firehose
-from kiskadee.helpers import enqueue_source, enqueue_pkg
+from kiskadee.helpers import enqueue_source, enqueue_pkg, chdir
 import kiskadee
 import urllib.request
 from subprocess import check_output
 from deb822 import Sources
 from time import sleep
-from kiskadee.helpers import chdir
+import re
+import shutil
 
 running = True
 
-
 class Plugin(kiskadee.plugins.Plugin):
+
+    def __init__(self):
+        kiskadee.plugins.Plugin.__init__(self)
+        self.sources = None
 
     def watch(self):
         """ Starts the continuing monitoring process of Debian
@@ -33,7 +35,8 @@ class Plugin(kiskadee.plugins.Plugin):
             sources_gz_dir = self._download_sources_gz(url)
             self._uncompress_gz(sources_gz_dir)
             self._queue_sources_gz_pkgs(sources_gz_dir)
-            sleep(self.config['schedule'] * 60)
+            sleep(float(self.config['schedule']) * 60)
+            shutil.rmtree(sources_gz_dir)
 
     @enqueue_source
     def get_sources(self, source_data):
@@ -43,13 +46,20 @@ class Plugin(kiskadee.plugins.Plugin):
         with chdir(path):
             url = self._dsc_url(source_data)
             check_output(['dget', url])
+        _source = {'source': ''.join([path, '/', self._source_path(path)])}
+        return _source
 
-        return path
+    def _source_path(self, path):
+        """ Return the path to the *.orig.tar.gz """
+        files = os.listdir(path)
+        prog = re.compile(".orig.")
+        return [x for x in files if prog.search(x)][0]
 
     def _queue_sources_gz_pkgs(self, path):
         sources = os.path.join(path, 'Sources')
         with open(sources) as sources_file:
-            for src in Sources.iter_paragraphs(sources_file):
+            self.sources = Sources.iter_paragraphs(sources_file)
+            for src in self.sources:
                 self._create_package_dict(src)
 
     @enqueue_pkg
