@@ -13,18 +13,18 @@ def runner():
     """Runner entry point
     """
     while running:
-        print('in loop')
+        kiskadee.logger.debug('RUNNER: entering loop')
         if not kiskadee.queue.is_empty():
-            print('dequeuing')
+            kiskadee.logger.debug('RUNNER: dequeuing')
             package = kiskadee.queue.dequeue_analysis()
-            print('dequeued')
-            print('running analysis')
+            kiskadee.logger.debug('RUNNER: dequeued')
             analysis_reports = analyze(package)
-            print('DONE running analysis')
+            kiskadee.logger.debug('DONE running analysis')
             # TODO: save reports in DB
-            print(analysis_reports)
-            print('end run')
+            kiskadee.logger.debug(analysis_reports)
+            kiskadee.logger.debug('end run')
         time.sleep(5)
+        kiskadee.logger.debug('RUNNER: loop ended')
 
 
 def analyze(package):
@@ -45,18 +45,21 @@ def analyze(package):
         os.makedirs(sources)
 
     plugin = package['plugin'].Plugin()
+    kiskadee.logger.debug('ANALYSIS: Downloading...')
     compressed_sources = plugin.get_sources(package['name'],
                                             package['version'])
-    print('Downloaded!')
-    print('Unpacking...')
+    kiskadee.logger.debug('ANALYSIS: Downloaded!')
+    kiskadee.logger.debug('ANALYSIS: Unpacking...')
     shutil.unpack_archive(compressed_sources, sources)
-    print('Unpacked!')
+    kiskadee.logger.debug('ANALYSIS: Unpacked!')
 
     analyzers = plugin.analyzers()
     reports = []
     for analyzer in analyzers:
+        kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
         analysis = kiskadee.analyzers.run(analyzer, sources)
         firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
         reports.append(firehose_report)
+        kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
     # TODO: remove compressed files and uncompressed files after the analysis
     return reports
