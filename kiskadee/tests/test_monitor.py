@@ -10,6 +10,7 @@ from kiskadee.monitor import _start
 from time import sleep
 from kiskadee.model import Package, Plugin, Version, Base
 import kiskadee.queue
+import kiskadee.plugins.debian
 
 class TestMonitor(TestCase):
 
@@ -51,13 +52,13 @@ class TestMonitor(TestCase):
         self.assertEqual(self.monitor._plugin_name(plugin), 'debian')
 
     def test_save_some_plugin(self):
-        plugin = kiskadee.plugins.debian
-        self.monitor._save_plugin(plugin)
+        plugin = kiskadee.plugins.debian.Plugin()
+        self.monitor._save_plugin(kiskadee.plugins.debian)
         _plugins = self.monitor.session.query(Plugin).all()
         self.assertEqual(len(_plugins), 1)
         self.assertEqual(_plugins[0].name, 'debian')
         self.assertEqual(_plugins[0].description,
-                         plugin.PLUGIN_DATA['description'])
+                         plugin.config['description'])
 
     def test_save_package(self):
         plugin = kiskadee.plugins.debian

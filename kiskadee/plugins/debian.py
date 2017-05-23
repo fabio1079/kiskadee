@@ -46,13 +46,11 @@ class Plugin(kiskadee.plugins.Plugin):
 
         return path
 
-
     def _queue_sources_gz_pkgs(self, path):
         sources = os.path.join(path, 'Sources')
         with open(sources) as sources_file:
             for src in Sources.iter_paragraphs(sources_file):
                 self._create_package_dict(src)
-
 
     @enqueue_pkg
     def _create_package_dict(self, src):
@@ -61,8 +59,6 @@ class Plugin(kiskadee.plugins.Plugin):
             'plugin': kiskadee.plugins.debian,
             'meta': { 'directory': src['Directory']}
             }
-
-
 
     def _dsc_url(self, source_data):
         """ Mount the dsc url required by dget tool to download the
