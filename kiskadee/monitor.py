@@ -31,8 +31,7 @@ class Monitor:
         plugins = kiskadee.load_plugins()
         for plugin in plugins:
             self._save_plugin(plugin)
-            _plugin = plugin.Plugin()
-            _start(_plugin.watch, True)
+            _start(plugin.Plugin().watch, True)
         # Start runner
         _start(kiskadee.runner.runner, True)
 
@@ -80,8 +79,8 @@ class Monitor:
         try:
             if semver.compare(pkg['version'], current_pkg_version) == 1:
                 _new_version = Version(number=pkg['version'],
-                                    package_id=_pkg.id,
-                                    has_analysis=False)
+                                       package_id=_pkg.id,
+                                       has_analysis=False)
                 _pkg.versions.append(_new_version)
                 self.session.add(_pkg)
                 self.session.commit()
@@ -94,13 +93,13 @@ class Monitor:
         return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
 
     def _save_plugin(self, plugin):
-        name = self._plugin_name(plugin)
-        config = plugin.Plugin().config
+        plugin = plugin.Plugin()
+        name = plugin.name
         self.logger.debug("Saving %s plugin in database" % name)
         if not self.session.query(Plugin).filter(Plugin.name == name).first():
             _plugin = Plugin(name=name,
-                             target=config.get('target'),
-                             description=config['description'])
+                             target=plugin.config['target'],
+                             description=plugin.config['description'])
             self.session.add(_plugin)
             self.session.commit()
 

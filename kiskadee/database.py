@@ -7,7 +7,7 @@ class Database:
         self.session = self._create_session(self.engine)
 
     def _create_engine(self):
-        return create_engine('postgresql://kiskadee@localhost/kiskadee_dev')
+        return create_engine('postgresql://kiskadee:kiskadee@localhost/kiskadee')
 
     def _create_session(self, engine):
         DBSession = orm.sessionmaker(bind=engine)

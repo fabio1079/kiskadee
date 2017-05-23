@@ -22,8 +22,8 @@ class Plugin(kiskadee.plugins.Plugin):
         It should not matter, since Juliet does not receive updates frequently.
         """
         juliet = {}
-        juliet['plugin'] = sys.modules['__name__']
+        juliet['plugin'] = sys.modules[__name__]
         juliet['name'] = 'juliet'
         juliet['version'] = '1.2'
         # this should be queued to the other queue first
-        kiskadee.queue.analysis_enqueue(juliet)
+        kiskadee.queue.enqueue_analysis(juliet)
