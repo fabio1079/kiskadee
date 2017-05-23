@@ -91,11 +91,12 @@ class Monitor:
 
     def _save_plugin(self, plugin):
         name = self._plugin_name(plugin)
+        config = plugin.Plugin().config
         self.logger.debug("Saving %s plugin in database" % name)
         if not self.session.query(Plugin).filter(Plugin.name == name).first():
             _plugin = Plugin(name=name,
-                             target=plugin.PLUGIN_DATA['target'],
-                             description=plugin.PLUGIN_DATA['description'])
+                             target=config['target'],
+                             description=config['description'])
             self.session.add(_plugin)
             self.session.commit()
 

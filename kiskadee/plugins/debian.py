@@ -9,7 +9,6 @@
 import os
 import tarfile
 import tempfile
-from shutil import copy2
 from kiskadee.helpers import to_firehose
 from kiskadee.helpers import enqueue_source, enqueue_pkg
 import kiskadee
@@ -19,121 +18,92 @@ from deb822 import Sources
 from time import sleep
 from kiskadee.helpers import chdir
 
-PLUGIN_DATA = kiskadee.config['debian_plugin']
 running = True
 
-def queue_sources_gz_pkgs(path):
-    sources = os.path.join(path, 'Sources')
-    with open(sources) as sources_file:
-        for src in Sources.iter_paragraphs(sources_file):
-            create_package_dict(src)
 
+class Plugin(kiskadee.plugins.Plugin):
 
-@enqueue_pkg
-def create_package_dict(src):
-    return {'name': src["Package"],
-           'version': src["Version"],
-           'plugin': kiskadee.plugins.debian,
-           'meta': { 'directory': src['Directory']}
-           }
+    def watch(self):
+        """ Starts the continuing monitoring process of Debian
+        Repositories. Each package monitored by the plugin will be
+        queued using the enqueue_pkg decorator. """
 
+        while running:
+            url = self._sources_gz_url()
+            sources_gz_dir = self._download_sources_gz(url)
+            self._uncompress_gz(sources_gz_dir)
+            self._queue_sources_gz_pkgs(sources_gz_dir)
+            sleep(self.config['schedule'] * 60)
 
-@enqueue_source
-def download_source(source_data):
-    """Download packages from some debian mirror."""
+    @enqueue_source
+    def get_sources(self, source_data):
+        """Download packages from some debian mirror."""
 
-    path = tempfile.mkdtemp()
-    with chdir(path):
-        url = dsc_url(source_data)
-        check_output(['dget', url])
+        path = tempfile.mkdtemp()
+        with chdir(path):
+            url = self._dsc_url(source_data)
+            check_output(['dget', url])
+
         return path
 
 
-def watch():
-    """ Starts the continuing monitoring process of Debian
-    Repositories. Each package monitored by the plugin will be
-    queued using the enqueue_pkg decorator. """
-
-    while running:
-        url = sources_gz_url()
-        sources_gz_dir = download_sources_gz(url)
-        uncompress_gz(sources_gz_dir)
-        queue_sources_gz_pkgs(sources_gz_dir)
-        sleep(PLUGIN_DATA.get('schedule') * 60)
+    def _queue_sources_gz_pkgs(self, path):
+        sources = os.path.join(path, 'Sources')
+        with open(sources) as sources_file:
+            for src in Sources.iter_paragraphs(sources_file):
+                self._create_package_dict(src)
 
 
-def uncompress_tar_gz(source, path):
-    """Extract the source code to a randomic dir.
-
-    :source: The source code (tar.gz) that will be analyzed.
-    :path: The path where the tar.gz is located.
-    """
-
-    copy_source(source, path)
-    abs_tar_path = path + '/' + os.path.basename(source)
-    source_tarfile = tarfile.open(abs_tar_path)
-    source_tarfile.extractall(path)
-    os.remove(abs_tar_path)
-
-
-def copy_source(source, path):
-    """Copy the source code to a proper directory
-
-    :arg1: source file
-    """
-
-    source_path = os.path.abspath(source)
-    copy2(source_path, path)
-
-
-def extracted_source_path():
-    """Create a temporary directory
-    """
-    return tempfile.mkdtemp()
+    @enqueue_pkg
+    def _create_package_dict(self, src):
+        return {'name': src["Package"],
+            'version': src["Version"],
+            'plugin': kiskadee.plugins.debian,
+            'meta': { 'directory': src['Directory']}
+            }
 
 
 
-def dsc_url(source_data):
-    """ Mount the dsc url required by dget tool to download the
-    source of a debian package.
-    (a.g dget http://ftp.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc)
+    def _dsc_url(self, source_data):
+        """ Mount the dsc url required by dget tool to download the
+        source of a debian package.
+        (a.g dget http://ftp.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc)
 
-    """
+        """
 
-    name = source_data['name']
-    version = source_data['version']
-    directory = source_data['directory']
-    mirror = PLUGIN_DATA['target']
-    return ''.join([mirror, '/', directory, '/', name, '_', version, '.dsc'])
-
-
-def sources_gz_url():
-    """ Mount the Sources.gz url"""
-    mirror = PLUGIN_DATA['target']
-    release = PLUGIN_DATA['release']
-
-    return "%s/dists/%s/main/source/Sources.gz" % (mirror, release)
+        name = source_data['name']
+        version = source_data['version']
+        directory = source_data['directory']
+        return ''.join([self.config['target'], '/',
+                        directory, '/', name, '_', version, '.dsc'])
 
 
-def download_sources_gz(url):
-    """Download and Extract the Sources.gz file, from some Debian Mirror.
+    def _sources_gz_url(self):
+        """ Mount the Sources.gz url"""
 
-    :data: The config.json file as a dict
-    :returns: The path to the Sources.gz file
-
-    """
-
-    path = tempfile.mkdtemp()
-    with chdir(path):
-        in_file = urllib.request.urlopen(url)
-        data = in_file.read()
-        with open('Sources.gz', 'wb') as info:
-            info.write(data)
-    return path
+        return "%s/dists/%s/main/source/Sources.gz" % (self.config['target'],
+                                                        self.config['release'])
 
 
-def uncompress_gz(path):
-    """Extract Some .gz file"""
-    compressed_file_path = os.path.join(path, PLUGIN_DATA['meta'])
-    check_output(['gzip', '-d', '-k', '-f', compressed_file_path])
-    return path
+    def _download_sources_gz(self, url):
+        """Download and Extract the Sources.gz file, from some Debian Mirror.
+
+        :data: The config.json file as a dict
+        :returns: The path to the Sources.gz file
+
+        """
+
+        path = tempfile.mkdtemp()
+        with chdir(path):
+            in_file = urllib.request.urlopen(url)
+            data = in_file.read()
+            with open('Sources.gz', 'wb') as info:
+                info.write(data)
+        return path
+
+
+    def _uncompress_gz(self, path):
+        """Extract Some .gz file"""
+        compressed_file_path = os.path.join(path, self.config['meta'])
+        check_output(['gzip', '-d', '-k', '-f', compressed_file_path])
+        return path
