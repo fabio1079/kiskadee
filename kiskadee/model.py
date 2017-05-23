@@ -21,7 +21,7 @@ class Plugin(Base):
     __tablename__ = 'plugins'
     id = Column(Integer, Sequence('plugins_id_seq', optional=True), primary_key=True)
     name = Column(Unicode(255), nullable=False, unique=True)
-    target = Column(Unicode(255), nullable=False)
+    target = Column(Unicode(255), nullable=True)
     description = Column(UnicodeText)
     packages = orm.relationship('Package', backref='plugins')
 

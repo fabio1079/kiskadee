@@ -25,18 +25,19 @@ class Monitor:
         database = kiskadee.database.Database()
         self.engine = database.engine
         self.session = database.session
+        Base.metadata.create_all(self.engine)
+        Base.metadata.bind = self.engine
         _start(self.monitor, False)
         plugins = kiskadee.load_plugins()
         for plugin in plugins:
             self._save_plugin(plugin)
-            _start(plugin.watch, True)
+            _plugin = plugin.Plugin()
+            _start(_plugin.watch, True)
         # Start runner
         _start(kiskadee.runner.runner, True)
 
     def monitor(self):
         """ Continuosly check new packages and save it in db """
-        Base.metadata.create_all(self.engine)
-        Base.metadata.bind = self.engine
         while self.running:
             pkg = self.dequeue()
             if pkg:
@@ -76,15 +77,18 @@ class Monitor:
         _pkg = self._query(Package).filter(Package.name == pkg['name']).first()
         current_pkg_version = _pkg.versions[-1].number
 
-        if semver.compare(pkg['version'], current_pkg_version) == 1:
-            _new_version = Version(number=pkg['version'],
-                                   package_id=_pkg.id,
-                                   has_analysis=False)
-            _pkg.versions.append(_new_version)
-            self.session.add(_pkg)
-            self.session.commit()
-        else:
-            return {}
+        try:
+            if semver.compare(pkg['version'], current_pkg_version) == 1:
+                _new_version = Version(number=pkg['version'],
+                                    package_id=_pkg.id,
+                                    has_analysis=False)
+                _pkg.versions.append(_new_version)
+                self.session.add(_pkg)
+                self.session.commit()
+            else:
+                return {}
+        except ValueError:
+            self.logger.info("Cannot compare versions using semver")
 
     def _plugin_name(self, plugin):
         return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
@@ -95,7 +99,7 @@ class Monitor:
         self.logger.debug("Saving %s plugin in database" % name)
         if not self.session.query(Plugin).filter(Plugin.name == name).first():
             _plugin = Plugin(name=name,
-                             target=config['target'],
+                             target=config.get('target'),
                              description=config['description'])
             self.session.add(_plugin)
             self.session.commit()

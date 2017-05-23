@@ -65,9 +65,8 @@ def enqueue_source(func):
     queue in the enqueue_analysis,
     some random value. """
     def wrapper(*args, **kwargs):
-        sources = func(*args, **kwargs)
-        for source in sources:
-            enqueue_analysis(source)
+        source = func(*args, **kwargs)
+        enqueue_analysis(source)
     return wrapper
 
 
