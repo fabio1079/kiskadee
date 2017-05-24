@@ -12,7 +12,7 @@ from kiskadee.helpers import enqueue_source, enqueue_pkg, chdir
 import kiskadee
 import urllib.request
 from subprocess import check_output
-from deb822 import Sources
+from debian.deb822 import Sources
 from time import sleep
 import re
 import shutil
