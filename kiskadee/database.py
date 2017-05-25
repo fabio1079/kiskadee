@@ -1,5 +1,6 @@
-from sqlalchemy.ext.declarative import declarative_base
+import kiskadee
 from sqlalchemy import create_engine, orm
+
 
 class Database:
     def __init__(self):
@@ -7,7 +8,18 @@ class Database:
         self.session = self._create_session(self.engine)
 
     def _create_engine(self):
-        return create_engine('postgresql://kiskadee:kiskadee@localhost/kiskadee')
+        driver = kiskadee.config['db']['driver']
+        username = kiskadee.config['db']['username']
+        password = kiskadee.config['db']['password']
+        hostname = kiskadee.config['db']['hostname']
+        port = kiskadee.config['db']['port']
+        dbname = kiskadee.config['db']['dbname']
+        return create_engine('%s://%s:%s@%s:%s/%s' % (driver,
+                                                      username,
+                                                      password,
+                                                      hostname,
+                                                      port,
+                                                      dbname))
 
     def _create_session(self, engine):
         DBSession = orm.sessionmaker(bind=engine)
