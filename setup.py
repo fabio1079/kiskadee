@@ -1,5 +1,25 @@
 from setuptools import setup, find_packages
 
+
+# Thanks to Pagure:
+# https://pagure.io/pagure/blob/master/f/setup.py#_26
+def get_requirements(requirements_file='requirements.txt'):
+    """Get the contents of a file listing the requirements.
+
+    :arg requirements_file: path to a requirements file
+    :type requirements_file: string
+    :returns: the list of requirements, or an empty list if
+              `requirements_file` could not be opened or read
+    :return type: list
+    """
+
+    with open(requirements_file) as f:
+        return [
+                line.rstrip().split('#')[0]
+                for line in f.readlines()
+                if not line.startswith('#')
+                ]
+
 setup(
     name='kiskadee',
     version='0.1.dev0',
@@ -24,15 +44,7 @@ setup(
             include_package_data=False,
             entry_points={'console_scripts': [
                 'kiskadee = kiskadee.monitor:daemon']},
-            install_requires=[
-                'docker==2.0.0',
-                'psycopg2',
-                'firehose',
-                'sqlalchemy',
-                'semver',
-                'python-debian',
-                'chardet'
-                ],
+            install_requires=get_requirements(),
             test_suite='nose.collector',
             tests_require=['nose']
                 )
