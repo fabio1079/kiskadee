@@ -27,3 +27,10 @@ class Plugin(kiskadee.plugins.Plugin):
         juliet['version'] = '1.2'
         # this should be queued to the other queue first
         kiskadee.queue.enqueue_analysis(juliet)
+
+    def comprare_versions(v1, v2):
+        """Juliet has only one version
+        
+        This method does not matter here, let's just pass
+        """
+        return 0
