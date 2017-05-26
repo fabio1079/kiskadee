@@ -1,14 +1,23 @@
-__pycache__
-.venv
-*.pyc
-*.pyo
+# text editors
 *.swp
 *.swo
 *~
-/dist/
-/*.egg-info
+
+# python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
 .eggs
-reports
-kiskadee.log
+build/
+dist/
 tags
+.venv
+
+# kiskadee
+kiskadee.log
 kiskadee/tests/test_source/Sources
+reports
+
+# documentation
+doc/_build
