@@ -32,7 +32,7 @@ def to_firehose(bytes_input, analyzer):
         pass
 
     file_to_parse = os.path.join(tempdir, tmp_report_file)
-    with open(file_to_parse) as f:
+    with open(file_to_parse, 'w') as f:
         f.write(bytes_input.decode('UTF-8'))
 
     analyzer_module = import_analyzer_module(analyzer)
