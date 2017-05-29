@@ -32,7 +32,8 @@ setup(
             'Development Status :: 1 - Planning',
             'Environment :: Console',
             'Intended Audience :: Developers',
-            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'License :: OSI Approved :: '
+            'GNU Affero General Public License v3 or later (AGPLv3+)',
             'Programming Language :: Python :: 3.5',
             'Topic :: Security',
                 ],
