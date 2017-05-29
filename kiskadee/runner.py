@@ -3,8 +3,10 @@ import shutil
 import kiskadee
 import kiskadee.queue
 import kiskadee.analyzers
+import kiskadee.model
+import kiskadee.database
 import kiskadee.helpers
-import time
+import xml.etree.ElementTree
 
 running = True
 
@@ -12,19 +14,31 @@ running = True
 def runner():
     """Runner entry point
     """
+    database = kiskadee.database.Database()
+    engine = database.engine
+    session = database.session
+    kiskadee.model.Base.metadata.create_all(engine)
+    kiskadee.model.Base.metadata.bind = engine
     while running:
-        kiskadee.logger.debug('RUNNER: entering loop')
         if not kiskadee.queue.is_empty():
-            kiskadee.logger.debug('RUNNER: dequeuing')
+            kiskadee.logger.debug('RUNNER: dequeuing...')
             package = kiskadee.queue.dequeue_analysis()
-            kiskadee.logger.debug('RUNNER: dequeued')
+            kiskadee.logger.debug('RUNNER: dequeued %s-%s from %s'
+                                  % (package['name'],
+                                     package['version'],
+                                     package['plugin'].__name__))
             analysis_reports = analyze(package)
-            kiskadee.logger.debug('DONE running analysis')
-            # TODO: save reports in DB
-            kiskadee.logger.debug(analysis_reports)
-            kiskadee.logger.debug('end run')
-        time.sleep(5)
-        kiskadee.logger.debug('RUNNER: loop ended')
+            kiskadee.logger.debug('RUNNER: Saving analysis')
+            all_analyses = '\n'.join(analysis_reports)
+            plugin = kiskadee.model.Plugin(name=package['plugin'].__name__)
+            package = kiskadee.model.Package(name=package['name'])
+            version = kiskadee.model.Version(number=package['version'],
+                                             analysis=all_analyses,
+                                             has_analysis=True)
+            session.merge(package)
+            session.merge(plugin)
+            session.merge(version)
+            session.commit()
 
 
 def analyze(package):
@@ -59,7 +73,7 @@ def analyze(package):
         kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
         analysis = kiskadee.analyzers.run(analyzer, sources)
         firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
-        reports.append(firehose_report)
+        reports.append(xml.etree.tostring(firehose_report))
         kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
     # TODO: remove compressed files and uncompressed files after the analysis
     return reports
