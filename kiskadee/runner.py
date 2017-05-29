@@ -73,7 +73,7 @@ def analyze(package):
         kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
         analysis = kiskadee.analyzers.run(analyzer, sources)
         firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
-        reports.append(xml.etree.tostring(firehose_report))
+        reports.append(xml.etree.ElementTree.tostring(firehose_report))
         kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
     # TODO: remove compressed files and uncompressed files after the analysis
     return reports
