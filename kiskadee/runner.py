@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 import kiskadee
 import kiskadee.queue
 import kiskadee.analyzers
@@ -29,17 +30,26 @@ def runner():
                                      package['plugin'].__name__))
             analysis_reports = analyze(package)
             if analysis_reports:
-                kiskadee.logger.debug('RUNNER: Saving analysis')
+                kiskadee.logger.debug('RUNNER: Saving analysis %s' % str(package))
                 all_analyses = '\n'.join(analysis_reports)
-                plugin = kiskadee.model.Plugin(name=package['plugin'].__name__)
-                package = kiskadee.model.Package(name=package['name'])
-                version = kiskadee.model.Version(number=package['version'],
-                                                analysis=all_analyses,
-                                                has_analysis=True)
-                session.merge(package)
-                session.merge(plugin)
-                session.merge(version)
+                pkg = session.query(kiskadee.model.Package).\
+                      filter(kiskadee.model.Package.name == package['name']).\
+                      first()
+                pkg.versions[-1].has_analysis=True
+                pkg.versions[-1].analysis=all_analyses
+                session.add(pkg)
                 session.commit()
+                """ TODO: Not create a new session, make the session used by 
+                monitor global. If we use another session, 
+                session.merge() will not work. """
+                #plugin = kiskadee.model.Plugin(name=package['plugin'].__name__)
+                #_package = kiskadee.model.Package(name=package['name'])
+                #version = kiskadee.model.Version(number=package['version'],
+                #                                analysis=all_analyses,
+                                                    #has_analysis=True)
+                #session.merge(_package)
+                #session.merge(plugin)
+                #session.merge(version)
                 kiskadee.logger.debug('DONE running analysis')
                 # TODO: save reports in DB
                 kiskadee.logger.debug(analysis_reports)
@@ -65,18 +75,19 @@ def analyze(package):
     if compressed_source:
         kiskadee.logger.debug('ANALYSIS: Downloaded!')
         kiskadee.logger.debug('ANALYSIS: Unpacking...')
-        dir_name = os.path.dirname(compressed_source['path'])
-        shutil.unpack_archive(compressed_source['path'], dir_name)
-        kiskadee.logger.debug('ANALYSIS: Unpacked!')
-        analyzers = plugin.analyzers()
         reports = []
-        for analyzer in analyzers:
-            kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
-            analysis = kiskadee.analyzers.run(analyzer, dir_name)
-            firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
-            reports.append(xml.etree.ElementTree.tostring(firehose_report))
-            kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
-        # TODO: remove compressed files and uncompressed files after the analysis
+        path = tempfile.mkdtemp()
+        shutil.unpack_archive(compressed_source, path)
+        with kiskadee.helpers.chdir(path):
+            kiskadee.logger.debug('ANALYSIS: Unpacked!')
+            analyzers = plugin.analyzers()
+            for analyzer in analyzers:
+                kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
+                analysis = kiskadee.analyzers.run(analyzer, path)
+                firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
+                reports.append(str(firehose_report))
+                kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
+            # TODO: remove compressed files and uncompressed files after the analysis
         return reports
     else:
         kiskadee.logger.debug('RUNNER: invalid source dict')

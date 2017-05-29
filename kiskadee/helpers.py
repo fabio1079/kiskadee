@@ -38,9 +38,7 @@ def to_firehose(bytes_input, analyzer):
     analyzer_module = import_analyzer_module(analyzer)
 
     if (analyzer_module):
-        analyzer_report_file = report_directory + firehose_report_file
         firehose_tree = analyzer_module.parse_file(file_to_parse).to_xml()
-        firehose_tree.write(analyzer_report_file, encoding='UTF-8')
 
     shutil.rmtree(tempdir)
 

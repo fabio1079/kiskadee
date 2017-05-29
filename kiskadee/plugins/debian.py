@@ -48,14 +48,10 @@ class Plugin(kiskadee.plugins.Plugin):
             url = self._dsc_url(source_data)
             try:
                 check_output(['dget', url])
-                _source = {'path': ''.join([path, '/', self._source_path(path)]),
-                       'name': source_data['name'],
-                       'version': source_data['version']
-                      }
-                return _source
+                return ''.join([path, '/', self._source_path(path)
             except Exception:
                 self.logger.debug('Cannot download {} source'.format(source_data['name']))
-                return {}
+                return None
 
     def _source_path(self, path):
         """ Return the path to the *.orig.tar.gz """

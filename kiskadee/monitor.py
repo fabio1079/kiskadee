@@ -32,8 +32,7 @@ class Monitor:
         plugins = kiskadee.load_plugins()
         for plugin in plugins:
             self._save_plugin(plugin)
-            if(self._plugin_name(plugin) == 'debian'):
-                _start(plugin.Plugin().watch)
+            _start(plugin.Plugin().watch)
             time.sleep(1)
         _start(kiskadee.runner.runner, True)
 
@@ -111,7 +110,7 @@ class Monitor:
                              target=plugin.config['target'],
                              description=plugin.config['description'])
             self.session.add(_plugin)
-            self.session.commit()
+            #self.session.commit()
 
     def _query(self, arg):
         return self.session.query(arg)
