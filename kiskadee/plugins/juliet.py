@@ -4,6 +4,7 @@ import shutil
 import os.path
 import tempfile
 import sys
+from kiskadee.helpers import enqueue_pkg
 
 
 class Plugin(kiskadee.plugins.Plugin):
@@ -17,6 +18,7 @@ class Plugin(kiskadee.plugins.Plugin):
             shutil.copyfileobj(response, out_file)
         return zipfile_path
 
+    @enqueue_pkg
     def watch(self):
         """SAMATE does not provide a proper API to inspect new Juliet versions.
         It should not matter, since Juliet does not receive updates frequently.
@@ -25,12 +27,11 @@ class Plugin(kiskadee.plugins.Plugin):
         juliet['plugin'] = sys.modules[__name__]
         juliet['name'] = 'juliet'
         juliet['version'] = '1.2'
-        # this should be queued to the other queue first
-        kiskadee.queue.enqueue_analysis(juliet)
+        return juliet
 
     def comprare_versions(v1, v2):
         """Juliet has only one version
-        
+
         This method does not matter here, let's just pass
         """
         return 0

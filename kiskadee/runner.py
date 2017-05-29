@@ -28,17 +28,25 @@ def runner():
                                      package['version'],
                                      package['plugin'].__name__))
             analysis_reports = analyze(package)
-            kiskadee.logger.debug('RUNNER: Saving analysis')
-            all_analyses = '\n'.join(analysis_reports)
-            plugin = kiskadee.model.Plugin(name=package['plugin'].__name__)
-            package = kiskadee.model.Package(name=package['name'])
-            version = kiskadee.model.Version(number=package['version'],
-                                             analysis=all_analyses,
-                                             has_analysis=True)
-            session.merge(package)
-            session.merge(plugin)
-            session.merge(version)
-            session.commit()
+            if analysis_reports:
+                kiskadee.logger.debug('RUNNER: Saving analysis')
+                all_analyses = '\n'.join(analysis_reports)
+                plugin = kiskadee.model.Plugin(name=package['plugin'].__name__)
+                package = kiskadee.model.Package(name=package['name'])
+                version = kiskadee.model.Version(number=package['version'],
+                                                analysis=all_analyses,
+                                                has_analysis=True)
+                session.merge(package)
+                session.merge(plugin)
+                session.merge(version)
+                session.commit()
+                kiskadee.logger.debug('DONE running analysis')
+                # TODO: save reports in DB
+                kiskadee.logger.debug(analysis_reports)
+                kiskadee.logger.debug('end run')
+            else:
+                kiskadee.logger.debug('RUNNER: Something went wrong')
+                kiskadee.logger.debug('RUNNER: analysis could not be generated')
 
 
 def analyze(package):
@@ -49,31 +57,26 @@ def analyze(package):
         path: plugin default path for packages
         return: list with firehose reports
     """
-    base_dir = kiskadee.config['analyses']['path']
-    sources = os.path.join(base_dir,
-                           package['plugin'].__name__,
-                           package['name'],
-                           package['version'])
-    # shutil.rmtree(sources)
-    if not os.path.exists(sources):
-        os.makedirs(sources)
 
     plugin = package['plugin'].Plugin()
-    kiskadee.logger.debug('ANALYSIS: Downloading...')
-    compressed_sources = plugin.get_sources(package['name'],
-                                            package['version'])
-    kiskadee.logger.debug('ANALYSIS: Downloaded!')
-    kiskadee.logger.debug('ANALYSIS: Unpacking...')
-    shutil.unpack_archive(compressed_sources, sources)
-    kiskadee.logger.debug('ANALYSIS: Unpacked!')
-
-    analyzers = plugin.analyzers()
-    reports = []
-    for analyzer in analyzers:
-        kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
-        analysis = kiskadee.analyzers.run(analyzer, sources)
-        firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
-        reports.append(xml.etree.ElementTree.tostring(firehose_report))
-        kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
-    # TODO: remove compressed files and uncompressed files after the analysis
-    return reports
+    kiskadee.logger.info('ANALYSIS: Downloading {} '
+            'source...'.format(package['name']))
+    compressed_source = plugin.get_sources(package)
+    if compressed_source:
+        kiskadee.logger.debug('ANALYSIS: Downloaded!')
+        kiskadee.logger.debug('ANALYSIS: Unpacking...')
+        dir_name = os.path.dirname(compressed_source['path'])
+        shutil.unpack_archive(compressed_source['path'], dir_name)
+        kiskadee.logger.debug('ANALYSIS: Unpacked!')
+        analyzers = plugin.analyzers()
+        reports = []
+        for analyzer in analyzers:
+            kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
+            analysis = kiskadee.analyzers.run(analyzer, dir_name)
+            firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
+            reports.append(xml.etree.ElementTree.tostring(firehose_report))
+            kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
+        # TODO: remove compressed files and uncompressed files after the analysis
+        return reports
+    else:
+        kiskadee.logger.debug('RUNNER: invalid source dict')

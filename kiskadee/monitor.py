@@ -5,6 +5,7 @@ import kiskadee.queue
 import threading
 from multiprocessing import Process
 from kiskadee.model import Package, Plugin, Version, Base
+import time
 import semver
 
 
@@ -27,12 +28,13 @@ class Monitor:
         self.session = database.session
         Base.metadata.create_all(self.engine)
         Base.metadata.bind = self.engine
-        _start(self.monitor, False)
+        _start(self.monitor)
         plugins = kiskadee.load_plugins()
         for plugin in plugins:
             self._save_plugin(plugin)
-            _start(plugin.Plugin().watch, True)
-        # Start runner
+            if(self._plugin_name(plugin) == 'debian'):
+                _start(plugin.Plugin().watch)
+            time.sleep(1)
         _start(kiskadee.runner.runner, True)
 
     def monitor(self):
@@ -47,7 +49,8 @@ class Monitor:
         if not kiskadee.queue.packages_queue.empty():
             pkg = kiskadee.queue.dequeue_package()
             kiskadee.queue.package_done()
-            self.logger.debug("Dequed Package: %s" % str(pkg))
+            self.logger.info("Dequed Package: {}".format(str(pkg)))
+            time.sleep(1)
             return pkg
         return {}
 
@@ -69,8 +72,12 @@ class Monitor:
                            has_analysis=False)
         _package.versions.append(_version)
         self.session.add(_package)
-        self.logger.info("Saving package in db: %s" % str(pkg))
+        self.logger.info("Saving package in db: {}".format(str(pkg)))
         self.session.commit()
+        self.logger.info("Enqueue package {}_{} "
+                         " for analysis".format(pkg['name'], pkg['version']))
+        kiskadee.queue.enqueue_analysis(pkg)
+
 
     def _update_pkg_version(self, pkg):
         _pkg = self._query(Package).filter(Package.name == pkg['name']).first()
@@ -84,6 +91,9 @@ class Monitor:
                 _pkg.versions.append(_new_version)
                 self.session.add(_pkg)
                 self.session.commit()
+                self.logger.info("Enqueue package {}_{}"
+                                 "for analysis".format(pkg['name'], pkg['version']))
+                kiskadee.queue.enqueue_analysis(pkg)
             else:
                 return {}
         except ValueError:
@@ -95,7 +105,7 @@ class Monitor:
     def _save_plugin(self, plugin):
         plugin = plugin.Plugin()
         name = plugin.name
-        self.logger.debug("Saving %s plugin in database" % name)
+        self.logger.info("Saving {} plugin in database".format(name))
         if not self.session.query(Plugin).filter(Plugin.name == name).first():
             _plugin = Plugin(name=name,
                              target=plugin.config['target'],

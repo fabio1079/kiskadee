@@ -24,12 +24,14 @@ class Plugin(kiskadee.plugins.Plugin):
     def __init__(self):
         kiskadee.plugins.Plugin.__init__(self)
         self.sources = None
+        self.logger = kiskadee.logger
 
     def watch(self):
         """ Starts the continuing monitoring process of Debian
         Repositories. Each package monitored by the plugin will be
         queued using the enqueue_pkg decorator. """
 
+        self.logger.info("Starting Debian plugin")
         while running:
             url = self._sources_gz_url()
             sources_gz_dir = self._download_sources_gz(url)
@@ -38,16 +40,22 @@ class Plugin(kiskadee.plugins.Plugin):
             sleep(float(self.config['schedule']) * 60)
             shutil.rmtree(sources_gz_dir)
 
-    @enqueue_source
     def get_sources(self, source_data):
         """Download packages from some debian mirror."""
 
         path = tempfile.mkdtemp()
         with chdir(path):
             url = self._dsc_url(source_data)
-            check_output(['dget', url])
-        _source = {'source': ''.join([path, '/', self._source_path(path)])}
-        return _source
+            try:
+                check_output(['dget', url])
+                _source = {'path': ''.join([path, '/', self._source_path(path)]),
+                       'name': source_data['name'],
+                       'version': source_data['version']
+                      }
+                return _source
+            except Exception:
+                self.logger.debug('Cannot download {} source'.format(source_data['name']))
+                return {}
 
     def _source_path(self, path):
         """ Return the path to the *.orig.tar.gz """
@@ -79,7 +87,7 @@ class Plugin(kiskadee.plugins.Plugin):
 
         name = source_data['name']
         version = source_data['version']
-        directory = source_data['directory']
+        directory = source_data['meta']['directory']
         return ''.join([self.config['target'], '/',
                         directory, '/', name, '_', version, '.dsc'])
 
