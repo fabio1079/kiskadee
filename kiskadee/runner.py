@@ -1,4 +1,3 @@
-import os
 import shutil
 import tempfile
 import kiskadee
@@ -7,7 +6,7 @@ import kiskadee.analyzers
 import kiskadee.model
 import kiskadee.database
 import kiskadee.helpers
-import xml.etree.ElementTree
+import kiskadee.converter
 
 running = True
 
@@ -84,7 +83,7 @@ def analyze(package):
             for analyzer in analyzers:
                 kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
                 analysis = kiskadee.analyzers.run(analyzer, path)
-                firehose_report = kiskadee.helpers.to_firehose(analysis, analyzer)
+                firehose_report = kiskadee.converter.to_firehose(analysis, analyzer)
                 reports.append(str(firehose_report))
                 kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
             # TODO: remove compressed files and uncompressed files after the analysis
