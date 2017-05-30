@@ -18,7 +18,7 @@ class Plugin(kiskadee.plugins.Plugin):
         example['version'] = '0.1'
         return example
 
-    def comprare_versions(v1, v2):
+    def compare_versions(self, new, old):
         """Example has only one version
 
         This method does not matter here, let's just pass

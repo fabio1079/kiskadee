@@ -24,12 +24,12 @@ class Plugin():
         raise NotImplementedError('watch must be defined by plugin')
 
     @abc.abstractmethod
-    def compare_versions(v1, v2):
+    def compare_versions(self, new, old):
         """Comprare package versions
 
-        This method must return 1 if v1 is greater than v2 or 0 if not
+        This method must return 1 if new is greater than old or 0 if not
         """
-        raise NotImplementedError('watch must be defined by plugin')
+        raise NotImplementedError('compare_versions must be defined by plugin')
 
     def analyzers(self):
         """Get active analyzers for current plugin

@@ -29,7 +29,7 @@ class Plugin(kiskadee.plugins.Plugin):
         juliet['version'] = '1.2'
         return juliet
 
-    def comprare_versions(v1, v2):
+    def compare_versions(self, new, old):
         """Juliet has only one version
 
         This method does not matter here, let's just pass

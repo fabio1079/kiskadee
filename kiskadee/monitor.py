@@ -83,7 +83,7 @@ class Monitor:
         current_pkg_version = _pkg.versions[-1].number
 
         try:
-            if semver.compare(pkg['version'], current_pkg_version) == 1:
+            if pkg['plugin'].Plugin().compare_versions(pkg['version'], current_pkg_version) == 1:
                 _new_version = Version(number=pkg['version'],
                                        package_id=_pkg.id,
                                        has_analysis=False)
@@ -96,7 +96,7 @@ class Monitor:
             else:
                 return {}
         except ValueError:
-            self.logger.info("Cannot compare versions using semver")
+            self.logger.info("Could not compare versions")
 
     def _plugin_name(self, plugin):
         return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
