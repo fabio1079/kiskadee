@@ -4,7 +4,7 @@ import shutil
 import os.path
 import tempfile
 import sys
-from kiskadee.helpers import enqueue_pkg
+import kiskadee.queue
 
 
 class Plugin(kiskadee.plugins.Plugin):
@@ -18,7 +18,7 @@ class Plugin(kiskadee.plugins.Plugin):
             shutil.copyfileobj(response, out_file)
         return zipfile_path
 
-    @enqueue_pkg
+    @kiskadee.queue.package_enqueuer
     def watch(self):
         """SAMATE does not provide a proper API to inspect new Juliet versions.
         It should not matter, since Juliet does not receive updates frequently.

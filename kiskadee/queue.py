@@ -30,3 +30,23 @@ def dequeue_package():
 
 def package_done():
     packages_queue.task_done()
+
+
+def source_enqueuer(func):
+    """ Decorator to add the behavior of
+    queue in the enqueue_analysis,
+    some random value. """
+    def wrapper(*args, **kwargs):
+        source = func(*args, **kwargs)
+        enqueue_analysis(source)
+    return wrapper
+
+
+def package_enqueuer(func):
+    """ Decorator to add the behavior of
+    queue in the enqueue_package,
+    some random value. """
+    def wrapper(*args, **kwargs):
+        package = func(*args, **kwargs)
+        enqueue_package(package)
+    return wrapper

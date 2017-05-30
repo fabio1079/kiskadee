@@ -1,16 +1,13 @@
 import kiskadee
-import shutil
-import os.path
-import tempfile
 import sys
-from kiskadee.helpers import  enqueue_pkg
+import kiskadee.queue
 
 
 class Plugin(kiskadee.plugins.Plugin):
     def get_sources(self, source_data):
         return 'kiskadee/tests/test_source/test_source.tar.gz'
 
-    @enqueue_pkg
+    @kiskadee.queue.package_enqueuer
     def watch(self):
         """There is no proper API to inspect new example versions.
         It should not matter, since example will not receive updates.

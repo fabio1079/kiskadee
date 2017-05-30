@@ -8,7 +8,8 @@
 
 import os
 import tempfile
-from kiskadee.helpers import enqueue_source, enqueue_pkg, chdir
+from kiskadee.helpers import chdir
+import kiskadee.queue
 import kiskadee
 import urllib.request
 from subprocess import check_output
@@ -29,7 +30,7 @@ class Plugin(kiskadee.plugins.Plugin):
     def watch(self):
         """ Starts the continuing monitoring process of Debian
         Repositories. Each package monitored by the plugin will be
-        queued using the enqueue_pkg decorator. """
+        queued using the package_enqueuer decorator. """
 
         self.logger.info("Starting Debian plugin")
         while running:
@@ -66,7 +67,7 @@ class Plugin(kiskadee.plugins.Plugin):
             for src in self.sources:
                 self._create_package_dict(src)
 
-    @enqueue_pkg
+    @kiskadee.queue.package_enqueuer
     def _create_package_dict(self, src):
         return {'name': src["Package"],
             'version': src["Version"],
