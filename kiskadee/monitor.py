@@ -6,7 +6,6 @@ import threading
 from multiprocessing import Process
 from kiskadee.model import Package, Plugin, Version, Base
 import time
-import semver
 
 
 class Monitor:
