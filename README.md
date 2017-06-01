@@ -16,6 +16,11 @@ In order to install kiskadee dependencies, just run `pip install -e .`
 * compares repository versions against db versions
 * writes differences in the analysis queue
 
+In order to monitor Debian repositories, you will need to install
+devscripts package.
+
+```sudo dnf install devscripts```
+
 #### runner
 
 * consume the analysis queue and compare messages with plugin messages
