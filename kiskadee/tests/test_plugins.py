@@ -8,8 +8,7 @@ import shutil
 import socket
 import tempfile
 from kiskadee.queue import dequeue_package
-import kiskadee.plugins.debian
-
+import kiskadee
 
 def is_connected():
     try:
@@ -24,21 +23,22 @@ def is_connected():
 
 class TestPlugins(TestCase):
     def test_loading(self):
-        kiskadee.load_plugins()
-        plugins_path = path.join('kiskadee', 'plugins')
-        plugins_pkg_files = [f for f in listdir(plugins_path) if
-                             path.isfile(path.join(plugins_path, f))]
-        plugins_pkg_files.remove('__init__.py')
-        if '__init__.pyc' in plugins_pkg_files:
-            plugins_pkg_files.remove('__init__.pyc')
-        for plugin in plugins_pkg_files:
-            plugin_name, file_ext = path.splitext(plugin)
-            self.assertTrue('kiskadee.plugins.' + plugin_name in sys.modules)
+        _config = kiskadee.config
+        _config['debian_plugin'] = {'active': 'no'}
+        _config['juliet_plugin'] = {'active': 'yes'}
+        _config['example_plugin'] = {'active': 'yes'}
+        kiskadee.config = _config
+        plugins = kiskadee.load_plugins()
+        for plugin in plugins:
+            name = plugin.__name__.split('.')\
+            [len(plugin.__name__.split('.')) - 1]
+            self.assertTrue(name != 'debian')
 
 
 class TestDebianPlugin(TestCase):
 
     def setUp(self):
+        import kiskadee.plugins.debian
         self.debian_plugin = kiskadee.plugins.debian.Plugin()
         self.data = self.debian_plugin.config
 
@@ -83,6 +83,6 @@ class TestDebianPlugin(TestCase):
         expected_dsc_url = "http://ftp.us.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc"
         sample_package = {'name': '0ad',
                           'version': '0.0.21-2',
-                          'directory': 'pool/main/0/0ad'}
+                          'meta': {'directory': 'pool/main/0/0ad'} }
         url = self.debian_plugin._dsc_url(sample_package)
         self.assertEqual(expected_dsc_url, url)
