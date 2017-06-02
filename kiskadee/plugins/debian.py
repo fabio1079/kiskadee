@@ -8,24 +8,19 @@
 
 import os
 import tempfile
-from kiskadee.helpers import chdir
-import kiskadee.queue
-import kiskadee
 import urllib.request
-from subprocess import check_output
-from debian.deb822 import Sources
 from time import sleep
 import re
 import shutil
+from debian.deb822 import Sources
+from subprocess import check_output
 
-running = True
+from kiskadee.helpers import chdir
+import kiskadee.queue
+
+RUNNING = True
 
 class Plugin(kiskadee.plugins.Plugin):
-
-    def __init__(self):
-        kiskadee.plugins.Plugin.__init__(self)
-        self.sources = None
-        self.logger = kiskadee.logger
 
     def watch(self):
         """ Starts the continuing monitoring process of Debian
@@ -33,22 +28,25 @@ class Plugin(kiskadee.plugins.Plugin):
         queued using the package_enqueuer decorator. """
 
         self.logger.info("Starting Debian plugin")
-        while running:
+        while RUNNING:
             url = self._sources_gz_url()
-            sources_gz_dir = self._download_sources_gz(url)
-            self._uncompress_gz(sources_gz_dir)
-            self._queue_sources_gz_pkgs(sources_gz_dir)
-            sleep(float(self.config['schedule']) * 60)
-            shutil.rmtree(sources_gz_dir)
+            try:
+                sources_gz_dir = self._download_sources_gz(url)
+                self._uncompress_gz(sources_gz_dir)
+                self._queue_sources_gz_pkgs(sources_gz_dir)
+                sleep(float(self.config['schedule']) * 60)
+                shutil.rmtree(sources_gz_dir)
+            except URLError:
+                self.logger.debug("Cannot reach debian mirror")
 
     def get_sources(self, source_data):
         """Download packages from some debian mirror."""
 
         path = tempfile.mkdtemp()
-        with chdir(path):
+        with kiskadee.helpers.chdir(path):
             url = self._dsc_url(source_data)
             try:
-                check_output(['dget', url])
+                subprocess.check_output(['dget', url])
                 return ''.join([path, '/', self._source_path(path)])
             except:
                 self.logger.debug('Cannot download {} source'.format(source_data['name']))
@@ -71,8 +69,7 @@ class Plugin(kiskadee.plugins.Plugin):
     def _queue_sources_gz_pkgs(self, path):
         sources = os.path.join(path, 'Sources')
         with open(sources) as sources_file:
-            self.sources = Sources.iter_paragraphs(sources_file)
-            for src in self.sources:
+            for src in Sources.iter_paragraphs(sources_file):
                 self._create_package_dict(src)
 
     @kiskadee.queue.package_enqueuer
@@ -89,7 +86,6 @@ class Plugin(kiskadee.plugins.Plugin):
         (a.g dget http://ftp.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc)
 
         """
-
         name = source_data['name']
         version = source_data['version']
         directory = source_data['meta']['directory']
@@ -99,7 +95,6 @@ class Plugin(kiskadee.plugins.Plugin):
 
     def _sources_gz_url(self):
         """ Mount the Sources.gz url"""
-
         return "%s/dists/%s/main/source/Sources.gz" % (self.config['target'],
                                                         self.config['release'])
 
@@ -111,7 +106,6 @@ class Plugin(kiskadee.plugins.Plugin):
         :returns: The path to the Sources.gz file
 
         """
-
         path = tempfile.mkdtemp()
         with chdir(path):
             in_file = urllib.request.urlopen(url)
