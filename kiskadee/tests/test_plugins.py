@@ -86,3 +86,21 @@ class TestDebianPlugin(TestCase):
                           'meta': {'directory': 'pool/main/0/0ad'} }
         url = self.debian_plugin._dsc_url(sample_package)
         self.assertEqual(expected_dsc_url, url)
+
+    def test_compare_gt_version(self):
+        new = '1.1.1'
+        old = '1.1.0'
+        result = self.debian_plugin.compare_versions(new, old)
+        self.assertTrue(result)
+
+    def test_compare_smallest_version(self):
+        new = '8.5-2'
+        old = '8.6-0'
+        result = self.debian_plugin.compare_versions(new, old)
+        self.assertFalse(result)
+
+    def test_compare_equal_version(self):
+        new = '3.3.3-0'
+        old = '3.3.3-0'
+        result = self.debian_plugin.compare_versions(new, old)
+        self.assertFalse(result)
