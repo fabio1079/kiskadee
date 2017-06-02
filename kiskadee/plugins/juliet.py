@@ -26,6 +26,7 @@ class Plugin(kiskadee.plugins.Plugin):
         juliet = {}
         juliet['plugin'] = sys.modules[__name__]
         juliet['version'] = '1.2'
+        juliet['name'] = 'juliet'
         return juliet
 
     def compare_versions(self, new, old):
