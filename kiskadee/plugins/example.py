@@ -14,7 +14,6 @@ class Plugin(kiskadee.plugins.Plugin):
         """
         example = {}
         example['plugin'] = sys.modules[__name__]
-        example['name'] = 'example'
         example['version'] = '0.1'
         return example
 

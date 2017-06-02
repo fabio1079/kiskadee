@@ -1,19 +1,18 @@
-import kiskadee
+import threading
+from multiprocessing import Process
+import time
+
 import kiskadee.database
 import kiskadee.runner
 import kiskadee.queue
-import threading
-from multiprocessing import Process
 from kiskadee.model import Package, Plugin, Version, Base
-import time
 
-
+RUNNING = True
 class Monitor:
 
     def __init__(self):
         self.engine = None
         self.session = None
-        self.running = True
         self.logger = kiskadee.logger
 
     def initialize(self):
@@ -37,7 +36,7 @@ class Monitor:
 
     def monitor(self):
         """ Continuosly check new packages and save it in db """
-        while self.running:
+        while RUNNING:
             pkg = self.dequeue()
             if pkg:
                 self._save_or_update_pkg(pkg)
@@ -76,7 +75,6 @@ class Monitor:
                          " for analysis".format(pkg['name'], pkg['version']))
         kiskadee.queue.enqueue_analysis(pkg)
 
-
     def _update_pkg_version(self, pkg):
         _pkg = self._query(Package).filter(Package.name == pkg['name']).first()
         current_pkg_version = _pkg.versions[-1].number
@@ -109,11 +107,10 @@ class Monitor:
                              target=plugin.config['target'],
                              description=plugin.config['description'])
             self.session.add(_plugin)
-            #self.session.commit()
+            self.session.commit()
 
     def _query(self, arg):
         return self.session.query(arg)
-
 
 def _start(module, joinable=False, timeout=None):
     module_as_a_thread = threading.Thread(target=module)

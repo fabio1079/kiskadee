@@ -25,7 +25,6 @@ class Plugin(kiskadee.plugins.Plugin):
         """
         juliet = {}
         juliet['plugin'] = sys.modules[__name__]
-        juliet['name'] = 'juliet'
         juliet['version'] = '1.2'
         return juliet
 

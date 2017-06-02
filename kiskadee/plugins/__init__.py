@@ -11,6 +11,7 @@ class Plugin():
         self.name = full_name.split('.')[-1]
         config_section = self.name + '_plugin'
         self.config = kiskadee.config[config_section]
+        self.logger = kiskadee.logger
 
     @abc.abstractmethod
     def get_sources(self, name, version, *args, **kwargs):

@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+
 import kiskadee
 import kiskadee.queue
 import kiskadee.analyzers
@@ -38,8 +39,8 @@ def runner():
                 pkg.versions[-1].analysis=all_analyses
                 session.add(pkg)
                 session.commit()
-                """ TODO: Not create a new session, make the session used by 
-                monitor global. If we use another session, 
+                """ TODO: Not create a new session, make the session used by
+                monitor global. If we use another session,
                 session.merge() will not work. """
                 #plugin = kiskadee.model.Plugin(name=package['plugin'].__name__)
                 #_package = kiskadee.model.Package(name=package['name'])
