@@ -15,6 +15,7 @@ class Plugin(kiskadee.plugins.Plugin):
         example = {}
         example['plugin'] = sys.modules[__name__]
         example['version'] = '0.1'
+        example['name'] = 'example'
         return example
 
     def compare_versions(self, new, old):
