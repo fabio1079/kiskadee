@@ -8,7 +8,7 @@ import kiskadee.queue
 
 
 class Plugin(kiskadee.plugins.Plugin):
-    def get_sources(self, name, version, *args, **kwargs):
+    def get_sources(self, source_data):
         juliet_url = 'https://samate.nist.gov/SRD/testsuites/juliet/'
         juliet_filename = 'Juliet_Test_Suite_v1.2_for_C_Cpp.zip'
         zipfile_path = os.path.join(tempfile.mkdtemp(), juliet_filename)

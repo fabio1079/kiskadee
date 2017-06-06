@@ -14,7 +14,7 @@ class Plugin():
         self.logger = kiskadee.logger
 
     @abc.abstractmethod
-    def get_sources(self, name, version, *args, **kwargs):
+    def get_sources(package):
         """Returns the absolute path for a compressed file
         containing the package source code
         """
@@ -23,6 +23,8 @@ class Plugin():
     @abc.abstractmethod
     def watch(self):
         raise NotImplementedError('watch must be defined by plugin')
+
+blabla::
 
     @abc.abstractmethod
     def compare_versions(self, new, old):
