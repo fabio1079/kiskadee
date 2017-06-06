@@ -11,6 +11,7 @@ Welcome to kiskadee's documentation!
    :caption: Contents:
 
    plugins
+   monitor
 
 
 Indices and tables
