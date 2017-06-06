@@ -12,6 +12,8 @@ Welcome to kiskadee's documentation!
 
    plugins
    monitor
+   config_file
+   analyzers
 
 
 Indices and tables
