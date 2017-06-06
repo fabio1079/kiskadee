@@ -2,12 +2,11 @@ import docker
 
 
 def run(analyzer, sources):
-    """ Runs a static analyzer on a given package
+    """ Runs a static analyzer on a given package.
+    `analyzer` is the name of the static analyzer container to run.
+    `sources` is the absolute path for the uncompressed package. Returns 
+    a analysis results."""
 
-    analyzer: name of the static analyzer container to run
-    sources: absolute path for the uncompressed package
-    return: analysis results
-    """
     volume = {sources: {'bind': '/src', 'mode': 'ro'}}
     client = docker.from_env()
     # FIXME: Since we are using only cppcheck for now, we only care about stderr

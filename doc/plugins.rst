@@ -12,27 +12,8 @@ new plugin.
 
 The class defines the following behaviors:
 
-.. py:class:: Plugin
-
-    .. py:method:: compare_versions(new, old)
-
-        Returns *true* if `new` is greater then `old`. `new` and `old` will
-        be the versions of packages monitored by your plugin.
-
-    .. py:method:: get_sources(source_data)
-
-        Returns the absolute path for a compressed file
-        containing the package source code. `source_data` will be a dict
-        previously created by the plugin. `source_data` will have at least
-        two obrigatory keys: `name` and `version` of the package that have
-        to be downloaded.
-
-    .. py:method:: watch()
-
-        Continuously monitors some target repository. This method will be called
-        as a thread, and will run concurrently with the main kiskadee thread.
-        This method must enqueue packages using the
-        `@kiskadee.queue.package_enqueuer` decorator.
+.. autoclass:: kiskadee.plugins.Plugin()
+   :members: compare_versions, get_sources, watch
 
 Plugin example
 -----------------------

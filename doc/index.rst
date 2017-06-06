@@ -14,6 +14,7 @@ Welcome to kiskadee's documentation!
    monitor
    config_file
    analyzers
+   runner
 
 
 Indices and tables
