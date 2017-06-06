@@ -26,3 +26,42 @@ The class defines the following behaviors:
         previously created by the plugin. `source_data` will have at least
         two obrigatory keys: `name` and `version` of the package that have
         to be downloaded.
+
+    .. py:method:: watch()
+
+        Continuously monitors some target repository. This method will be called
+        as a thread, and will run concurrently with the main kiskadee thread.
+        This method must enqueue packages using the
+        `@kiskadee.queue.package_enqueuer` decorator.
+
+Plugin example
+-----------------------
+
+A simple example of a kiskadee plugin
+
+.. code-block:: python
+
+    import kiskadee
+    import sys
+    import kiskadee.queue
+    class Plugin(kiskadee.plugins.Plugin):
+        def get_sources(self, source_data):
+            return 'kiskadee/tests/test_source/test_source.tar.gz'
+
+        @kiskadee.queue.package_enqueuer
+        def watch(self):
+            """There is no proper API to inspect new example versions.
+            It should not matter, since example will not receive updates.
+            """
+            example = {}
+            example['plugin'] = sys.modules[__name__]
+            example['version'] = '0.1'
+            example['name'] = 'example'
+            return example
+
+        def compare_versions(self, new, old):
+            """Example has only one version
+
+            This method does not matter here, let's just pass
+            """
+            return 0

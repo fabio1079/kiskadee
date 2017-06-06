@@ -24,8 +24,6 @@ class Plugin():
     def watch(self):
         raise NotImplementedError('watch must be defined by plugin')
 
-blabla::
-
     @abc.abstractmethod
     def compare_versions(self, new, old):
         """Comprare package versions
