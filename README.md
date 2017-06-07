@@ -3,38 +3,14 @@
 kiskadee is a continuous static analysis tool which writes the analyses
 results into a Firehose database.
 
-## Dependencies
+## Development
 
-In order to install kiskadee dependencies, just run `pip install -e .`
+kiskadee dependencies are listed in requirements.txt. To install them, just run
+`pip install -e .`
 
-## Architecture
+## Documentation
 
-#### monitor
-  
-* loads all plugins watch() functions
-* load all repositories package versions with the watch() functions 
-* compares repository versions against db versions
-* writes differences in the analysis queue
-
-In order to monitor Debian repositories, you will need to install
-devscripts package.
-
-```sudo dnf install devscripts```
-
-#### runner
-
-* consume the analysis queue and compare messages with plugin messages
-  * on matches, run all analyzers listed by the plugin in upstream source code
-* Convert static analyzer output to firehose
-* save file in DB
-
-We think kubernetes may be a good idea for each plugin run. Not sure if
-possible.
-
-### plugins subpackage
-
-kiskadee needs plugins to run static analyzers. Each plugin must inherit from
-the Plugin class and implement its abstract methods.
+docs.pagure.org/kiskadee
 
 ## License
 
