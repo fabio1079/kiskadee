@@ -10,6 +10,11 @@ Welcome to kiskadee's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   plugins
+   monitor
+   config_file
+   analyzers
+   runner
 
 
 Indices and tables

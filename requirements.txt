@@ -4,3 +4,4 @@ firehose
 sqlalchemy
 python-debian
 chardet
+Sphinx

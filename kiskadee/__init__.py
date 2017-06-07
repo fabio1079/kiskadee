@@ -44,6 +44,8 @@ _config_file_name = 'kiskadee.conf'
 _sys_config_file = os.path.abspath(os.path.join('etc', _config_file_name))
 _dev_config_file = os.path.join(os.path.dirname(_my_path),  # go up a dir
                                 'util', _config_file_name)
+_doc_config_file = os.path.join(os.path.dirname(_my_path),
+                                'util', _config_file_name)
 _defaults = {}
 if not os.path.exists(_sys_config_file):
     # log _sys_config_file not found
@@ -55,10 +57,10 @@ if not os.path.exists(_dev_config_file):
 
 config = configparser.ConfigParser(defaults=_defaults)
 
-_read = config.read([_dev_config_file, _sys_config_file])
+_read = config.read([_dev_config_file, _sys_config_file, _doc_config_file])
 if len(_read) < 1:
-    raise ValueError("Invalid config files. Should be either %s or %s" %
-                     (_sys_config_file, _dev_config_file))
+    raise ValueError("Invalid config files. Should be either %s or %s or %s" %
+                     (_sys_config_file, _dev_config_file, _doc_config_file))
     # log no config files were loaded
     pass
 elif len(_read) == 2 or _read[0] == _sys_config_file:
