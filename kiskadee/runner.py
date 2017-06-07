@@ -41,21 +41,7 @@ def runner():
                 pkg.versions[-1].analysis=all_analyses
                 session.add(pkg)
                 session.commit()
-                """ TODO: Not create a new session, make the session used by
-                monitor global. If we use another session,
-                session.merge() will not work. """
-                #plugin = kiskadee.model.Plugin(name=package['plugin'].__name__)
-                #_package = kiskadee.model.Package(name=package['name'])
-                #version = kiskadee.model.Version(number=package['version'],
-                #                                analysis=all_analyses,
-                                                    #has_analysis=True)
-                #session.merge(_package)
-                #session.merge(plugin)
-                #session.merge(version)
-                kiskadee.logger.debug('DONE running analysis')
-                # TODO: save reports in DB
-                kiskadee.logger.debug(analysis_reports)
-                kiskadee.logger.debug('end run')
+                kiskadee.logger.debug('RUNNER: DONE running analysis')
             else:
                 kiskadee.logger.debug('RUNNER: Something went wrong')
                 kiskadee.logger.debug('RUNNER: analysis could not be generated')
