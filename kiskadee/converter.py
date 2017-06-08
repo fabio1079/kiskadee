@@ -9,7 +9,6 @@ def to_firehose(bytes_input, analyzer):
     :bytes_input: The analyzer report, as a byte string
     :returns: A xml.etree.ElementTree object, representing the firehose report
     """
-
     tempdir = tempfile.mkdtemp()
     tmp_report_file = "tmp_%s_report.xml" % analyzer
     report_directory = os.path.join(os.path.abspath("."), "reports/")
@@ -39,7 +38,6 @@ def import_analyzer_module(analyzer):
     analyzer: The name of the parser that will be imported
     :returns: Some firehose parser
     """
-
     try:
         return import_module("firehose.parsers.%s" % (analyzer))
     except ImportError:

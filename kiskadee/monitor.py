@@ -29,7 +29,6 @@ class Monitor:
             analysis will never be done. You can use de decorator
             `@kiskadee.queue.package_enqueuer` to easliy queue a package.
         """
-
         database = kiskadee.database.Database()
         self.engine = database.engine
         self.session = database.session
@@ -49,7 +48,6 @@ class Monitor:
         this package is enqueued in the `analyses_queue` queue, in order to
         the runner component trigger a static analysis. All the plugins
         must queue it's packages in the `packages_queue`."""
-
         while RUNNING:
             pkg = self.dequeue()
             if pkg:

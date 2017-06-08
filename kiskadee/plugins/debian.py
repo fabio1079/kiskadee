@@ -27,7 +27,6 @@ class Plugin(kiskadee.plugins.Plugin):
         """ Starts the continuing monitoring process of Debian
         Repositories. Each package monitored by the plugin will be
         queued using the package_enqueuer decorator. """
-
         self.logger.info("Starting Debian plugin")
         while RUNNING:
             url = self._sources_gz_url()
@@ -42,7 +41,6 @@ class Plugin(kiskadee.plugins.Plugin):
 
     def get_sources(self, source_data):
         """Download packages from some debian mirror."""
-
         path = tempfile.mkdtemp()
         with kiskadee.helpers.chdir(path):
             url = self._dsc_url(source_data)

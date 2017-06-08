@@ -20,7 +20,6 @@ class Plugin():
         previously created by the plugin. `source_data` will have at least
         two obrigatory keys: `name` and `version` of the package that have
         to be downloaded."""
-
         raise NotImplementedError('get_sources must be defined by plugin')
 
     @abc.abstractmethod
@@ -29,14 +28,12 @@ class Plugin():
         as a thread, and will run concurrently with the main kiskadee thread.
         This method must enqueue packages using the
         `@kiskadee.queue.package_enqueuer` decorator."""
-
         raise NotImplementedError('watch must be defined by plugin')
 
     @abc.abstractmethod
     def compare_versions(self, new, old):
         """Returns *true* if `new` is greater then `old`. `new` and `old` will
         be the versions of packages monitored by your plugin."""
-
         raise NotImplementedError('compare_versions must be defined by plugin')
 
     def analyzers(self):

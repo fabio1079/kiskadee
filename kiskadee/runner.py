@@ -15,7 +15,6 @@ def runner():
     """Continuously dequeue packages from `analyses_queue` and call the
     :func:`analyze` method, passing the dequeued package. After the analysis,
     updates the status of this package on the database."""
-
     database = kiskadee.database.Database()
     engine = database.engine
     session = database.session
@@ -54,7 +53,6 @@ def analyze(package):
         path: plugin default path for packages
         return: list with firehose reports
     """
-
     plugin = package['plugin'].Plugin()
     kiskadee.logger.info('ANALYSIS: Downloading {} '
                          'source...'.format(package['name']))
