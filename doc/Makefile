@@ -18,3 +18,20 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+release:
+	rm -rf kiskadee
+	git clone ssh://git@pagure.io/docs/kiskadee.git
+	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(0)
+	cp -r _build/html/* kiskadee
+	cd kiskadee; git diff
+	@printf "Confirm new documentation? [y/N]"; read confirm; \
+		if [ "$$confirm" = 'y' -o "$$confirm" = 'Y' ]; then \
+			cd kiskadee; git add . ; git commit && git push; \
+			rm -rf kiskadee; \
+		else \
+			echo 'Aborting...'; \
+			rm -rf kiskadee; \
+			false; \
+		fi
