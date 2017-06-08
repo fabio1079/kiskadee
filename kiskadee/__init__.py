@@ -39,6 +39,7 @@ def load_plugins():
             plugins.append(importlib.import_module('kiskadee.plugins.' + plugin))
     return plugins
 
+
 # Load kiskadee configurations
 _config_file_name = 'kiskadee.conf'
 _sys_config_file = os.path.abspath(os.path.join('etc', _config_file_name))

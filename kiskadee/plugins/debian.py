@@ -13,7 +13,7 @@ from time import sleep
 import re
 import shutil
 from debian.deb822 import Sources
-from subprocess import check_output
+import subprocess
 
 from kiskadee.helpers import chdir
 import kiskadee.queue
@@ -55,11 +55,11 @@ class Plugin(kiskadee.plugins.Plugin):
 
     def compare_versions(self, new, old):
         try:
-            check_output(['dpkg', '--compare-versions', new, 'gt', old])
+            subprocess.check_output(['dpkg', '--compare-versions', new, 'gt',
+                                     old])
             return True
         except:
             return False
-
 
     def _source_path(self, path):
         """ Return the path to the *.orig.tar.gz """
@@ -76,10 +76,10 @@ class Plugin(kiskadee.plugins.Plugin):
     @kiskadee.queue.package_enqueuer
     def _create_package_dict(self, src):
         return {'name': src["Package"],
-            'version': src["Version"],
-            'plugin': kiskadee.plugins.debian,
-            'meta': { 'directory': src['Directory']}
-            }
+                'version': src["Version"],
+                'plugin': kiskadee.plugins.debian,
+                'meta': {'directory': src['Directory']}
+                }
 
     def _dsc_url(self, source_data):
         """ Mount the dsc url required by dget tool to download the
@@ -93,12 +93,10 @@ class Plugin(kiskadee.plugins.Plugin):
         return ''.join([self.config['target'], '/',
                         directory, '/', name, '_', version, '.dsc'])
 
-
     def _sources_gz_url(self):
         """ Mount the Sources.gz url"""
         return "%s/dists/%s/main/source/Sources.gz" % (self.config['target'],
-                                                        self.config['release'])
-
+                                                       self.config['release'])
 
     def _download_sources_gz(self, url):
         """Download and Extract the Sources.gz file, from some Debian Mirror.
@@ -115,9 +113,9 @@ class Plugin(kiskadee.plugins.Plugin):
                 info.write(data)
         return path
 
-
     def _uncompress_gz(self, path):
         """Extract Some .gz file"""
         compressed_file_path = os.path.join(path, self.config['meta'])
-        check_output(['gzip', '-d', '-k', '-f', compressed_file_path])
+        subprocess.check_output(['gzip', '-d', '-k', '-f',
+                                 compressed_file_path])
         return path

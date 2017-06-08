@@ -21,8 +21,8 @@ class Monitor:
         """ Starts all the threads involved with the monitoring process.
         This includes all plugins that queue packages in the packages_queue,
         and the monitor() method, which retrieves packages from packages_queue,
-        and makes the necessary database operations 
-        
+        and makes the necessary database operations
+
         .. warning::
 
             If a plugin not enqueue the packages in the packages_queue, the
@@ -102,7 +102,8 @@ class Monitor:
                 self.session.add(_pkg)
                 self.session.commit()
                 self.logger.info("Enqueue package {}_{}"
-                                 "for analysis".format(pkg['name'], pkg['version']))
+                                 "for analysis".format(pkg['name'],
+                                                       pkg['version']))
                 kiskadee.queue.enqueue_analysis(pkg)
             else:
                 return {}

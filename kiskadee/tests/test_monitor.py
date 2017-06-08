@@ -18,22 +18,22 @@ class TestMonitor(TestCase):
         self.monitor.session = Session()
         model.Base.metadata.create_all(self.monitor.engine)
         self.pkg1 = {'name': 'curl',
-                'version': '7.52.1-5',
-                'plugin': kiskadee.plugins.debian,
-                'meta': { 'directory': 'pool/main/c/curl'}
-                }
+                     'version': '7.52.1-5',
+                     'plugin': kiskadee.plugins.debian,
+                     'meta': {'directory': 'pool/main/c/curl'}
+                     }
 
         self.pkg2 = {'name': 'urlscan',
-                'version': '0.8.2',
-                'plugin': kiskadee.plugins.debian,
-                'meta': { 'directory': 'pool/main/u/urlscan'}
-                }
+                     'version': '0.8.2',
+                     'plugin': kiskadee.plugins.debian,
+                     'meta': {'directory': 'pool/main/u/urlscan'}
+                     }
 
         self.pkg3 = {'name': 'curl',
-                'version': '7.52.2-5',
-                'plugin': kiskadee.plugins.debian,
-                'meta': { 'directory': 'pool/main/c/curl'}
-                }
+                     'version': '7.52.2-5',
+                     'plugin': kiskadee.plugins.debian,
+                     'meta': {'directory': 'pool/main/c/curl'}
+                     }
 
     def tearDown(self):
         # model.metadata.drop_all(self.engine)
@@ -99,7 +99,7 @@ class TestMonitor(TestCase):
         self.assertEqual(len(_pkgs), 1)
 
         _pkg_versions = self.monitor._query(Package).\
-                filter(Package.name==_pkg['name']).first().versions
+            filter(Package.name == _pkg['name']).first().versions
 
         _first_version = _pkg_versions[0].number
         _current_version = _pkg_versions[-1].number

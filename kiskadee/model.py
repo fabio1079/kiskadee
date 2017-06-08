@@ -7,7 +7,8 @@ Base = declarative_base()
 
 class Package(Base):
     __tablename__ = 'packages'
-    id = Column(Integer, Sequence('packages_id_seq', optional=True), primary_key=True)
+    id = Column(Integer,
+                Sequence('packages_id_seq', optional=True), primary_key=True)
     name = Column(Unicode(255), nullable=False)
     plugin_id = Column(Integer, ForeignKey('plugins.id'), nullable=False)
     versions = orm.relationship('Version', backref='packages')
@@ -18,7 +19,8 @@ class Package(Base):
 
 class Plugin(Base):
     __tablename__ = 'plugins'
-    id = Column(Integer, Sequence('plugins_id_seq', optional=True), primary_key=True)
+    id = Column(Integer,
+                Sequence('plugins_id_seq', optional=True), primary_key=True)
     name = Column(Unicode(255), nullable=False, unique=True)
     target = Column(Unicode(255), nullable=True)
     description = Column(UnicodeText)
@@ -27,7 +29,8 @@ class Plugin(Base):
 
 class Version(Base):
     __tablename__ = 'versions'
-    id = Column(Integer, Sequence('versions_id_seq', optional=True), primary_key=True)
+    id = Column(Integer,
+                Sequence('versions_id_seq', optional=True), primary_key=True)
     number = Column(Unicode(100), nullable=False)
     package_id = Column(Integer, ForeignKey('packages.id'), nullable=False)
     has_analysis = Column(Boolean)

@@ -36,14 +36,14 @@ def runner():
                 pkg = session.query(kiskadee.model.Package).\
                       filter(kiskadee.model.Package.name == package['name']).\
                       first()
-                pkg.versions[-1].has_analysis=True
-                pkg.versions[-1].analysis=all_analyses
+                pkg.versions[-1].has_analysis = True
+                pkg.versions[-1].analysis = all_analyses
                 session.add(pkg)
                 session.commit()
                 kiskadee.logger.debug('RUNNER: DONE running analysis')
             else:
                 kiskadee.logger.debug('RUNNER: Something went wrong')
-                kiskadee.logger.debug('RUNNER: analysis could not be generated')
+                kiskadee.logger.debug('RUNNER: could not generate analysis')
 
 
 def analyze(package):
@@ -57,7 +57,7 @@ def analyze(package):
 
     plugin = package['plugin'].Plugin()
     kiskadee.logger.info('ANALYSIS: Downloading {} '
-            'source...'.format(package['name']))
+                         'source...'.format(package['name']))
     compressed_source = plugin.get_sources(package)
     if compressed_source:
         kiskadee.logger.debug('ANALYSIS: Downloaded!')
@@ -71,7 +71,8 @@ def analyze(package):
             for analyzer in analyzers:
                 kiskadee.logger.debug('ANALYSIS: running %s ...' % analyzer)
                 analysis = kiskadee.analyzers.run(analyzer, path)
-                firehose_report = kiskadee.converter.to_firehose(analysis, analyzer)
+                firehose_report = kiskadee.converter.to_firehose(analysis,
+                                                                 analyzer)
                 reports.append(str(firehose_report))
                 kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
             # TODO: remove compressed files and uncompressed files after the analysis
