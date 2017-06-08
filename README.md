@@ -3,6 +3,15 @@
 kiskadee is a continuous static analysis tool which writes the analyses
 results into a Firehose database.
 
+## Running
+
+To run kiskadee, you must have docker installed and running. Use the
+dockerfiles in the util directory to build the containers for each static
+analyzer.
+
+If you are using distribution with selinux, be aware that you must set
+permissions so the container can access external files.
+
 ## Development
 
 kiskadee dependencies are listed in requirements.txt. To install them, just run
