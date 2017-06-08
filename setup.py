@@ -21,6 +21,7 @@ def get_requirements(requirements_file='requirements.txt'):
                 if not line.startswith('#')
                 ]
 
+
 setup(
     name='kiskadee',
     version=__version__,
@@ -48,5 +49,9 @@ setup(
             'kiskadee = kiskadee.monitor:daemon']},
     install_requires=get_requirements(),
     test_suite='nose.collector',
-    tests_require=['nose']
+    tests_require=[
+        'nose',
+        'flake8',
+        'pydocstyle'
+        ]
         )
