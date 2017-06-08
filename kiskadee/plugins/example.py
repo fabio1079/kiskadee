@@ -18,7 +18,7 @@ class Plugin(kiskadee.plugins.Plugin):
         return example
 
     def compare_versions(self, new, old):
-        """Example has only one version
+        """Example has only one version.
 
         This method does not matter here, let's just pass
         """

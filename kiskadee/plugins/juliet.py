@@ -29,7 +29,7 @@ class Plugin(kiskadee.plugins.Plugin):
         return juliet
 
     def compare_versions(self, new, old):
-        """Juliet has only one version
+        """Juliet has only one version.
 
         This method does not matter here, let's just pass
         """

@@ -12,9 +12,12 @@ running = True
 
 
 def runner():
-    """Continuously dequeue packages from `analyses_queue` and call the
+    """Run static analyzers.
+
+    Continuously dequeue packages from `analyses_queue` and call the
     :func:`analyze` method, passing the dequeued package. After the analysis,
-    updates the status of this package on the database."""
+    updates the status of this package on the database.
+    """
     database = kiskadee.database.Database()
     engine = database.engine
     session = database.session
@@ -46,7 +49,9 @@ def runner():
 
 
 def analyze(package):
-    """ The package dict is in the queue. The keys are:
+    """ The package dict is in the queue.
+
+    The keys are:
         plugin: the plugin module itself
         name: the package name
         version: the package version

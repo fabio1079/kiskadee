@@ -24,8 +24,9 @@ RUNNING = True
 class Plugin(kiskadee.plugins.Plugin):
 
     def watch(self):
-        """ Starts the continuing monitoring process of Debian
-        Repositories. Each package monitored by the plugin will be
+        """ Start the monitoring process for Debian Repositories.
+
+        Each package monitored by the plugin will be
         queued using the package_enqueuer decorator. """
         self.logger.info("Starting Debian plugin")
         while RUNNING:
@@ -60,7 +61,7 @@ class Plugin(kiskadee.plugins.Plugin):
             return False
 
     def _source_path(self, path):
-        """ Return the path to the *.orig.tar.gz """
+        """ Return the path to the *.orig.tar.gz."""
         files = os.listdir(path)
         prog = re.compile(".orig.")
         return [x for x in files if prog.search(x)][0]
@@ -80,9 +81,10 @@ class Plugin(kiskadee.plugins.Plugin):
                 }
 
     def _dsc_url(self, source_data):
-        """ Mount the dsc url required by dget tool to download the
-        source of a debian package.
-        (a.g dget http://ftp.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc)
+        """Build dsc url to download a debian package sources.
+
+        This url is required by dget. e.g.:
+        dget http://ftp.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc
 
         """
         name = source_data['name']
@@ -92,7 +94,7 @@ class Plugin(kiskadee.plugins.Plugin):
                         directory, '/', name, '_', version, '.dsc'])
 
     def _sources_gz_url(self):
-        """ Mount the Sources.gz url"""
+        """Mount the Sources.gz url."""
         return "%s/dists/%s/main/source/Sources.gz" % (self.config['target'],
                                                        self.config['release'])
 
@@ -112,7 +114,7 @@ class Plugin(kiskadee.plugins.Plugin):
         return path
 
     def _uncompress_gz(self, path):
-        """Extract Some .gz file"""
+        """Extract Some .gz file."""
         compressed_file_path = os.path.join(path, self.config['meta'])
         subprocess.check_output(['gzip', '-d', '-k', '-f',
                                  compressed_file_path])
