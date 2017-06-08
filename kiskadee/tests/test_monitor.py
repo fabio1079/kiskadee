@@ -3,14 +3,11 @@ from kiskadee.monitor import Monitor
 from kiskadee import model
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import kiskadee
-from kiskadee.queue import enqueue_analysis, dequeue_package, \
-        enqueue_package
-from kiskadee.monitor import _start
-from time import sleep
-from kiskadee.model import Package, Plugin, Version, Base
+from kiskadee.queue import enqueue_package
+from kiskadee.model import Package, Plugin
 import kiskadee.queue
 import kiskadee.plugins.debian
+
 
 class TestMonitor(TestCase):
 

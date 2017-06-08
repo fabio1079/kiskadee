@@ -1,7 +1,6 @@
 import shutil
 import tempfile
 
-import kiskadee
 import kiskadee.queue
 import kiskadee.analyzers
 import kiskadee.model

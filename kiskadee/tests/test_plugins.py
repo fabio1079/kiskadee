@@ -1,14 +1,8 @@
 from unittest import TestCase
-import unittest
-import kiskadee
-import sys
 import os
-from os import path, listdir
 import shutil
-import socket
 import tempfile
-from kiskadee.queue import dequeue_package
-import kiskadee
+import kiskadee.queue
 
 
 class TestPlugins(TestCase):
@@ -61,7 +55,7 @@ class TestDebianPlugin(TestCase):
         self.debian_plugin._uncompress_gz(temp_dir)
         self.debian_plugin._queue_sources_gz_pkgs(temp_dir)
         shutil.rmtree(temp_dir)
-        some_pkg = dequeue_package()
+        some_pkg = kiskadee.queue.dequeue_package()
         self.assertTrue(isinstance(some_pkg, dict))
         self.assertIn('name', some_pkg)
         self.assertIn('version', some_pkg)
@@ -73,7 +67,7 @@ class TestDebianPlugin(TestCase):
         expected_dsc_url = "http://ftp.us.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc"
         sample_package = {'name': '0ad',
                           'version': '0.0.21-2',
-                          'meta': {'directory': 'pool/main/0/0ad'} }
+                          'meta': {'directory': 'pool/main/0/0ad'}}
         url = self.debian_plugin._dsc_url(sample_package)
         self.assertEqual(expected_dsc_url, url)
 

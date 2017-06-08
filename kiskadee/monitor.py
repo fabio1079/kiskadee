@@ -8,6 +8,8 @@ import kiskadee.queue
 from kiskadee.model import Package, Plugin, Version, Base
 
 RUNNING = True
+
+
 class Monitor:
 
     def __init__(self):
@@ -123,6 +125,7 @@ class Monitor:
 
     def _query(self, arg):
         return self.session.query(arg)
+
 
 def _start(module, joinable=False, timeout=None):
     module_as_a_thread = threading.Thread(target=module)

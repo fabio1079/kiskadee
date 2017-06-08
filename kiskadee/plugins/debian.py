@@ -20,6 +20,7 @@ import kiskadee.queue
 
 RUNNING = True
 
+
 class Plugin(kiskadee.plugins.Plugin):
 
     def watch(self):

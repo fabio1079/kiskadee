@@ -1,4 +1,3 @@
-import kiskadee
 import sys
 import kiskadee.queue
 

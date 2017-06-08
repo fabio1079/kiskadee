@@ -1,7 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, UnicodeText, UniqueConstraint,\
-                       Sequence, Unicode, ForeignKey, Boolean, orm,\
-                       create_engine
+                       Sequence, Unicode, ForeignKey, Boolean, orm
 
 Base = declarative_base()
 
