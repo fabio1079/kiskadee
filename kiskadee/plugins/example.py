@@ -5,7 +5,10 @@ import kiskadee.queue
 
 
 class Plugin(kiskadee.plugins.Plugin):
+    """Example kiskadee plugin implementation."""
+
     def get_sources(self, source_data):
+        """Use sources from test suite."""
         return 'kiskadee/tests/test_source/test_source.tar.gz'
 
     @kiskadee.queue.package_enqueuer

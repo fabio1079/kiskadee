@@ -13,6 +13,7 @@ from contextlib import contextmanager
 
 @contextmanager
 def chdir(path):
+    """Context manager decorator for temporary directories."""
     initial_dir = os.getcwd()
     os.chdir(path)
     yield

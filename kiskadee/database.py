@@ -5,7 +5,10 @@ from sqlalchemy import create_engine, orm
 
 
 class Database:
+    """kiskadee Database class."""
+
     def __init__(self):
+        """Return a Database object with SQLAlchemy session and engine."""
         self.engine = self._create_engine()
         self.session = self._create_session(self.engine)
 

@@ -16,8 +16,10 @@ RUNNING = True
 
 
 class Monitor:
+    """Provide kiskadee monitoring objects."""
 
     def __init__(self):
+        """Return a non initialized Monitor."""
         self.engine = None
         self.session = None
         self.logger = kiskadee.logger

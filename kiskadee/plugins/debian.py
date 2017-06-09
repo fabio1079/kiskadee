@@ -24,6 +24,7 @@ RUNNING = True
 
 
 class Plugin(kiskadee.plugins.Plugin):
+    """Plugin to monitor Debian Project Packages."""
 
     def watch(self):
         """Start the monitoring process for Debian Repositories.
@@ -57,6 +58,7 @@ class Plugin(kiskadee.plugins.Plugin):
                 return None
 
     def compare_versions(self, new, old):
+        """Compare Debian package versions using dpkg."""
         try:
             subprocess.check_output(['dpkg', '--compare-versions', new, 'gt',
                                      old])

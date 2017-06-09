@@ -46,6 +46,11 @@ for plugin in _plugins_pkg_files:
 
 
 def load_plugins():
+    """Load kiskadee plugins.
+
+    This function loads all active plugins(see kiskadee.conf documentation) and
+    returns a list with each module object imported this way.
+    """
     plugins = []
     for plugin in kiskadee_plugins_list:
         if config[plugin + '_plugin'].getboolean('active'):

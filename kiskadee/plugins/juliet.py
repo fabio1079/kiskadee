@@ -14,7 +14,10 @@ import kiskadee.queue
 
 
 class Plugin(kiskadee.plugins.Plugin):
+    """Plugin to analyze Juliet test cases."""
+
     def get_sources(self, source_data):
+        """Download Juliet 1.2 from SARD's website."""
         juliet_url = 'https://samate.nist.gov/SRD/testsuites/juliet/'
         juliet_filename = 'Juliet_Test_Suite_v1.2_for_C_Cpp.zip'
         zipfile_path = os.path.join(tempfile.mkdtemp(), juliet_filename)

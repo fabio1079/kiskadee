@@ -8,6 +8,13 @@ Base = declarative_base()
 
 
 class Package(Base):
+    """Software packages abstraction.
+
+    A software package is the source code for a software project. It may be
+    upstream's distribution or the sources provided by some other source, like
+    a linux distribution.
+    """
+
     __tablename__ = 'packages'
     id = Column(Integer,
                 Sequence('packages_id_seq', optional=True), primary_key=True)
@@ -20,6 +27,8 @@ class Package(Base):
 
 
 class Plugin(Base):
+    """kiskadee plugin abstraction."""
+
     __tablename__ = 'plugins'
     id = Column(Integer,
                 Sequence('plugins_id_seq', optional=True), primary_key=True)
@@ -30,6 +39,8 @@ class Plugin(Base):
 
 
 class Version(Base):
+    """Abstraction of a package version."""
+
     __tablename__ = 'versions'
     id = Column(Integer,
                 Sequence('versions_id_seq', optional=True), primary_key=True)

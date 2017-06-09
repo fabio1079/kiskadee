@@ -10,9 +10,18 @@ import inspect
 
 
 class Plugin():
+    """Abstract Plugin class."""
+
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):
+        """Return a new kiskadee Plugin.
+
+        The plugin name is the module name.
+        There MUST be a [PLUGIN_NAME_plugin] section in kiskadee.conf for each
+        plugin. Refer to the configuration file documentation for more
+        information.
+        """
         full_name = inspect.getmodule(self).__name__
         self.name = full_name.split('.')[-1]
         config_section = self.name + '_plugin'
