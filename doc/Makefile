@@ -28,7 +28,7 @@ release:
 	cd kiskadee; git diff
 	@printf "Confirm new documentation? [y/N]"; read confirm; \
 		if [ "$$confirm" = 'y' -o "$$confirm" = 'Y' ]; then \
-			cd kiskadee; git add . ; git commit && git push; \
+			cd kiskadee; git add . ; git commit && git push; cd ..; \
 			rm -rf kiskadee; \
 		else \
 			echo 'Aborting...'; \
