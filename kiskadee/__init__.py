@@ -4,10 +4,23 @@ kiskadee runs different static analyzers on a set of pre-defined software
 repositories. When the kiskadee package is loaded, we load all the plugin names
 in the plugins subpackages.
 
-On the following variables and a functions are exported:
+The following variables and functions are exported:
     - kiskadee_plugins_list - a list of all enabled plugin names
     - load_plugins() - a function to load all enabled plugins
     - config - a ConfigParser object with kiskadee configurations
+
+Modules:
+    - analyzers
+    - converter
+    - database
+    - helpers
+    - model
+    - monitor
+    - queue
+    - runner
+
+Subpackages:
+    plugins
 """
 import os
 import importlib
