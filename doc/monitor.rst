@@ -1,8 +1,8 @@
 Monitor - Module to manage kiskadee analysis
 ============================================
 
-This class is responsible to dequeue packages from `packages_queue` and
-checks if this package needs to be analyzed.
+This class is responsible to dequeue packages from the `packages_queue` and
+check which packages need to be analyzed.
 
 The class defines the following public behaviors:
 

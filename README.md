@@ -12,6 +12,8 @@ analyzer.
 If you are using distribution with selinux, be aware that you must set
 permissions so the container can access external files.
 
+kiskadee looks for its configuration file under `/etc/kiskadee.conf`.
+
 ## Development
 
 kiskadee dependencies are listed in requirements.txt. To install them, just run

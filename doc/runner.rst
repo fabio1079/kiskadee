@@ -2,7 +2,7 @@ Runner - Module to run static analysis
 ============================================
 
 This module is responsible to run several static analyzers on
-some source code.
+on a given project source code.
 
 The module defines the following public behaviors:
 
