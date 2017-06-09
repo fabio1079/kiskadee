@@ -49,9 +49,9 @@ def runner():
 
 
 def analyze(package):
-    """ The package dict is in the queue.
+    """Run each analyzer on a package.
 
-    The keys are:
+    The package dict is in the queue. The keys are:
         plugin: the plugin module itself
         name: the package name
         version: the package version

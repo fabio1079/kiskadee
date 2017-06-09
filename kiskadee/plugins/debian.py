@@ -24,10 +24,11 @@ RUNNING = True
 class Plugin(kiskadee.plugins.Plugin):
 
     def watch(self):
-        """ Start the monitoring process for Debian Repositories.
+        """Start the monitoring process for Debian Repositories.
 
         Each package monitored by the plugin will be
-        queued using the package_enqueuer decorator. """
+        queued using the package_enqueuer decorator.
+        """
         self.logger.info("Starting Debian plugin")
         while RUNNING:
             url = self._sources_gz_url()
@@ -61,7 +62,7 @@ class Plugin(kiskadee.plugins.Plugin):
             return False
 
     def _source_path(self, path):
-        """ Return the path to the *.orig.tar.gz."""
+        """Return the path to the *.orig.tar.gz."""
         files = os.listdir(path)
         prog = re.compile(".orig.")
         return [x for x in files if prog.search(x)][0]

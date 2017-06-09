@@ -20,6 +20,7 @@ class Plugin(kiskadee.plugins.Plugin):
     @kiskadee.queue.package_enqueuer
     def watch(self):
         """SAMATE does not provide a proper API to inspect new Juliet versions.
+
         It should not matter, since Juliet does not receive updates frequently.
         """
         juliet = {}

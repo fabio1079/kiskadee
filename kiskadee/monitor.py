@@ -18,7 +18,7 @@ class Monitor:
         self.logger = kiskadee.logger
 
     def initialize(self):
-        """ Starts all the threads involved with the monitoring process.
+        """Start all threads related to the monitoring process.
 
         This includes all plugins that queue packages in the packages_queue,
         and the monitor() method, which retrieves packages from packages_queue,
@@ -57,7 +57,7 @@ class Monitor:
                 self._save_or_update_pkg(pkg)
 
     def dequeue(self):
-        """ dequeue packages from packages_queue."""
+        """Dequeue packages from packages_queue."""
         if not kiskadee.queue.packages_queue.empty():
             pkg = kiskadee.queue.dequeue_package()
             kiskadee.queue.package_done()
@@ -138,7 +138,7 @@ def _start(module, joinable=False, timeout=None):
 
 
 def daemon():
-    """ Entry point to the monitor module."""
+    """Entry point to the monitor module."""
     # TODO: improve with start/stop system
     monitor = Monitor()
     p = Process(target=monitor.initialize())

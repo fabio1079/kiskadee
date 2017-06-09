@@ -1,4 +1,4 @@
-""" Continous static analysis package.
+"""Continous static analysis package.
 
 kiskadee runs different static analyzers on a set of pre-defined software
 repositories. When the kiskadee package is loaded, we load all the plugin names

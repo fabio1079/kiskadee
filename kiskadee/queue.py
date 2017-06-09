@@ -33,7 +33,7 @@ def package_done():
 
 
 def source_enqueuer(func):
-    """ Decorator to queue return values with enqueue_analysis."""
+    """Decorate functions to queue return values with enqueue_analysis."""
     def wrapper(*args, **kwargs):
         source = func(*args, **kwargs)
         enqueue_analysis(source)
@@ -41,7 +41,7 @@ def source_enqueuer(func):
 
 
 def package_enqueuer(func):
-    """ Decorator to queue return values with enqueue_package."""
+    """Decorate functions to queue return values with enqueue_package."""
     def wrapper(*args, **kwargs):
         package = func(*args, **kwargs)
         enqueue_package(package)
