@@ -1,3 +1,5 @@
+"""Provide kiskadee Database operations."""
+
 import kiskadee
 from sqlalchemy import create_engine, orm
 

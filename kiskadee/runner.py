@@ -1,6 +1,7 @@
+"""Run each static analyzer in each package marked for analysis."""
+
 import shutil
 import tempfile
-
 import kiskadee.queue
 import kiskadee.analyzers
 import kiskadee.model

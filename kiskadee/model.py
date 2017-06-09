@@ -1,3 +1,5 @@
+"""This module provides kiskadee database model."""
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, UnicodeText, UniqueConstraint,\
                        Sequence, Unicode, ForeignKey, Boolean, orm

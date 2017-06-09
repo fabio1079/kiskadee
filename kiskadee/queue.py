@@ -1,3 +1,5 @@
+"""Provide kiskadee queues and operations on them."""
+
 import queue
 
 analyses_queue = queue.Queue()

@@ -1,3 +1,10 @@
+"""Plugin to analyze Juliet test cases.
+
+Juliet is a static analysis test suite provided by NIST's SAMATE team. It
+contains injected, known CWE's in specific points and similar code snippets
+with the injected flaws fixed.
+"""
+
 import urllib.request
 import shutil
 import os.path

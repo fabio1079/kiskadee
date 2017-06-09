@@ -1,3 +1,5 @@
+"""This module provides functions to run static analyzers."""
+
 import docker
 
 

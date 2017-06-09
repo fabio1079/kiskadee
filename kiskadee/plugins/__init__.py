@@ -1,3 +1,9 @@
+"""Plugin package.
+
+Each kiskadee plugin must be a module in this package that implements the
+Plugin class here defined.
+"""
+
 import abc
 import kiskadee
 import inspect

@@ -1,7 +1,12 @@
+"""Provide kiskadee monitoring capabilities.
+
+kiskadee monitors repositories checking for new package versions to be
+analyzed. This module provides such capabilities.
+"""
+
 import threading
 from multiprocessing import Process
 import time
-
 import kiskadee.database
 import kiskadee.runner
 import kiskadee.queue

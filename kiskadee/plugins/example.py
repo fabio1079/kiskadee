@@ -1,3 +1,5 @@
+"""Example kiskadee plugin implementation."""
+
 import sys
 import kiskadee.queue
 

@@ -1,3 +1,8 @@
+"""Firehose static analysis report format converter.
+
+Module providing functions to convert analysis reports to the firehose format.
+"""
+
 from importlib import import_module
 import shutil
 import tempfile
