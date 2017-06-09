@@ -36,7 +36,8 @@ def load_plugins():
     plugins = []
     for plugin in kiskadee_plugins_list:
         if config[plugin + '_plugin'].getboolean('active'):
-            plugins.append(importlib.import_module('kiskadee.plugins.' + plugin))
+            plugins.append(importlib.import_module('kiskadee.plugins.'
+                                                   + plugin))
     return plugins
 
 
@@ -75,7 +76,8 @@ else:
 log_file = config['DEFAULT']['log_file']
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s - ' +
+                              '%(levelname)s - %(message)s')
 if log_file != 'stdout':
     _warning = logging.FileHandler(log_file, mode='w+')
     _info = logging.FileHandler(log_file, mode='w+')

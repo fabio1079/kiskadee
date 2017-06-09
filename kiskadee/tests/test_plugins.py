@@ -14,8 +14,8 @@ class TestPlugins(TestCase):
         kiskadee.config = _config
         plugins = kiskadee.load_plugins()
         for plugin in plugins:
-            name = plugin.__name__.split('.')\
-            [len(plugin.__name__.split('.')) - 1]
+            name_index = len(plugin.__name__.split('.')) - 1
+            name = plugin.__name__.split('.')[name_index]
             self.assertTrue(name != 'debian')
 
 
@@ -64,7 +64,8 @@ class TestDebianPlugin(TestCase):
         self.assertIn('directory', some_pkg['meta'])
 
     def test_mount_dsc_url(self):
-        expected_dsc_url = "http://ftp.us.debian.org/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc"
+        expected_dsc_url = ("http://ftp.us.debian.org" +
+                            "/debian/pool/main/0/0ad/0ad_0.0.21-2.dsc")
         sample_package = {'name': '0ad',
                           'version': '0.0.21-2',
                           'meta': {'directory': 'pool/main/0/0ad'}}

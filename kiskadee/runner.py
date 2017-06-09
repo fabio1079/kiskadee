@@ -33,11 +33,12 @@ def runner():
                                      package['plugin'].__name__))
             analysis_reports = analyze(package)
             if analysis_reports:
-                kiskadee.logger.debug('RUNNER: Saving analysis %s' % str(package))
+                kiskadee.logger.debug('RUNNER: Saving analysis %s' %
+                                      str(package))
                 all_analyses = '\n'.join(analysis_reports)
-                pkg = session.query(kiskadee.model.Package).\
-                      filter(kiskadee.model.Package.name == package['name']).\
-                      first()
+                pkg = (session.query(kiskadee.model.Package).
+                       filter(kiskadee.model.Package.name == package['name']).
+                       first())
                 pkg.versions[-1].has_analysis = True
                 pkg.versions[-1].analysis = all_analyses
                 session.add(pkg)
@@ -78,7 +79,7 @@ def analyze(package):
                                                                  analyzer)
                 reports.append(str(firehose_report))
                 kiskadee.logger.debug('ANALYSIS: DONE running %s' % analyzer)
-            # TODO: remove compressed files and uncompressed files after the analysis
+            # TODO: remove compressed/uncompressed files after the analysis
         return reports
     else:
         kiskadee.logger.debug('RUNNER: invalid source dict')

@@ -9,6 +9,7 @@
 import os
 import tempfile
 import urllib.request
+import urllib.error
 from time import sleep
 import re
 import shutil
@@ -38,7 +39,7 @@ class Plugin(kiskadee.plugins.Plugin):
                 self._queue_sources_gz_pkgs(sources_gz_dir)
                 sleep(float(self.config['schedule']) * 60)
                 shutil.rmtree(sources_gz_dir)
-            except URLError:
+            except urllib.error.URLError:
                 self.logger.debug("Cannot reach debian mirror")
 
     def get_sources(self, source_data):
@@ -50,7 +51,8 @@ class Plugin(kiskadee.plugins.Plugin):
                 subprocess.check_output(['dget', url])
                 return ''.join([path, '/', self._source_path(path)])
             except:
-                self.logger.debug('Cannot download {} source'.format(source_data['name']))
+                self.logger.debug('Cannot download {} source'.
+                                  format(source_data['name']))
                 return None
 
     def compare_versions(self, new, old):

@@ -26,7 +26,8 @@ def to_firehose(bytes_input, analyzer):
     analyzer_module = import_analyzer_module(analyzer)
 
     if (analyzer_module):
-        firehose_tree = analyzer_module.parse_file(file_to_parse).to_xml_bytes()
+        analysis_instance = analyzer_module.parse_file(file_to_parse)
+        firehose_tree = analysis_instance.to_xml_bytes()
 
     shutil.rmtree(tempdir)
 

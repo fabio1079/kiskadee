@@ -95,7 +95,8 @@ class Monitor:
         current_pkg_version = _pkg.versions[-1].number
 
         try:
-            if pkg['plugin'].Plugin().compare_versions(pkg['version'], current_pkg_version) == 1:
+            if(pkg['plugin'].Plugin().
+               compare_versions(pkg['version'], current_pkg_version) == 1):
                 _new_version = Version(number=pkg['version'],
                                        package_id=_pkg.id,
                                        has_analysis=False)
