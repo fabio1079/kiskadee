@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to kiskadee's documentation!
-====================================
+kiskadee documentation
+======================
 
 .. toctree::
    :maxdepth: 2
@@ -13,9 +13,9 @@ Welcome to kiskadee's documentation!
    introduction
    plugins
    monitor
-   config_file
    analyzers
    runner
+   config_file
 
 
 Indices and tables

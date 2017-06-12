@@ -1,5 +1,5 @@
-Introduction - kiskadee: a continuous static analysis system
-============================================================
+kiskadee: a continuous static analysis system
+=============================================
 
 Static analyzers are computer programs that analyze other computer programs.
 This is generally done by checking source code through static analysis methods.
