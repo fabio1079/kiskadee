@@ -10,6 +10,7 @@ Welcome to kiskadee's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   introduction
    plugins
    monitor
    config_file
