@@ -27,15 +27,15 @@ class Monitor:
     def initialize(self):
         """Start all threads related to the monitoring process.
 
-        This includes all plugins that queue packages in the packages_queue,
+        This includes all plugins that enqueue packages in the packages_queue,
         and the monitor() method, which retrieves packages from packages_queue,
         and makes the necessary database operations
 
         .. warning::
 
-            If a plugin not enqueue the packages in the packages_queue, the
-            analysis will never be done. You can use de decorator
-            `@kiskadee.queue.package_enqueuer` to easliy queue a package.
+            If a plugin does not enqueue the packages in the packages_queue,
+            the analysis will never be performed. You can use thee decorator
+            `@kiskadee.queue.package_enqueuer` to easiliy enqueue a package.
         """
         database = kiskadee.database.Database()
         self.engine = database.engine
@@ -55,8 +55,8 @@ class Monitor:
 
         The packages are dequeued from the `package_queue`. When a package
         needs to be analyzed, this package is enqueued in the `analyses_queue`
-        queue, in order to the runner component trigger a static analysis. All
-        the plugins must queue it's packages in the `packages_queue`.
+        queue so the runner component can trigger an analysis. Each plugin must
+        enqueue its packages in the `packages_queue`.
         """
         while RUNNING:
             pkg = self.dequeue()
