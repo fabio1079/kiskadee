@@ -1,7 +1,7 @@
 # kiskadee
 
-kiskadee is a continuous static analysis tool which writes the analyses
-results into a Firehose database.
+kiskadee is a continuous static analysis tool which writes the analyses results
+into a Firehose database.
 
 ## Running
 
@@ -16,16 +16,19 @@ kiskadee looks for its configuration file under `/etc/kiskadee.conf`.
 
 ## Development
 
+kiskadee development is hosted at [pagure](https://pagure.io/kiskadee). Feel
+free to open issues and pull requests there.
+
 kiskadee dependencies are listed in requirements.txt. To install them, just run
 `pip install -e .`
 
 ## Documentation
 
-docs.pagure.org/kiskadee
+[kiskadee documentation is hosted at pagure.](docs.pagure.org/kiskadee)
 
 ## License
 
-Copyright (C) 2017 the AUTHORS
+Copyright (C) 2017 the AUTHORS (see the AUTHORS file)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
