@@ -123,8 +123,8 @@ class Monitor:
         return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
 
     def _save_plugin(self, plugin):
+        name = self._plugin_name(plugin)
         plugin = plugin.Plugin()
-        name = plugin.name
         self.logger.info("Saving {} plugin in database".format(name))
         if not self.session.query(Plugin).filter(Plugin.name == name).first():
             _plugin = Plugin(name=name,
