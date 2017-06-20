@@ -12,6 +12,5 @@ def run(analyzer, sources):
     """
     volume = {sources: {'bind': '/src', 'mode': 'ro'}}
     client = docker.from_env()
-    # FIXME: Since we are using only cppcheck for now, we only want stderr
     return client.containers.run(analyzer, '/src', volumes=volume,
-                                 stdout=False, stderr=True)
+                                 stdout=True, stderr=True)
