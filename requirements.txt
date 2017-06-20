@@ -1,6 +1,6 @@
 docker==2.0.0
 psycopg2
-firehose
+firehose>=0.5
 sqlalchemy
 python-debian
 chardet
