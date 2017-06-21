@@ -54,8 +54,8 @@ def load_plugins():
     plugins = []
     for plugin in kiskadee_plugins_list:
         if config[plugin + '_plugin'].getboolean('active'):
-            plugins.append(importlib.import_module('kiskadee.plugins.'
-                                                   + plugin))
+            plugins.append(importlib.import_module(
+                           'kiskadee.plugins.' + plugin))
     return plugins
 
 
