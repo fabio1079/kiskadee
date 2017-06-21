@@ -16,7 +16,7 @@ def to_firehose(bytes_input, analyzer):
     :returns: A xml.etree.ElementTree object, representing the firehose report
     """
     tempdir = tempfile.mkdtemp()
-    tmp_report_file = "tmp_%s_report.xml" % analyzer
+    tmp_report_file = "%s_report.raw" % analyzer
     report_directory = os.path.join(os.path.abspath("."), "reports/")
 
     try:
