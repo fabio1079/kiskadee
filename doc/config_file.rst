@@ -17,7 +17,7 @@ This example shows a simple entry to the example plugin.
     [example_plugin]
     target = example
     description = SAMATE Juliet test suite
-    analyzers = cppcheck
+    analyzers = cppcheck flawfinder
     active = yes
 
 The field `active` tells kiskadee if this plugin must be loaded when kiskadee
