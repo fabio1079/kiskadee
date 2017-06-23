@@ -41,7 +41,7 @@ setup(
     keywords='static analysis software assurance',
     author='Athos Ribeiro, David Carlos',
     author_email='athoscr@fedoraproject.org, ddavidcarlos1392@gmail.com',
-    url='https://github.com/LSS-USP/kiskadee',
+    url='https://pagure.io/kiskadee',
     license='GPLv3',
     packages=find_packages(),
     include_package_data=False,
