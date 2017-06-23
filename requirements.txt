@@ -1,4 +1,4 @@
-docker==2.0.0
+docker
 psycopg2
 firehose>=0.5
 sqlalchemy

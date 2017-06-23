@@ -11,6 +11,6 @@ def run(analyzer, sources):
     a analysis results.
     """
     volume = {sources: {'bind': '/src', 'mode': 'ro'}}
-    client = docker.from_env()
+    client = docker.from_env(version='auto')
     return client.containers.run(analyzer, '/src', volumes=volume,
                                  stdout=True, stderr=True)
