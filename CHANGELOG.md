@@ -4,6 +4,7 @@
 ### Added
 - flawfinder analyzer.
 - scan-build (clang) analyzer.
+- frama-c analyzer.
 
 ## [0.1] - 2017-06-12
 ### Added
