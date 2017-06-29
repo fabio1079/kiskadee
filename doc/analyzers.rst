@@ -1,10 +1,12 @@
 List of supported analyzers
 ===========================
 
-For now, kiskadee only runs cppcheck (http://cppcheck.sourceforge.net/), and
-flawfinder (https://www.dwheeler.com/flawfinder/), but it is ready to run
-Frama-C and the clang static analyzer, which will be available in future
-releases.
+For now, kiskadee supports cppcheck (http://cppcheck.sourceforge.net/),
+flawfinder (https://www.dwheeler.com/flawfinder/), Frama-C, and the clang
+static analyzer (scan-build). While there's full support for cppcheck and
+flawfinder, Frama-C and scan-build support is still in early stages, since
+these tools run more sophisticated analysis and require some tunning for each
+software analyzed, which makes it harder to come up with a general approach.
 
 Each analyzer in kiskadee runs under docker, so you will have to
 properly configure a docker engine in your environment in order to run
