@@ -42,7 +42,7 @@ setup(
     author='Athos Ribeiro, David Carlos',
     author_email='athoscr@fedoraproject.org, ddavidcarlos1392@gmail.com',
     url='https://pagure.io/kiskadee',
-    license='GPLv3',
+    license='AGPLv3',
     packages=find_packages(),
     include_package_data=False,
     entry_points={'console_scripts': [
