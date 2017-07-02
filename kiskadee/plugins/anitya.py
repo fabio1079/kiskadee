@@ -125,7 +125,7 @@ class AnityaConsumer(fedmsg.consumers.FedmsgConsumer):
 
     def __init__(self, *args, **kw):
         """Anityaconsumer constructor."""
-        super().__init__(*args, *kw)
+        super().__init__(*args, **kw)
         context = zmq.Context()
         self.socket = context.socket(zmq.PUB)
         self.socket.bind("tcp://*:5556")
