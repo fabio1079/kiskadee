@@ -61,9 +61,9 @@ overview of this plugins.
       identified, it source code is downloaded, and a analysis is made.
 
     - *anitya.py*: A plugin to monitor fedmsg events, published on the
-      Anitya project. The Anitya project monitor upstream releases and
-      broadcast them on fedmsg. The plugin will consume this events, and
-      trigger analysis when it's possible.
+      Anitya project. The Anitya project monitors upstream releases and
+      broadcast them on fedmsg. The plugin will consume these events, and
+      trigger analyses when possible.
 
 
     - *juliet.py*: Juliet is a static analysis test suite provided by
