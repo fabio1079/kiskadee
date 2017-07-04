@@ -13,7 +13,7 @@ Modules:
     - analyzers
     - converter
     - database
-    - helpers
+    - util
     - model
     - monitor
     - queue

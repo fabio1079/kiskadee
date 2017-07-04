@@ -6,7 +6,7 @@ import kiskadee.queue
 import kiskadee.analyzers
 import kiskadee.model
 import kiskadee.database
-import kiskadee.helpers
+import kiskadee.util
 import kiskadee.converter
 
 running = True
@@ -73,7 +73,7 @@ def analyze(package):
         reports = []
         path = tempfile.mkdtemp()
         shutil.unpack_archive(compressed_source, path)
-        with kiskadee.helpers.chdir(path):
+        with kiskadee.util.chdir(path):
             kiskadee.logger.debug('ANALYSIS: Unpacked!')
             analyzers = plugin.analyzers()
             for analyzer in analyzers:

@@ -10,7 +10,7 @@ import shutil
 from debian.deb822 import Sources
 import subprocess
 
-from kiskadee.helpers import chdir
+from kiskadee.util import chdir
 import kiskadee.queue
 
 RUNNING = True
@@ -40,7 +40,7 @@ class Plugin(kiskadee.plugins.Plugin):
     def get_sources(self, source_data):
         """Download packages from some debian mirror."""
         path = tempfile.mkdtemp()
-        with kiskadee.helpers.chdir(path):
+        with kiskadee.util.chdir(path):
             url = self._dsc_url(source_data)
             try:
                 subprocess.check_output(['dget', url])
