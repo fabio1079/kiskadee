@@ -17,6 +17,7 @@ session = database.session
 
 def runner():
     """Run static analyzers.
+
     Continuously dequeue packages from `analyses_queue` and call the
     :func:`analyze` method, passing the dequeued package. After the analysis,
     updates the status of this package on the database.
