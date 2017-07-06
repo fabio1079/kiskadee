@@ -79,3 +79,78 @@ class TestModel(TestCase):
         self.package.versions.append(package_version_2)
         with self.assertRaises(exc.IntegrityError):
             self.session.commit()
+
+    def test_compose_kiskadee_source(self):
+        _analyzer = self.session.query(model.Analyzer)\
+                    .filter(model.Analyzer.name == "cppcheck").first()
+        package = model.Package(
+                name='bla',
+                plugin_id=self.plugin.id
+                )
+        package_version = model.Version(
+                number='1.0.1',
+                package_id=package.id
+                )
+
+        package_analysis = model.Analysis(
+                raw="<>",
+                analyzer_id=_analyzer.id,
+                version_id=package_version.id
+                )
+
+        self.plugin.packages.append(package)
+        package.versions.append(package_version)
+        package_version.analysis.append(package_analysis)
+
+        self.assertEqual(package.versions[0].analysis[0].raw, "<>")
+
+    def test_save_several_analysis(self):
+
+        _analyzer1 = (
+                self.session.query(model.Analyzer)
+                .filter(model.Analyzer.name == "cppcheck").first()
+                )
+        _analyzer2 = (
+                self.session.query(model.Analyzer)
+                .filter(model.Analyzer.name == "flawfinder").first()
+                )
+
+        package = model.Package(
+                name='bla',
+                plugin_id=self.plugin.id
+                )
+        package_version = model.Version(
+                number='1.0.1',
+                package_id=package.id
+                )
+
+        self.plugin.packages.append(package)
+        package.versions.append(package_version)
+
+        self.session.add(package)
+        self.session.add(package_version)
+        self.session.commit()
+
+        package_analysis1 = model.Analysis(
+                raw="<>",
+                analyzer_id=_analyzer1.id,
+                version_id=package_version.id
+                )
+        package_analysis2 = model.Analysis(
+                raw="><",
+                analyzer_id=_analyzer2.id,
+                version_id=package_version.id
+                )
+
+        self.session.add(package_analysis1)
+        self.session.add(package_analysis2)
+        self.session.commit()
+
+        saved_package = (
+                self.session.query(model.Package)
+                .filter(model.Package.name == 'bla').first()
+                )
+        analysis = saved_package.versions[-1].analysis
+        self.assertEqual(len(analysis), 2)
+        self.assertEqual(analysis[0].raw, "<>")
+        self.assertEqual(analysis[1].raw, "><")

@@ -118,17 +118,18 @@ def _path_to_uncompressed_source(package, plugin):
             'ANALYSIS: Downloading {} '
             'source...'.format(package['name'])
     )
-    compressed_source = plugin.get_sources(package)
-    if compressed_source:
-        kiskadee.logger.debug('ANALYSIS: Downloaded!')
-        kiskadee.logger.debug('ANALYSIS: Unpacking...')
-        path = tempfile.mkdtemp()
-        shutil.unpack_archive(compressed_source, path)
-        kiskadee.logger.debug('ANALYSIS: Unpacked!')
-        return path
-    else:
+    try:
+        compressed_source = plugin.get_sources(package)
+    except Exception as err:
         kiskadee.logger.debug('RUNNER: invalid compressed source')
         return None
+
+    kiskadee.logger.debug('ANALYSIS: Downloaded!')
+    kiskadee.logger.debug('ANALYSIS: Unpacking...')
+    path = tempfile.mkdtemp()
+    shutil.unpack_archive(compressed_source, path)
+    kiskadee.logger.debug('ANALYSIS: Unpacked!')
+    return path
 
 
 def _create_analyzers(_session):
