@@ -1,13 +1,14 @@
 from unittest import TestCase
-from kiskadee.monitor import Monitor
-from kiskadee import model
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from kiskadee import model
+from kiskadee.monitor import Monitor
 from kiskadee.queue import enqueue_package
 from kiskadee.model import Package, Plugin
 import kiskadee.queue
 import kiskadee.plugins.debian
-from kiskadee.runner import _create_analyzers
+from kiskadee.runner import create_analyzers
 
 
 class TestMonitor(TestCase):
@@ -18,7 +19,7 @@ class TestMonitor(TestCase):
         session = Session()
         self.monitor = Monitor(session)
         model.Base.metadata.create_all(self.engine)
-        _create_analyzers(self.monitor.session)
+        create_analyzers(self.monitor.session)
         self.pkg1 = {'name': 'curl',
                      'version': '7.52.1-5',
                      'plugin': kiskadee.plugins.debian,

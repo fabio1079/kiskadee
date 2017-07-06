@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker
 
 from kiskadee import model
-from kiskadee.runner import _create_analyzers
+from kiskadee.runner import create_analyzers
 
 
 class TestModel(TestCase):
@@ -13,7 +13,7 @@ class TestModel(TestCase):
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         model.Base.metadata.create_all(self.engine)
-        _create_analyzers(self.session)
+        create_analyzers(self.session)
         self.plugin = model.Plugin(name='kiskadee-plugin', target='university')
         self.package = model.Package(name='python-kiskadee')
         self.version = model.Version(number='1.0-rc1')

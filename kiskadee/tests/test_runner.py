@@ -1,9 +1,8 @@
 from unittest import TestCase
 
-from kiskadee.runner import _analyze, _path_to_uncompressed_source
-from kiskadee.runner import _save_source_analysis
+from kiskadee.runner import analyze, _path_to_uncompressed_source
+from kiskadee.runner import _save_source_analysis, create_analyzers
 import kiskadee.plugins.example
-from kiskadee.runner import _create_analyzers
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from kiskadee import model
@@ -16,7 +15,7 @@ class TestAnalyzers(TestCase):
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         model.Base.metadata.create_all(self.engine)
-        _create_analyzers(self.session)
+        create_analyzers(self.session)
         self.plugin = kiskadee.plugins.debian.Plugin()
         self.deb_pkg = {'name': 'test',
                         'version': '1.0.0',
@@ -37,7 +36,7 @@ class TestAnalyzers(TestCase):
         source_path = _path_to_uncompressed_source(
                 source_to_analysis, kiskadee.plugins.example.Plugin()
         )
-        firehose_report = _analyze(self.deb_pkg, "cppcheck", source_path)
+        firehose_report = analyze(self.deb_pkg, "cppcheck", source_path)
         self.assertIsNotNone(firehose_report)
 
     def test_save_source_analysis(self):

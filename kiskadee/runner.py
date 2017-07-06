@@ -22,7 +22,7 @@ def runner():
     """
     kiskadee.logger.debug('Starting runner component')
     session = kiskadee.database.Database().session
-    _create_analyzers(session)
+    create_analyzers(session)
     while running:
         if not kiskadee.queue.is_empty():
             kiskadee.logger.debug('RUNNER: dequeuing...')
@@ -32,40 +32,50 @@ def runner():
                                      source_to_analysis['version'],
                                      source_to_analysis['plugin'].__name__))
 
-            _call_analyzers(source_to_analysis, session)
+            call_analyzers(source_to_analysis, session)
 
 
-def _call_analyzers(source_to_analysis, session):
-            plugin = source_to_analysis['plugin'].Plugin()
-            source_path = _path_to_uncompressed_source(
-                    source_to_analysis, plugin
-            )
-            analyzers = plugin.analyzers()
-            for analyzer in analyzers:
-                firehose_report = _analyze(
-                        source_to_analysis, analyzer, source_path
-                )
-                _save_source_analysis(
-                        source_to_analysis, firehose_report, analyzer, session
-                )
+def call_analyzers(source_to_analysis, session):
+    """Iterate over the package analyzers.
 
-            session.commit()
+    For each analyzer defined to analysis the source, call
+    the function :func:`analyze`, passing the source dict, the analyzer
+    to run the analysis, and the path to a compressed source.
+    """
+    plugin = source_to_analysis['plugin'].Plugin()
+    source_path = _path_to_uncompressed_source(
+            source_to_analysis, plugin
+    )
+    analyzers = plugin.analyzers()
+    for analyzer in analyzers:
+        firehose_report = analyze(
+                source_to_analysis, analyzer, source_path
+        )
+        _save_source_analysis(
+                source_to_analysis, firehose_report, analyzer, session
+        )
+
+    session.commit()
 
 
-def _analyze(source_to_analysis, analyzer, source_path):
+def analyze(source_to_analysis, analyzer, source_path):
     """Run each analyzer on a source_to_analysis.
 
-    The source_to_analysis dict is in the queue. The keys are:
-        plugin: the plugin module itself
-        name: the package name
-        version: the package version
-        path: plugin default path for packages
-        return: list with firehose reports
+    The `source_to_analysis` dict is in the queue. The keys are:
+        - plugin: the plugin module itself
+        - name: the package name
+        - version: the package version
+        - path: plugin default path for packages
+        - return: list with firehose reports
+    The `analyzer` is the name of a static analyzer already created on the
+    database.
+    The `source_path` is the absolute path to a compressed source, returned
+    by the :func:`_path_to_uncompressed_source`.
     """
     if source_path is None:
         return None
 
-    with kiskadee.helpers.chdir(source_path):
+    with kiskadee.util.chdir(source_path):
             kiskadee.logger.debug('ANALYSIS: running {} ...'.format(analyzer))
             try:
                 analysis = kiskadee.analyzers.run(analyzer, source_path)
@@ -132,7 +142,13 @@ def _path_to_uncompressed_source(package, plugin):
     return path
 
 
-def _create_analyzers(_session):
+def create_analyzers(_session):
+    """Create the analyzers on database.
+
+    The kiskadee analyzers are defined on the section `analyzers` of the
+    kiskadee.conf file. The `_session` argument represents a sqlalchemy
+    session.
+    """
     list_of_analyzers = dict(kiskadee.config._sections["analyzers"])
     for name, version in list_of_analyzers.items():
         if not (_session.query(Analyzer).filter(Analyzer.name == name).
