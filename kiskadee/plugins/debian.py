@@ -43,12 +43,13 @@ class Plugin(kiskadee.plugins.Plugin):
         with kiskadee.util.chdir(path):
             url = self._dsc_url(source_data)
             try:
-                subprocess.check_output(['dget', url])
+                subprocess.check_output(['dget', url, '-u'])
                 return ''.join([path, '/', self._source_path(path)])
-            except:
+            except Exception as err:
                 kiskadee.logger.debug(
                         'Cannot download {} source'
                         .format(source_data['name']))
+                kiskadee.logger.debug(err)
                 return None
 
     def compare_versions(self, new, old):

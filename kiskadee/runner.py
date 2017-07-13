@@ -2,6 +2,7 @@
 
 import shutil
 import tempfile
+
 import kiskadee.queue
 import kiskadee.analyzers
 import kiskadee.model
@@ -69,7 +70,7 @@ def analyze(source_to_analysis, analyzer, source_path):
         - return: list with firehose reports
     The `analyzer` is the name of a static analyzer already created on the
     database.
-    The `source_path` is the absolute path to a compressed source, returned
+    The `source_path` is the directory to a uncompressed source, returned
     by the :func:`_path_to_uncompressed_source`.
     """
     if source_path is None:
@@ -130,16 +131,22 @@ def _path_to_uncompressed_source(package, plugin):
     )
     try:
         compressed_source = plugin.get_sources(package)
+        kiskadee.logger.debug(
+                'ANALYSIS: Downloaded {} source'.format(package['name']))
+        kiskadee.logger.debug(
+                'ANALYSIS: Unpacking {} source'.format(package['name'])
+                )
+        path = tempfile.mkdtemp()
+        shutil.unpack_archive(compressed_source, path)
+        kiskadee.logger.debug(
+                'ANALYSIS: Unpacked {} source'.format(package['name'])
+                )
+        return path
     except Exception as err:
         kiskadee.logger.debug('RUNNER: invalid compressed source')
+        kiskadee.logger.debug(err)
         return None
 
-    kiskadee.logger.debug('ANALYSIS: Downloaded!')
-    kiskadee.logger.debug('ANALYSIS: Unpacking...')
-    path = tempfile.mkdtemp()
-    shutil.unpack_archive(compressed_source, path)
-    kiskadee.logger.debug('ANALYSIS: Unpacked!')
-    return path
 
 
 def create_analyzers(_session):
