@@ -148,7 +148,6 @@ def _path_to_uncompressed_source(package, plugin):
         return None
 
 
-
 def create_analyzers(_session):
     """Create the analyzers on database.
 

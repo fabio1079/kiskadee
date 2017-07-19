@@ -6,8 +6,27 @@ into a Firehose database.
 ## Running
 
 To run kiskadee, you must have docker installed and running. Use the
-dockerfiles in the util directory to build the containers for each static
-analyzer.
+dockerfiles in the util directory to build the images for each static
+analyzer. The name of the image must be equal of the analyzer name.
+You can acomplish that by doing
+    
+    docker build . -t cppcheck
+
+First create the virtualenv
+
+    sudo dnf install virtualenv
+    virtualenv -p /usr/bin/python3
+    source bin/activate
+
+Install some package dependencies
+
+    sudo dnf install openssl-devel python3-devel gcc redhat-rpm-config
+
+Install python packages and run kiskadee
+
+    pip install -e .
+    kiskadee
+
 
 If you are using distribution with selinux, be aware that you must set
 permissions so the container can access external files.
