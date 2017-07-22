@@ -83,41 +83,47 @@ class Monitor:
     def _send_to_runner(self, pkg):
         _name = self._plugin_name(pkg['plugin'])
         _plugin = self._query(Plugin).filter(Plugin.name == _name).first()
+        _package = self._query(Package).filter(Package.name == pkg['name']).first()
+
         if _plugin:
             pkg["plugin_id"] = _plugin.id
-            if not self._query(Package).\
-                    filter(Package.name == pkg['name']).first():
+            if not _package:
                 kiskadee.logger.debug(
                         "MONITOR: Sending package {}_{} "
                         " for analysis".format(pkg['name'], pkg['version'])
                 )
                 kiskadee.queue.enqueue_analysis(pkg)
             else:
-                self._update_pkg_version(pkg)
+                new_version = pkg['version']
+                analysed_version = _package.versions[-1].number
+                plugin = pkg['plugin'].Plugin()
+                if (plugin.compare_versions(new_version, analysed_version)):
+                    kiskadee.queue.enqueue_analysis(pkg)
 
     def _save_analyzed_pkg(self, pkg):
         if not pkg:
             return {}
 
+        _name = self._plugin_name(pkg['plugin'])
         _package = self._query(Package).filter(Package.name == pkg['name']).first()
-
-        if _package:
-            new_version = pkg['version']
-            analysed_version = _package.versions[-1].number
-            if plugin.compare_versions(new_version, analysed_version):
-                _package = self._update_pkg(_package)
-            else:
-                return None
+        _plugin = self._query(Plugin).filter(Plugin.name == _name).first()
 
         if not _package:
             _package = self._save_pkg(pkg)
 
+        if _package:
+            new_version = pkg['version']
+            analysed_version = _package.versions[-1].number
+            _package = self._update_pkg(_package, pkg)
+
+
         for analyzer, result in pkg['results'].items():
             self._save_analysis(pkg, analyzer, result, _package.versions[-1])
 
-    def _update_pkg(self, pkg, package):
-        current_pkg_version = package.versions[-1].number
+    def _update_pkg(self, package, pkg):
 
+        if(package.versions[-1].number == pkg['version']):
+            return package
         try:
             _new_version = Version(
                     number=pkg['version'],

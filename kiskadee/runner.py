@@ -2,6 +2,7 @@
 
 import shutil
 import tempfile
+import os
 
 import kiskadee.queue
 import kiskadee.analyzers
@@ -109,22 +110,31 @@ def _path_to_uncompressed_source(package, plugin):
             'ANALYSIS: Downloading {} '
             'source...'.format(package['name'])
     )
-    try:
-        compressed_source = plugin.get_sources(package)
+
+    compressed_source = plugin.get_sources(package)
+
+    if compressed_source:
         kiskadee.logger.debug(
-                'ANALYSIS: Downloaded {} source'.format(package['name']))
-        kiskadee.logger.debug(
-                'ANALYSIS: Unpacking {} source'.format(package['name'])
+                'ANALYSIS: Downloaded {} source in {} path'
+                .format(package['name'], os.path.dirname(compressed_source))
                 )
-        path = tempfile.mkdtemp()
-        shutil.unpack_archive(compressed_source, path)
+        uncompressed_source_path = tempfile.mkdtemp()
+        shutil.unpack_archive(compressed_source, uncompressed_source_path)
+        kiskadee.logger.debug(
+                'ANALYSIS: Unpacking {} source in {} path'
+                .format(package['name'], uncompressed_source_path)
+                )
+        shutil.rmtree(os.path.dirname(compressed_source))
         kiskadee.logger.debug(
                 'ANALYSIS: Unpacked {} source'.format(package['name'])
                 )
-        return path
-    except Exception as err:
+        kiskadee.logger.debug(
+                'ANALYSIS: Remove {} temp directory'
+                .format(os.path.dirname(compressed_source))
+            )
+        return uncompressed_source_path
+    else:
         kiskadee.logger.debug('RUNNER: invalid compressed source')
-        kiskadee.logger.debug(err)
         return None
 
 

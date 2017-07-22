@@ -40,17 +40,18 @@ class Plugin(kiskadee.plugins.Plugin):
     def get_sources(self, source_data):
         """Download packages from some debian mirror."""
         path = tempfile.mkdtemp()
-        with kiskadee.util.chdir(path):
-            url = self._dsc_url(source_data)
-            try:
-                subprocess.check_output(['dget', url, '-u'])
-                return ''.join([path, '/', self._source_path(path)])
-            except Exception as err:
-                kiskadee.logger.debug(
-                        'Cannot download {} source'
-                        .format(source_data['name']))
-                kiskadee.logger.debug(err)
-                return None
+        url = self._dsc_url(source_data)
+        try:
+            subprocess.check_output(
+                    "(cd {} && dget {} -u -q)".format(path, url), shell=True
+                )
+            return ''.join([path, '/', self._source_path(path)])
+        except Exception as err:
+            kiskadee.logger.debug(
+                    'Cannot download {} source'
+                    .format(source_data['name']))
+            kiskadee.logger.debug(err)
+            return None
 
     def compare_versions(self, new, old):
         """Compare Debian package versions using dpkg."""
