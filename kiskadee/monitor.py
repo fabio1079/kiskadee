@@ -52,66 +52,120 @@ class Monitor:
         enqueue its packages in the `packages_queue`.
         """
         while RUNNING:
-            pkg = self.dequeue()
+            pkg = self.dequeue_package()
             if pkg:
-                self._save_or_update_pkg(pkg)
+                self._send_to_runner(pkg)
+            time.sleep(2)
+            package_to_save = self.dequeue_result()
+            self._save_analyzed_pkg(package_to_save)
 
-    def dequeue(self):
+    def dequeue_package(self):
         """Dequeue packages from packages_queue."""
         if not kiskadee.queue.packages_queue.empty():
             pkg = kiskadee.queue.dequeue_package()
             kiskadee.queue.package_done()
-            kiskadee.logger.debug("Dequed Package: {}".format(str(pkg)))
+            kiskadee.logger.debug("MONITOR: Dequed Package: {}_{}"
+                    .format(pkg["name"], pkg["version"]))
             time.sleep(1)
             return pkg
         return {}
 
-    def _save_or_update_pkg(self, pkg):
+    def dequeue_result(self):
+        """Dequeue analyzed packages from result_queue."""
+        if not kiskadee.queue.result_queue.empty():
+            pkg = kiskadee.queue.dequeue_result()
+            kiskadee.logger.debug("MONITOR: Dequed result for package : {}_{}"
+                    .format(pkg["name"], pkg["version"]))
+            return pkg
+        return {}
+
+
+    def _send_to_runner(self, pkg):
         _name = self._plugin_name(pkg['plugin'])
         _plugin = self._query(Plugin).filter(Plugin.name == _name).first()
         if _plugin:
+            pkg["plugin_id"] = _plugin.id
             if not self._query(Package).\
                     filter(Package.name == pkg['name']).first():
-                self._save_pkg(pkg, _plugin)
-            else:
-                self._update_pkg_version(pkg)
-
-    def _save_pkg(self, pkg, _plugin):
-        _package = Package(name=pkg['name'],
-                           plugin_id=_plugin.id)
-        _version = Version(number=pkg['version'],
-                           package_id=_package.id)
-        _package.versions.append(_version)
-        self.session.add(_package)
-        kiskadee.logger.debug("Saving package in db: {}".format(str(pkg)))
-        self.session.commit()
-        kiskadee.logger.debug(
-                "Enqueue package {}_{} "
-                " for analysis".format(pkg['name'], pkg['version'])
-        )
-        kiskadee.queue.enqueue_analysis(pkg)
-
-    def _update_pkg_version(self, pkg):
-        _pkg = self._query(Package).filter(Package.name == pkg['name']).first()
-        current_pkg_version = _pkg.versions[-1].number
-
-        try:
-            if(pkg['plugin'].Plugin().
-               compare_versions(pkg['version'], current_pkg_version) == 1):
-                _new_version = Version(number=pkg['version'],
-                                       package_id=_pkg.id)
-                _pkg.versions.append(_new_version)
-                self.session.add(_pkg)
-                self.session.commit()
                 kiskadee.logger.debug(
-                        "Enqueue package {}_{}"
-                        "for analysis".format(pkg['name'], pkg['version'])
+                        "MONITOR: Sending package {}_{} "
+                        " for analysis".format(pkg['name'], pkg['version'])
                 )
                 kiskadee.queue.enqueue_analysis(pkg)
             else:
-                return {}
+                self._update_pkg_version(pkg)
+
+    def _save_analyzed_pkg(self, pkg):
+        if not pkg:
+            return {}
+
+        _package = self._query(Package).filter(Package.name == pkg['name']).first()
+
+        if _package:
+            new_version = pkg['version']
+            analysed_version = _package.versions[-1].number
+            if plugin.compare_versions(new_version, analysed_version):
+                _package = self._update_pkg(_package)
+            else:
+                return None
+
+        if not _package:
+            _package = self._save_pkg(pkg)
+
+        for analyzer, result in pkg['results'].items():
+            self._save_analysis(pkg, analyzer, result, _package.versions[-1])
+
+    def _update_pkg(self, pkg, package):
+        current_pkg_version = package.versions[-1].number
+
+        try:
+            _new_version = Version(
+                    number=pkg['version'],
+                    package_id=package.id
+                    )
+            package.versions.append(_new_version)
+            self.session.add(package)
+            self.session.commit()
+            kiskadee.logger.debug(
+                    "MONITOR: Sending package {}_{}"
+                    "for analysis".format(pkg['name'], pkg['version'])
+                    )
+            #kiskadee.queue.enqueue_analysis(pkg)
+            return package
         except ValueError:
-            kiskadee.logger.debug("Could not compare versions")
+            kiskadee.logger.debug("MONITOR: Could not compare versions")
+            return None
+
+    def _save_pkg(self, pkg):
+        _package = Package(name=pkg['name'],
+                           plugin_id=pkg['plugin_id'])
+        self.session.add(_package)
+        self.session.commit()
+        _version = Version(number=pkg['version'],
+                           package_id=_package.id)
+        self.session.add(_version)
+        self.session.commit()
+        return _package
+
+
+    def _save_analysis(self, pkg, analyzer, result, version):
+        _analysis = kiskadee.model.Analysis()
+        try:
+            _analyzer = self._query(kiskadee.model.Analyzer).\
+                    filter(kiskadee.model.Analyzer.name == analyzer).first()
+            _analysis.analyzer_id = _analyzer.id
+            _analysis.version_id = version.id
+            _analysis.raw = result
+            self.session.add(_analysis)
+            self.session.commit()
+            kiskadee.logger.debug("MONITOR: Saved analysis for package: {}_{}"
+                    .format(pkg["name"], pkg["version"]))
+        except Exception as err:
+            kiskadee.logger.debug(
+                    "MONITOR: The required analyzer was not registered in kiskadee"
+                    )
+            kiskadee.logger.debug(err)
+            return None
 
     def _plugin_name(self, plugin):
         return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
@@ -119,7 +173,7 @@ class Monitor:
     def _save_plugin(self, plugin):
         name = self._plugin_name(plugin)
         plugin = plugin.Plugin()
-        kiskadee.logger.debug("Saving {} plugin in database".format(name))
+        kiskadee.logger.debug("MONITOR: Saving {} plugin in database".format(name))
         if not self.session.query(Plugin).filter(Plugin.name == name).first():
             _plugin = Plugin(name=name,
                              target=plugin.config['target'],

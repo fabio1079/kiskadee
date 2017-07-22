@@ -1,9 +1,12 @@
 """Provide kiskadee queues and operations on them."""
 
 import queue
+import kiskadee
 
-analyses_queue = queue.Queue()
-packages_queue = queue.Queue()
+size = kiskadee.config['DEFAULT']['queue_size']
+analyses_queue = queue.Queue(int(size))
+packages_queue = queue.Queue(int(size))
+result_queue = queue.Queue(int(size))
 
 
 def enqueue_analysis(package):
@@ -82,3 +85,14 @@ def package_enqueuer(func):
         package = func(*args, **kwargs)
         enqueue_package(package)
     return wrapper
+
+def enqueue_result(package):
+    """Enqueue a package analyzed by the runner component.
+    """
+    result_queue.put(package)
+
+
+def dequeue_result():
+    """Dequeue a analyzed package by the runner component.
+    """
+    return result_queue.get()

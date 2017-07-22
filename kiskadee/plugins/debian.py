@@ -107,11 +107,10 @@ class Plugin(kiskadee.plugins.Plugin):
 
         """
         path = tempfile.mkdtemp()
-        with chdir(path):
-            in_file = urllib.request.urlopen(url)
-            data = in_file.read()
-            with open('Sources.gz', 'wb') as info:
-                info.write(data)
+        in_file = urllib.request.urlopen(url)
+        data = in_file.read()
+        with open(''.join([path, '/', 'Sources.gz']), 'wb') as info:
+            info.write(data)
         return path
 
     def _uncompress_gz(self, path):

@@ -47,16 +47,27 @@ def call_analyzers(source_to_analysis, session):
     source_path = _path_to_uncompressed_source(
             source_to_analysis, plugin
     )
+    if not source_path:
+        return None
+
     analyzers = plugin.analyzers()
+    source_to_analysis['results'] = {}
     for analyzer in analyzers:
         firehose_report = analyze(
                 source_to_analysis, analyzer, source_path
         )
-        _save_source_analysis(
-                source_to_analysis, firehose_report, analyzer, session
-        )
+        if firehose_report:
+            source_to_analysis['results'][analyzer] = firehose_report
 
-    session.commit()
+
+    if source_to_analysis['results']:
+        kiskadee.logger.debug(
+                "RUNNER: Sending {}-{} to Monitor"
+                .format(source_to_analysis["name"],
+                        source_to_analysis["version"]
+                )
+        )
+        kiskadee.queue.enqueue_result(source_to_analysis)
 
 
 def analyze(source_to_analysis, analyzer, source_path):
@@ -76,52 +87,21 @@ def analyze(source_to_analysis, analyzer, source_path):
     if source_path is None:
         return None
 
-    with kiskadee.util.chdir(source_path):
-            kiskadee.logger.debug('ANALYSIS: running {} ...'.format(analyzer))
-            try:
-                analysis = kiskadee.analyzers.run(analyzer, source_path)
-                firehose_report = kiskadee.converter.to_firehose(analysis,
-                                                                 analyzer)
-                kiskadee.logger.debug(
-                        'ANALYSIS: DONE {} analysis'.format(analyzer)
-                )
-                return firehose_report
-            except Exception as err:
-                kiskadee.logger.debug('RUNNER: could not generate analysis')
-                kiskadee.logger.debug(err)
-        # TODO: remove compressed/uncompressed files after the analysis
-
-
-def _save_source_analysis(source_to_analysis, analysis, analyzer, session):
-
-    if analysis is None:
-        return None
-
-    source_name = source_to_analysis['name']
-    source_version = source_to_analysis['version']
-
-    kiskadee.logger.debug(
-        "Saving analysis of {} on package {}-{}"
-        .format(analyzer, source_name, source_version)
-    )
-    package = (
-            session.query(kiskadee.model.Package)
-            .filter(kiskadee.model.Package.name == source_name).first()
-    )
-    version_id = package.versions[-1].id
-    _analysis = kiskadee.model.Analysis()
+    kiskadee.logger.debug('ANALYSIS: running {} ...'.format(analyzer))
     try:
-        _analyzer = session.query(kiskadee.model.Analyzer).\
-            filter(kiskadee.model.Analyzer.name == analyzer).first()
-        _analysis.analyzer_id = _analyzer.id
-        _analysis.version_id = version_id
-        _analysis.raw = analysis
-        session.add(_analysis)
-    except Exception as err:
+        analysis = kiskadee.analyzers.run(analyzer, source_path)
+        firehose_report = kiskadee.converter.to_firehose(analysis,
+                                                            analyzer)
         kiskadee.logger.debug(
-            "The required analyzer was not registered in kiskadee"
+                'ANALYSIS: DONE {} analysis'.format(analyzer)
         )
+        shutil.rmtree(source_path)
+        return firehose_report
+    except Exception as err:
+        kiskadee.logger.debug('RUNNER: could not generate analysis')
         kiskadee.logger.debug(err)
+        return None
+# TODO: remove compressed/uncompressed files after the analysis
 
 
 def _path_to_uncompressed_source(package, plugin):
