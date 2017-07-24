@@ -1,4 +1,5 @@
 """Provide kiskadee queues and operations on them."""
+import time
 
 import queue
 import kiskadee
@@ -84,6 +85,11 @@ def package_enqueuer(func):
     def wrapper(*args, **kwargs):
         package = func(*args, **kwargs)
         enqueue_package(package)
+        kiskadee.logger.debug(
+                "PLUGIN: Sending package {}_{}"
+                " for monitor".format(package['name'], package['version'])
+                )
+        time.sleep(2)
     return wrapper
 
 
