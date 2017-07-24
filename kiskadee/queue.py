@@ -86,13 +86,12 @@ def package_enqueuer(func):
         enqueue_package(package)
     return wrapper
 
+
 def enqueue_result(package):
-    """Enqueue a package analyzed by the runner component.
-    """
+    """Enqueue a package analyzed by the runner component."""
     result_queue.put(package)
 
 
 def dequeue_result():
-    """Dequeue a analyzed package by the runner component.
-    """
+    """Dequeue a analyzed package by the runner component."""
     return result_queue.get()

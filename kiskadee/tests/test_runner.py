@@ -1,14 +1,14 @@
-from unittest import TestCase
+import unittest
 
 from kiskadee.runner import analyze, _path_to_uncompressed_source
-from kiskadee.runner import _save_source_analysis, create_analyzers
+from kiskadee.runner import create_analyzers, call_analyzers
 import kiskadee.plugins.example
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from kiskadee import model
 
 
-class TestAnalyzers(TestCase):
+class TestAnalyzers(unittest.TestCase):
 
     def setUp(self):
         self.engine = create_engine('sqlite:///:memory:')
@@ -39,44 +39,20 @@ class TestAnalyzers(TestCase):
         firehose_report = analyze(self.deb_pkg, "cppcheck", source_path)
         self.assertIsNotNone(firehose_report)
 
-    def test_save_source_analysis(self):
-
+    def test_generate_a_firehose_report(self):
         source_to_analysis = {
                 'name': 'test',
                 'version': '1.0.0',
                 'plugin': kiskadee.plugins.example
         }
 
-        package = model.Package(
-                name='test',
-                plugin_id=self.plugin.id
-                )
+        call_analyzers(source_to_analysis)
 
-        package_version = model.Version(
-                number='1.0.0',
-                package_id=package.id
-                )
+        analyzed_pkg = kiskadee.queue.dequeue_result()
 
-        package.versions.append(package_version)
-
-        self.session.add(package)
-        self.session.add(package_version)
-        self.session.commit()
-
-        firehose_report = "<>"
-        _save_source_analysis(
-                source_to_analysis,
-                firehose_report,
-                "cppcheck",
-                self.session
-        )
-
-        saved_analysis = (
-                self.session.query(model.Analysis)
-                .filter(model.Analysis.raw == firehose_report).first()
-        )
-
-        self.assertIsNotNone(saved_analysis)
+        self.assertEqual(analyzed_pkg['name'], source_to_analysis['name'])
+        self.assertIn('cppcheck', analyzed_pkg['results'])
+        self.assertIn('flawfinder', analyzed_pkg['results'])
 
     def test_path_to_uncompressed_source(self):
 

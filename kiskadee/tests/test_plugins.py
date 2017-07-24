@@ -7,6 +7,7 @@ import threading
 import time
 
 import kiskadee.queue
+import kiskadee
 
 
 class TestPlugins(TestCase):
@@ -59,6 +60,7 @@ class TestDebianPlugin(TestCase):
         self.debian_plugin._uncompress_gz(temp_dir)
         self.debian_plugin._queue_sources_gz_pkgs(temp_dir)
         shutil.rmtree(temp_dir)
+
         some_pkg = kiskadee.queue.dequeue_package()
         self.assertTrue(isinstance(some_pkg, dict))
         self.assertIn('name', some_pkg)

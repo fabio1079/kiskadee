@@ -64,9 +64,10 @@ class Monitor:
         if not kiskadee.queue.packages_queue.empty():
             pkg = kiskadee.queue.dequeue_package()
             kiskadee.queue.package_done()
-            kiskadee.logger.debug("MONITOR: Dequed Package: {}_{}"
-                    .format(pkg["name"], pkg["version"]))
-            time.sleep(1)
+            kiskadee.logger.debug(
+                    "MONITOR: Dequed Package: {}_{}"
+                    .format(pkg["name"], pkg["version"])
+                )
             return pkg
         return {}
 
@@ -74,16 +75,20 @@ class Monitor:
         """Dequeue analyzed packages from result_queue."""
         if not kiskadee.queue.result_queue.empty():
             pkg = kiskadee.queue.dequeue_result()
-            kiskadee.logger.debug("MONITOR: Dequed result for package : {}_{}"
-                    .format(pkg["name"], pkg["version"]))
+            kiskadee.logger.debug(
+                    "MONITOR: Dequed result for package : {}_{}"
+                    .format(pkg["name"], pkg["version"])
+                )
             return pkg
         return {}
-
 
     def _send_to_runner(self, pkg):
         _name = self._plugin_name(pkg['plugin'])
         _plugin = self._query(Plugin).filter(Plugin.name == _name).first()
-        _package = self._query(Package).filter(Package.name == pkg['name']).first()
+        _package = (
+                self._query(Package)
+                .filter(Package.name == pkg['name']).first()
+            )
 
         if _plugin:
             pkg["plugin_id"] = _plugin.id
@@ -104,18 +109,14 @@ class Monitor:
         if not pkg:
             return {}
 
-        _name = self._plugin_name(pkg['plugin'])
-        _package = self._query(Package).filter(Package.name == pkg['name']).first()
-        _plugin = self._query(Plugin).filter(Plugin.name == _name).first()
-
+        _package = (
+                self._query(Package)
+                .filter(Package.name == pkg['name']).first()
+            )
         if not _package:
             _package = self._save_pkg(pkg)
-
         if _package:
-            new_version = pkg['version']
-            analysed_version = _package.versions[-1].number
             _package = self._update_pkg(_package, pkg)
-
 
         for analyzer, result in pkg['results'].items():
             self._save_analysis(pkg, analyzer, result, _package.versions[-1])
@@ -136,7 +137,6 @@ class Monitor:
                     "MONITOR: Sending package {}_{}"
                     "for analysis".format(pkg['name'], pkg['version'])
                     )
-            #kiskadee.queue.enqueue_analysis(pkg)
             return package
         except ValueError:
             kiskadee.logger.debug("MONITOR: Could not compare versions")
@@ -153,7 +153,6 @@ class Monitor:
         self.session.commit()
         return _package
 
-
     def _save_analysis(self, pkg, analyzer, result, version):
         _analysis = kiskadee.model.Analysis()
         try:
@@ -164,12 +163,15 @@ class Monitor:
             _analysis.raw = result
             self.session.add(_analysis)
             self.session.commit()
-            kiskadee.logger.debug("MONITOR: Saved analysis for package: {}_{}"
-                    .format(pkg["name"], pkg["version"]))
+            kiskadee.logger.debug(
+                    "MONITOR: Saved analysis for package: {}_{}"
+                    .format(pkg["name"], pkg["version"])
+                )
         except Exception as err:
             kiskadee.logger.debug(
-                    "MONITOR: The required analyzer was not registered in kiskadee"
-                    )
+                    "MONITOR: The required analyzer was" +
+                    "not registered in kiskadee"
+                )
             kiskadee.logger.debug(err)
             return None
 
@@ -179,7 +181,9 @@ class Monitor:
     def _save_plugin(self, plugin):
         name = self._plugin_name(plugin)
         plugin = plugin.Plugin()
-        kiskadee.logger.debug("MONITOR: Saving {} plugin in database".format(name))
+        kiskadee.logger.debug(
+                "MONITOR: Saving {} plugin in database".format(name)
+            )
         if not self.session.query(Plugin).filter(Plugin.name == name).first():
             _plugin = Plugin(name=name,
                              target=plugin.config['target'],

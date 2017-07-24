@@ -34,10 +34,10 @@ def runner():
                                      source_to_analysis['version'],
                                      source_to_analysis['plugin'].__name__))
 
-            call_analyzers(source_to_analysis, session)
+            call_analyzers(source_to_analysis)
 
 
-def call_analyzers(source_to_analysis, session):
+def call_analyzers(source_to_analysis):
     """Iterate over the package analyzers.
 
     For each analyzer defined to analysis the source, call
@@ -60,14 +60,12 @@ def call_analyzers(source_to_analysis, session):
         if firehose_report:
             source_to_analysis['results'][analyzer] = firehose_report
 
-
     if source_to_analysis['results']:
         kiskadee.logger.debug(
                 "RUNNER: Sending {}-{} to Monitor"
                 .format(source_to_analysis["name"],
-                        source_to_analysis["version"]
-                )
-        )
+                        source_to_analysis["version"])
+            )
         kiskadee.queue.enqueue_result(source_to_analysis)
 
 
@@ -92,10 +90,8 @@ def analyze(source_to_analysis, analyzer, source_path):
     try:
         analysis = kiskadee.analyzers.run(analyzer, source_path)
         firehose_report = kiskadee.converter.to_firehose(analysis,
-                                                            analyzer)
-        kiskadee.logger.debug(
-                'ANALYSIS: DONE {} analysis'.format(analyzer)
-        )
+                                                         analyzer)
+        kiskadee.logger.debug('ANALYSIS: DONE {} analysis'.format(analyzer))
         shutil.rmtree(source_path)
         return firehose_report
     except Exception as err:
@@ -106,6 +102,10 @@ def analyze(source_to_analysis, analyzer, source_path):
 
 
 def _path_to_uncompressed_source(package, plugin):
+
+    if not plugin or not package:
+        return None
+
     kiskadee.logger.debug(
             'ANALYSIS: Downloading {} '
             'source...'.format(package['name'])
@@ -124,7 +124,8 @@ def _path_to_uncompressed_source(package, plugin):
                 'ANALYSIS: Unpacking {} source in {} path'
                 .format(package['name'], uncompressed_source_path)
                 )
-        shutil.rmtree(os.path.dirname(compressed_source))
+        if not compressed_source.find("kiskadee/tests") > -1:
+            shutil.rmtree(os.path.dirname(compressed_source))
         kiskadee.logger.debug(
                 'ANALYSIS: Unpacked {} source'.format(package['name'])
                 )

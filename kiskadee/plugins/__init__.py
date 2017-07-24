@@ -62,7 +62,7 @@ class Plugin():
         This information should live in kiskadee's configuration file as
         the name of each analyzer separated by spaces.
         """
-        if not self.config['analyzers']:
-            return kiskadee.config['analyzers'].split()
+        if not self.config.get('analyzers'):
+            return kiskadee.config['analyzers']
         else:
-            return self.config['analyzers'].split()
+            return self.config['analyzers']

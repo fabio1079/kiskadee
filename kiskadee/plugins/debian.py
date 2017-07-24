@@ -10,7 +10,6 @@ import shutil
 from debian.deb822 import Sources
 import subprocess
 
-from kiskadee.util import chdir
 import kiskadee.queue
 
 RUNNING = True
@@ -67,7 +66,7 @@ class Plugin(kiskadee.plugins.Plugin):
         files = os.listdir(path)
         prog = re.compile(".orig.")
         return [x for x in files if prog.search(x)
-                and x.find("dsc") == -1][0]
+                and x.find("asc") == -1][0]
 
     def _queue_sources_gz_pkgs(self, path):
         sources = os.path.join(path, 'Sources')
@@ -87,7 +86,6 @@ class Plugin(kiskadee.plugins.Plugin):
         if version.find(":") > -1:
             return version.split(":")[1]
         return version
-
 
     def _dsc_url(self, source_data):
         """Build dsc url to download a debian package sources.

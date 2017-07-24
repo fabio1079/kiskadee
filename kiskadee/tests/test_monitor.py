@@ -20,23 +20,33 @@ class TestMonitor(TestCase):
         self.monitor = Monitor(session)
         model.Base.metadata.create_all(self.engine)
         create_analyzers(self.monitor.session)
-        self.pkg1 = {'name': 'curl',
-                     'version': '7.52.1-5',
-                     'plugin': kiskadee.plugins.debian,
-                     'meta': {'directory': 'pool/main/c/curl'}
-                     }
+        self.pkg1 = {
+                'name': 'curl',
+                'version': '7.52.1-5',
+                'plugin': kiskadee.plugins.debian,
+                'meta': {'directory': 'pool/main/c/curl'},
+                'results': {
+                    'cppcheck': '<>',
+                    'flawfinder': '><'},
+                'plugin_id': 1}
 
         self.pkg2 = {'name': 'urlscan',
                      'version': '0.8.2',
                      'plugin': kiskadee.plugins.debian,
-                     'meta': {'directory': 'pool/main/u/urlscan'}
-                     }
+                     'meta': {'directory': 'pool/main/u/urlscan'},
+                     'results': {
+                            'cppcheck': '<>',
+                            'flawfinder': '><'},
+                     'plugin_id': 1}
 
         self.pkg3 = {'name': 'curl',
                      'version': '7.52.2-5',
                      'plugin': kiskadee.plugins.debian,
-                     'meta': {'directory': 'pool/main/c/curl'}
-                     }
+                     'meta': {'directory': 'pool/main/c/curl'},
+                     'results': {
+                            'cppcheck': '<>',
+                            'flawfinder': '><'},
+                     'plugin_id': 1}
 
     def tearDown(self):
         # model.metadata.drop_all(self.engine)
@@ -44,7 +54,7 @@ class TestMonitor(TestCase):
 
     def test_dequeue_package(self):
         enqueue_package(self.pkg1)
-        _pkg = self.monitor.dequeue()
+        _pkg = self.monitor.dequeue_package()
         self.assertTrue(isinstance(_pkg, dict))
 
     def test_return_plugin_name(self):
@@ -66,14 +76,14 @@ class TestMonitor(TestCase):
         enqueue_package(self.pkg1)
         enqueue_package(self.pkg2)
 
-        _pkg = self.monitor.dequeue()
-        self.monitor._save_or_update_pkg(_pkg)
+        _pkg = self.monitor.dequeue_package()
+        self.monitor._save_analyzed_pkg(_pkg)
         _pkgs = self.monitor.session.query(Package).all()
         self.assertEqual(len(_pkgs), 1)
         self.assertEqual(_pkgs[0].name, _pkg['name'])
 
-        _pkg = self.monitor.dequeue()
-        self.monitor._save_or_update_pkg(_pkg)
+        _pkg = self.monitor.dequeue_package()
+        self.monitor._save_analyzed_pkg(_pkg)
         _pkgs = self.monitor.session.query(Package).all()
         self.assertEqual(len(_pkgs), 2)
         self.assertEqual(_pkgs[1].name, _pkg['name'])
@@ -81,7 +91,7 @@ class TestMonitor(TestCase):
     def test_save_version(self):
         plugin = kiskadee.plugins.debian
         self.monitor._save_plugin(plugin)
-        self.monitor._save_or_update_pkg(self.pkg1)
+        self.monitor._save_analyzed_pkg(self.pkg1)
         _pkgs = self.monitor.session.query(Package).all()
         _version = _pkgs[0].versions[0].number
         self.assertEqual(_version, self.pkg1['version'])
@@ -92,11 +102,11 @@ class TestMonitor(TestCase):
         enqueue_package(self.pkg1)
         enqueue_package(self.pkg3)
 
-        _pkg = self.monitor.dequeue()
-        self.monitor._save_or_update_pkg(_pkg)
+        _pkg = self.monitor.dequeue_package()
+        self.monitor._save_analyzed_pkg(_pkg)
 
-        _pkg = self.monitor.dequeue()
-        self.monitor._save_or_update_pkg(_pkg)
+        _pkg = self.monitor.dequeue_package()
+        self.monitor._save_analyzed_pkg(_pkg)
 
         _pkgs = self.monitor.session.query(Package).all()
         self.assertEqual(len(_pkgs), 1)
