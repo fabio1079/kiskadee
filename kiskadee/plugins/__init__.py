@@ -63,6 +63,6 @@ class Plugin():
         the name of each analyzer separated by spaces.
         """
         if not self.config.get('analyzers'):
-            return kiskadee.config['analyzers']
+            return kiskadee.config['analyzers'].split()
         else:
-            return self.config['analyzers']
+            return self.config['analyzers'].split()
