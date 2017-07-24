@@ -5,7 +5,7 @@ import kiskadee
 
 size = kiskadee.config['DEFAULT']['queue_size']
 analyses_queue = queue.Queue(int(size))
-packages_queue = queue.Queue(int(size))
+packages_queue = queue.Queue()
 result_queue = queue.Queue(int(size))
 
 
