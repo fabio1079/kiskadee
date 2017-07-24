@@ -1,6 +1,12 @@
 # Change Log
 
-## [Unreleased]
+## [0.2.1] - 2017-07-24
+### Added
+- Improve kiskadee log messages.
+- save a package only when it be analyzed.
+- fix debian plugin missing packages.
+
+## [0.2] - 2017-07-12
 ### Added
 - flawfinder analyzer.
 - scan-build (clang) analyzer.
