@@ -66,7 +66,8 @@ class Plugin(kiskadee.plugins.Plugin):
         """Return the path to the *.orig.tar.gz."""
         files = os.listdir(path)
         prog = re.compile(".orig.")
-        return [x for x in files if prog.search(x)][0]
+        return [x for x in files if prog.search(x)
+                and x.find("dsc") == -1][0]
 
     def _queue_sources_gz_pkgs(self, path):
         sources = os.path.join(path, 'Sources')
@@ -77,10 +78,16 @@ class Plugin(kiskadee.plugins.Plugin):
     @kiskadee.queue.package_enqueuer
     def _create_package_dict(self, src):
         return {'name': src["Package"],
-                'version': src["Version"],
+                'version': self._parse_version(src["Version"]),
                 'plugin': kiskadee.plugins.debian,
                 'meta': {'directory': src['Directory']}
                 }
+
+    def _parse_version(self, version):
+        if version.find(":") > -1:
+            return version.split(":")[1]
+        return version
+
 
     def _dsc_url(self, source_data):
         """Build dsc url to download a debian package sources.
