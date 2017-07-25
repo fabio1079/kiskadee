@@ -3,11 +3,12 @@ import time
 
 import queue
 import kiskadee
+from kiskadee.util import _plugin_name
 
 size = kiskadee.config['DEFAULT']['queue_size']
-analyses_queue = queue.Queue(int(size))
+analyses_queue = queue.Queue()
 packages_queue = queue.Queue()
-result_queue = queue.Queue(int(size))
+result_queue = queue.Queue()
 
 
 def enqueue_analysis(package):
@@ -85,10 +86,11 @@ def package_enqueuer(func):
     def wrapper(*args, **kwargs):
         package = func(*args, **kwargs)
         enqueue_package(package)
+        plugin = _plugin_name(package['plugin'])
         kiskadee.logger.debug(
-                "PLUGIN: Sending package {}_{}"
-                " for monitor".format(package['name'], package['version'])
-                )
+                "{} plugin: Sending package {}_{} for monitor"
+                .format(plugin, package['name'], package['version'])
+            )
         time.sleep(2)
     return wrapper
 

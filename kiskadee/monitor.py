@@ -11,6 +11,7 @@ import kiskadee.database
 import kiskadee.runner
 import kiskadee.queue
 from kiskadee.model import Package, Plugin, Version
+from kiskadee.util import _plugin_name
 
 RUNNING = True
 
@@ -83,7 +84,7 @@ class Monitor:
         return {}
 
     def _send_to_runner(self, pkg):
-        _name = self._plugin_name(pkg['plugin'])
+        _name = _plugin_name(pkg['plugin'])
         _plugin = self._query(Plugin).filter(Plugin.name == _name).first()
         _package = (
                 self._query(Package)
@@ -175,11 +176,9 @@ class Monitor:
             kiskadee.logger.debug(err)
             return None
 
-    def _plugin_name(self, plugin):
-        return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]
 
     def _save_plugin(self, plugin):
-        name = self._plugin_name(plugin)
+        name = _plugin_name(plugin)
         plugin = plugin.Plugin()
         kiskadee.logger.debug(
                 "MONITOR: Saving {} plugin in database".format(name)
