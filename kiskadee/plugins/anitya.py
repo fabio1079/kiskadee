@@ -38,8 +38,6 @@ class Plugin(kiskadee.plugins.Plugin):
                 msg = socket.recv_string()
                 self._create_package_dict(msg)
 
-        return {}
-
     def get_sources(self, source_data):
         """Download packages from some Anitya Backend."""
         path = tempfile.mkdtemp()
@@ -81,23 +79,31 @@ class Plugin(kiskadee.plugins.Plugin):
     @kiskadee.queue.package_enqueuer
     def _create_package_dict(self, fedmsg_event):
         event = self._event_to_dict(fedmsg_event)
-        project = event.get('body').get('msg').get('project')
-        source_dict = {}
-        if project:
-            source_dict = {
-                    'name': project.get('name'),
-                    'version': project.get('version'),
-                    'plugin': kiskadee.plugins.anitya,
-                    'meta': {
-                        'backend': project.get('backend'),
-                        'homepage': project.get('homepage')
-                    }
-            }
-        return source_dict
+        if event:
+            project = event.get('body').get('msg').get('project')
+            source_dict = {}
+            if project:
+                source_dict = {
+                        'name': project.get('name'),
+                        'version': project.get('version'),
+                        'plugin': kiskadee.plugins.anitya,
+                        'meta': {
+                            'backend': project.get('backend'),
+                            'homepage': project.get('homepage')
+                        }
+                }
+            return source_dict
 
     def _event_to_dict(self, msg):
         msg = msg[msg.find(" ")+1::]
-        return yaml.load(msg)
+        event = None
+        try:
+            event = yaml.load(msg)
+            return event
+        except Exception as err:
+            kiskadee.logger.debug("Something went wrong on Anitya event")
+            kiskadee.logger.debug(err)
+            return event
 
 
 class Backends():

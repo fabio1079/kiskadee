@@ -2,7 +2,6 @@
 
 import docker
 
-
 def run(analyzer, sources):
     """Run a static analyzer on a given package.
 
@@ -13,4 +12,5 @@ def run(analyzer, sources):
     volume = {sources: {'bind': '/src', 'mode': 'Z'}}
     client = docker.from_env(version='auto')
     return client.containers.run(analyzer, '/src', volumes=volume,
-                                 stdout=True, stderr=True, tty=True)
+                                 stdout=True, stderr=True,
+                                 tty=True, remove=True)

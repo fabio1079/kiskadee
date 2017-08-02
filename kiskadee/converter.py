@@ -30,6 +30,7 @@ def to_firehose(bytes_input, analyzer):
 
     analyzer_module = import_analyzer_module(analyzer)
 
+    firehose_tree = None
     if (analyzer_module):
         with open(file_to_parse, 'r') as f:
             analysis_instance = analyzer_module.parse_file(f)

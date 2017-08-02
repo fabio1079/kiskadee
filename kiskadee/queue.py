@@ -5,11 +5,9 @@ import queue
 import kiskadee
 from kiskadee.util import _plugin_name
 
-size = kiskadee.config['DEFAULT']['queue_size']
 analyses_queue = queue.Queue()
 packages_queue = queue.Queue()
 result_queue = queue.Queue()
-
 
 def enqueue_analysis(package):
     """Enqueue a package for analysis.
