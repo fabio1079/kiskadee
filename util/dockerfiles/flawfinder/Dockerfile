@@ -3,7 +3,7 @@ FROM fedora
 RUN dnf -y update && dnf clean all
 RUN dnf -y install python flawfinder && dnf clean all
 
-RUN useradd -ms /bin/bash kiskadee
-USER kiskadee
-
-ENTRYPOINT ["flawfinder"]
+COPY ./docker-entrypoint.sh /tmp
+WORKDIR /tmp
+RUN chmod 777 docker-entrypoint.sh
+ENTRYPOINT ["/tmp/docker-entrypoint.sh"]

@@ -1,6 +1,7 @@
 """This module provides functions to run static analyzers."""
 
 import docker
+from subprocess import check_output
 
 def run(analyzer, sources):
     """Run a static analyzer on a given package.
@@ -11,6 +12,8 @@ def run(analyzer, sources):
     """
     volume = {sources: {'bind': '/src', 'mode': 'Z'}}
     client = docker.from_env(version='auto')
+    uid = int(check_output("echo $UID", shell=True))
     return client.containers.run(analyzer, '/src', volumes=volume,
                                  stdout=True, stderr=True,
-                                 tty=True, remove=True, user='kiskadee')
+                                 tty=True, remove=True,
+                                 environment={'KISKADEE_UID': uid})

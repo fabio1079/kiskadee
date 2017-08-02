@@ -3,9 +3,7 @@ FROM fedora
 RUN dnf -y update && dnf clean all
 RUN dnf -y install frama-c && dnf clean all
 
-RUN useradd -ms /bin/bash kiskadee
-USER kiskadee
-
-COPY ./run-analysis.sh /usr/bin/run-analysis
-
-ENTRYPOINT ["run-analysis"]
+COPY ./docker-entrypoint.sh /tmp
+WORKDIR /tmp
+RUN chmod 777 docker-entrypoint.sh
+ENTRYPOINT ["/tmp/docker-entrypoint.sh"]

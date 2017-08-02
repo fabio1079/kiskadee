@@ -165,8 +165,8 @@ class Monitor:
             self.session.add(_analysis)
             self.session.commit()
             kiskadee.logger.debug(
-                    "MONITOR: Saved analysis for package: {}_{}"
-                    .format(pkg["name"], pkg["version"])
+                    "MONITOR: Saved analysis done by {} for package: {}_{}"
+                    .format(analyzer, pkg["name"], pkg["version"])
                 )
         except Exception as err:
             kiskadee.logger.debug(

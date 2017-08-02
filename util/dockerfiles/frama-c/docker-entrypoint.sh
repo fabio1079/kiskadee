@@ -1,5 +1,10 @@
 #!/bin/sh
 
+useradd -ms /bin/bash kiskadee -u $KISKADEE_UID
+chown -R kiskadee:kiskadee /src
+chmod -R 755 /src
+cd /src
+
 # get all header files in the given path
 HEADERS=`find $1 | grep '\.h$' | sed 's/\/[^/]\+\.h$//' | sort -u | sed 's/^/-I /' | tr '\n' ' '`
 
