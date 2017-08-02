@@ -67,6 +67,7 @@ def call_analyzers(source_to_analysis):
                         source_to_analysis["version"])
             )
         kiskadee.queue.enqueue_result(source_to_analysis)
+    shutil.rmtree(source_path)
 
 
 def analyze(source_to_analysis, analyzer, source_path):
@@ -92,7 +93,6 @@ def analyze(source_to_analysis, analyzer, source_path):
         firehose_report = kiskadee.converter.to_firehose(analysis,
                                                          analyzer)
         kiskadee.logger.debug('ANALYSIS: DONE {} analysis'.format(analyzer))
-        shutil.rmtree(source_path)
         return firehose_report
     except Exception as err:
         kiskadee.logger.debug('RUNNER: could not generate analysis')

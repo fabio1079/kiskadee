@@ -3,7 +3,7 @@ FROM fedora
 RUN dnf -y update && dnf clean all
 RUN dnf -y install python flawfinder && dnf clean all
 
-run useradd -ms /bin/bash kiskadee
-user kiskadee
+RUN useradd -ms /bin/bash kiskadee
+USER kiskadee
 
 ENTRYPOINT ["flawfinder"]
