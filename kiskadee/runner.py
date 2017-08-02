@@ -12,7 +12,7 @@ import kiskadee.util
 import kiskadee.converter
 from kiskadee.model import Analyzer
 
-running = True
+RUNNING = True
 
 
 def runner():
@@ -25,7 +25,7 @@ def runner():
     kiskadee.logger.debug('Starting runner component')
     session = kiskadee.database.Database().session
     create_analyzers(session)
-    while running:
+    while RUNNING:
         if not kiskadee.queue.is_empty():
             kiskadee.logger.debug('RUNNER: dequeuing...')
             source_to_analysis = kiskadee.queue.dequeue_analysis()

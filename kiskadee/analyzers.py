@@ -13,4 +13,4 @@ def run(analyzer, sources):
     client = docker.from_env(version='auto')
     return client.containers.run(analyzer, '/src', volumes=volume,
                                  stdout=True, stderr=True,
-                                 tty=True, remove=True)
+                                 tty=True, remove=True, user='kiskadee')
