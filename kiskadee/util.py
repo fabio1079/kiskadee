@@ -22,7 +22,6 @@ def chdir(path):
     yield
     os.chdir(initial_dir)
 
-
 def download(path, url, file_name):
     """Download something from the internet.
 
@@ -45,6 +44,3 @@ def download(path, url, file_name):
         )
         kiskadee.logger.debug(err)
         return {}
-
-def _plugin_name(plugin):
-    return plugin.__name__.split('.')[len(plugin.__name__.split('.')) - 1]

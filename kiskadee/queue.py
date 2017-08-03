@@ -1,75 +1,32 @@
 """Provide kiskadee queues and operations on them."""
 import time
-
 import queue
+from multiprocessing import Queue
+
 import kiskadee
-from kiskadee.util import _plugin_name
 
-analyses_queue = queue.Queue()
 packages_queue = queue.Queue()
-result_queue = queue.Queue()
 
-def enqueue_analysis(package):
-    """Enqueue a package for analysis.
+class KiskadeeQueue():
 
-    A package abstraction is a dict with the following key, value pairs:
-        - plugin: the module object of a kiskadee plugin.
-        - name: package name.
-        - version: package version.
-    """
-    analyses_queue.put(package)
+    def __init__(self):
+        self.analysis = Queue()
+        self.results = Queue()
 
+    def enqueue_analysis(self, pkg):
+        return self.analysis.put(pkg)
 
-def dequeue_analysis():
-    """Dequeue a package for analysis.
+    def dequeue_analysis(self):
+        return self.analysis.get()
 
-    A package abstraction is a dict with the following key, value pairs:
-        - plugin: the module object of a kiskadee plugin.
-        - name: package name.
-        - version: package version.
-    """
-    return analyses_queue.get()
+    def dequeue_result(self):
+        return self.results.get()
 
+    def enqueue_result(self, pkg):
+        return self.results.put(pkg)
 
-def analysis_done():
-    """Anounce analysis is finished."""
-    analyses_queue.task_done()
-
-
-def is_empty():
-    """Check if `analyses_queue is empty`.
-
-    Returns True if the queue is empty and False otherwise.
-    """
-    return analyses_queue.empty()
-
-
-def enqueue_package(package):
-    """Enqueue a package for monitoring purposes.
-
-    A package abstraction is a dict with the following key, value pairs:
-        - plugin: the module object of a kiskadee plugin.
-        - name: package name.
-        - version: package version.
-    """
-    packages_queue.put(package)
-
-
-def dequeue_package():
-    """Dequeue a package for monitoring purposes.
-
-    A package abstraction is a dict with the following key, value pairs:
-        - plugin: the module object of a kiskadee plugin.
-        - name: package name.
-        - version: package version.
-    """
-    return packages_queue.get()
-
-
-def package_done():
-    """Anounce package was verified."""
-    packages_queue.task_done()
-
+    def results_empty(self):
+        return self.results.empty()
 
 def source_enqueuer(func):
     """Decorate functions to queue return values with enqueue_analysis."""
@@ -78,26 +35,15 @@ def source_enqueuer(func):
         enqueue_analysis(source)
     return wrapper
 
-
 def package_enqueuer(func):
     """Decorate functions to queue return values with enqueue_package."""
     def wrapper(*args, **kwargs):
         package = func(*args, **kwargs)
-        enqueue_package(package)
-        plugin = _plugin_name(package['plugin'])
+        packages_queue.put(package)
+        plugin = package['plugin'].name
         kiskadee.logger.debug(
                 "{} plugin: Sending package {}_{} for monitor"
                 .format(plugin, package['name'], package['version'])
             )
         time.sleep(2)
     return wrapper
-
-
-def enqueue_result(package):
-    """Enqueue a package analyzed by the runner component."""
-    result_queue.put(package)
-
-
-def dequeue_result():
-    """Dequeue a analyzed package by the runner component."""
-    return result_queue.get()

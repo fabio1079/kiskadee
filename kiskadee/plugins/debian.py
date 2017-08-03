@@ -78,7 +78,7 @@ class Plugin(kiskadee.plugins.Plugin):
     def _create_package_dict(self, src):
         return {'name': src["Package"],
                 'version': self._parse_version(src["Version"]),
-                'plugin': kiskadee.plugins.debian,
+                'plugin': kiskadee.plugins.debian.Plugin(),
                 'meta': {'directory': src['Directory']}
                 }
 

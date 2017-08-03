@@ -18,7 +18,7 @@ class Plugin(kiskadee.plugins.Plugin):
         It should not matter, since example will not receive updates.
         """
         example = {}
-        example['plugin'] = sys.modules[__name__]
+        example['plugin'] = kiskadee.plugins.example.Plugin()
         example['version'] = '0.1'
         example['name'] = 'example'
         return example
