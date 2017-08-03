@@ -17,12 +17,6 @@ def to_firehose(bytes_input, analyzer):
     """
     tempdir = tempfile.mkdtemp()
     tmp_report_file = "%s_report.raw" % analyzer
-    report_directory = os.path.join(os.path.abspath("."), "reports/")
-
-    try:
-        os.mkdir(report_directory)
-    except OSError:
-        pass
 
     file_to_parse = os.path.join(tempdir, tmp_report_file)
     with open(file_to_parse, 'w') as f:

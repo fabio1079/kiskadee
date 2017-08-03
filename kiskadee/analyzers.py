@@ -14,6 +14,5 @@ def run(analyzer, sources):
     client = docker.from_env(version='auto')
     uid = int(check_output("echo $UID", shell=True))
     return client.containers.run(analyzer, '/src', volumes=volume,
-                                 stdout=True, stderr=True,
-                                 tty=True, remove=True,
-                                 environment={'KISKADEE_UID': uid})
+                                 environment={'KISKADEE_UID': uid},
+                                 stderr=True, stdout=True, tty=True)
