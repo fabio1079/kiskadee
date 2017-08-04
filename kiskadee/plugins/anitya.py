@@ -86,7 +86,7 @@ class Plugin(kiskadee.plugins.Plugin):
                 source_dict = {
                         'name': project.get('name'),
                         'version': project.get('version'),
-                        'plugin': kiskadee.plugins.anitya,
+                        'plugin': kiskadee.plugins.anitya.Plugin(),
                         'meta': {
                             'backend': project.get('backend'),
                             'homepage': project.get('homepage')

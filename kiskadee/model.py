@@ -4,6 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, UnicodeText, UniqueConstraint,\
                        Sequence, Unicode, ForeignKey, orm
 
+import kiskadee
+
 Base = declarative_base()
 
 
@@ -72,3 +74,21 @@ class Analysis(Base):
     version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)
     analyzer_id = Column(Integer, ForeignKey('analyzers.id'), nullable=False)
     raw = Column(UnicodeText)
+
+
+def create_analyzers(_session):
+    """Create the analyzers on database.
+
+    The kiskadee analyzers are defined on the section `analyzers` of the
+    kiskadee.conf file. The `_session` argument represents a sqlalchemy
+    session.
+    """
+    list_of_analyzers = dict(kiskadee.config._sections["analyzers"])
+    for name, version in list_of_analyzers.items():
+        if not (_session.query(Analyzer).filter(Analyzer.name == name).
+                filter(Analyzer.version == version).first()):
+            new_analyzer = kiskadee.model.Analyzer()
+            new_analyzer.name = name
+            new_analyzer.version = version
+            _session.add(new_analyzer)
+    _session.commit()

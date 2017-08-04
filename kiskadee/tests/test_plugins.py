@@ -22,6 +22,12 @@ class TestPlugins(TestCase):
             name_index = len(plugin.__name__.split('.')) - 1
             name = plugin.__name__.split('.')[name_index]
             self.assertTrue(name != 'debian')
+        kiskadee.config['example_plugin'] = {
+                'target': 'example',
+                'description': 'SAMATE Juliet test suite',
+                'analyzers': 'cppcheck flawfinder',
+                'active': 'yes'
+            }
 
 
 class TestDebianPlugin(TestCase):
@@ -61,7 +67,7 @@ class TestDebianPlugin(TestCase):
         self.debian_plugin._queue_sources_gz_pkgs(temp_dir)
         shutil.rmtree(temp_dir)
 
-        some_pkg = kiskadee.queue.dequeue_package()
+        some_pkg = kiskadee.queue.packages_queue.get()
         self.assertTrue(isinstance(some_pkg, dict))
         self.assertIn('name', some_pkg)
         self.assertIn('version', some_pkg)
@@ -182,7 +188,7 @@ class TestAnityaPlugin(TestCase):
     def test_create_package_dict(self):
 
         self.anitya_plugin._create_package_dict(self.msg)
-        _dict = kiskadee.queue.dequeue_package()
+        _dict = kiskadee.queue.packages_queue.get()
         self.assertEqual(_dict['name'], 'urlscan')
         self.assertEqual(_dict['version'], '0.8.5')
         self.assertEqual(_dict['meta']['backend'], 'GitHub')
@@ -190,4 +196,4 @@ class TestAnityaPlugin(TestCase):
                 _dict['meta']['homepage'],
                 'https://github.com/firecat53/urlscan'
         )
-        self.assertEqual(_dict['plugin'], kiskadee.plugins.anitya)
+        self.assertEqual(_dict['plugin'].name, 'anitya')

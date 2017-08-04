@@ -1,11 +1,12 @@
 import unittest
 
-from kiskadee.runner import analyze, _path_to_uncompressed_source
-from kiskadee.runner import create_analyzers, call_analyzers
+from kiskadee.runner import Runner
 import kiskadee.plugins.example
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from kiskadee import model
+from kiskadee.model import create_analyzers
+from kiskadee.queue import KiskadeeQueue
 
 
 class TestAnalyzers(unittest.TestCase):
@@ -19,36 +20,39 @@ class TestAnalyzers(unittest.TestCase):
         self.plugin = kiskadee.plugins.debian.Plugin()
         self.deb_pkg = {'name': 'test',
                         'version': '1.0.0',
-                        'plugin': kiskadee.plugins.debian
+                        'plugin': kiskadee.plugins.debian.Plugin()
                         }
         self.plugin = model.Plugin(name='kiskadee-plugin', target='university')
         self.session.add(self.plugin)
         self.session.commit()
+        kiskadee_queue = KiskadeeQueue()
+        self.runner = Runner()
+        self.runner.kiskadee_queue = kiskadee_queue
 
     def test_run_analyzer(self):
 
         source_to_analysis = {
                 'name': 'test',
                 'version': '1.0.0',
-                'plugin': kiskadee.plugins.example
+                'plugin': kiskadee.plugins.example.Plugin()
         }
 
-        source_path = _path_to_uncompressed_source(
+        source_path = self.runner._path_to_uncompressed_source(
                 source_to_analysis, kiskadee.plugins.example.Plugin()
-        )
-        firehose_report = analyze(self.deb_pkg, "cppcheck", source_path)
+            )
+        firehose_report = self.runner.analyze(
+                self.deb_pkg, "cppcheck", source_path)
         self.assertIsNotNone(firehose_report)
 
     def test_generate_a_firehose_report(self):
         source_to_analysis = {
                 'name': 'test',
                 'version': '1.0.0',
-                'plugin': kiskadee.plugins.example
+                'plugin': kiskadee.plugins.example.Plugin()
         }
 
-        call_analyzers(source_to_analysis)
-
-        analyzed_pkg = kiskadee.queue.dequeue_result()
+        self.runner.call_analyzers(source_to_analysis)
+        analyzed_pkg = self.runner.kiskadee_queue.dequeue_result()
 
         self.assertEqual(analyzed_pkg['name'], source_to_analysis['name'])
         self.assertIn('cppcheck', analyzed_pkg['results'])
@@ -62,7 +66,7 @@ class TestAnalyzers(unittest.TestCase):
                 'plugin': kiskadee.plugins.example
         }
 
-        source_path = _path_to_uncompressed_source(
+        source_path = self.runner._path_to_uncompressed_source(
                 source_to_analysis, kiskadee.plugins.example.Plugin()
         )
 
@@ -76,7 +80,7 @@ class TestAnalyzers(unittest.TestCase):
                 'plugin': kiskadee.plugins.example
         }
 
-        source_path = _path_to_uncompressed_source(
+        source_path = self.runner._path_to_uncompressed_source(
                 source_to_analysis, None
         )
 

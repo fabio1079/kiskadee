@@ -10,36 +10,39 @@ import kiskadee.model
 import kiskadee.database
 import kiskadee.util
 import kiskadee.converter
-from kiskadee.model import Analyzer
 
 RUNNING = True
 
+
 class Runner:
+    """Provide kiskadee runner objects."""
 
-    def __init__(self, kiskadee_queue):
-        self.kiskadee_queue = kiskadee_queue
+    def __init__(self):
+        """Return a non initialized Runner."""
+        self.kiskadee_queue = None
 
-    def runner(self):
+    def runner(self, kiskadee_queue):
         """Run static analyzers.
 
         Continuously dequeue packages from `analyses_queue` and call the
-        :func:`analyze` method, passing the dequeued package. After the analysis,
-        updates the status of this package on the database.
+        :func:`analyze` method, passing the dequeued package.
+        After the analysis, updates the status of this package on the database.
         """
         kiskadee.logger.debug('Starting runner subprocess')
         kiskadee.logger.debug('runner PID: {}'.format(os.getpid()))
         session = kiskadee.database.Database().session
-        self.create_analyzers(session)
+        kiskadee.model.create_analyzers(session)
+        self.kiskadee_queue = kiskadee_queue
         while RUNNING:
             kiskadee.logger.debug('RUNNER: dequeuing...')
             source_to_analysis = self.kiskadee_queue.dequeue_analysis()
-            kiskadee.logger.debug('RUNNER: dequeued %s-%s from %s'
-                                    % (source_to_analysis['name'],
-                                        source_to_analysis['version'],
-                                        source_to_analysis['plugin'].name))
-
+            kiskadee.logger.debug(
+                    'RUNNER: dequeued {}-{} from {}'
+                    .format(source_to_analysis['name'],
+                            source_to_analysis['version'],
+                            source_to_analysis['plugin'].name)
+                )
             self.call_analyzers(source_to_analysis)
-
 
     def call_analyzers(self, source_to_analysis):
         """Iterate over the package analyzers.
@@ -73,7 +76,6 @@ class Runner:
             self.kiskadee_queue.enqueue_result(source_to_analysis)
         shutil.rmtree(source_path)
 
-
     def analyze(self, source_to_analysis, analyzer, source_path):
         """Run each analyzer on a source_to_analysis.
 
@@ -94,16 +96,19 @@ class Runner:
         kiskadee.logger.debug('ANALYSIS: running {} ...'.format(analyzer))
         try:
             analysis = kiskadee.analyzers.run(analyzer, source_path)
-            firehose_report = kiskadee.converter.to_firehose(analysis,
-                                                            analyzer)
-            kiskadee.logger.debug('ANALYSIS: DONE {} analysis'.format(analyzer))
+            firehose_report = kiskadee.converter.to_firehose(
+                    analysis, analyzer
+                )
+            kiskadee.logger.debug(
+                    'ANALYSIS: DONE {} analysis'
+                    .format(analyzer)
+                )
             return firehose_report
         except Exception as err:
             kiskadee.logger.debug('RUNNER: could not generate analysis')
             kiskadee.logger.debug(err)
             return None
     # TODO: remove compressed/uncompressed files after the analysis
-
 
     def _path_to_uncompressed_source(self, package, plugin):
 
@@ -120,8 +125,11 @@ class Runner:
         if compressed_source:
             kiskadee.logger.debug(
                     'ANALYSIS: Downloaded {} source in {} path'
-                    .format(package['name'], os.path.dirname(compressed_source))
+                    .format(
+                        package['name'],
+                        os.path.dirname(compressed_source)
                     )
+                )
             uncompressed_source_path = tempfile.mkdtemp()
             shutil.unpack_archive(compressed_source, uncompressed_source_path)
             kiskadee.logger.debug(
@@ -141,21 +149,3 @@ class Runner:
         else:
             kiskadee.logger.debug('RUNNER: invalid compressed source')
             return None
-
-
-    def create_analyzers(self, _session):
-        """Create the analyzers on database.
-
-        The kiskadee analyzers are defined on the section `analyzers` of the
-        kiskadee.conf file. The `_session` argument represents a sqlalchemy
-        session.
-        """
-        list_of_analyzers = dict(kiskadee.config._sections["analyzers"])
-        for name, version in list_of_analyzers.items():
-            if not (_session.query(Analyzer).filter(Analyzer.name == name).
-                    filter(Analyzer.version == version).first()):
-                new_analyzer = kiskadee.model.Analyzer()
-                new_analyzer.name = name
-                new_analyzer.version = version
-                _session.add(new_analyzer)
-        _session.commit()

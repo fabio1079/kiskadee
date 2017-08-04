@@ -22,6 +22,7 @@ def chdir(path):
     yield
     os.chdir(initial_dir)
 
+
 def download(path, url, file_name):
     """Download something from the internet.
 

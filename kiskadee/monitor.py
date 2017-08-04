@@ -4,7 +4,7 @@ kiskadee monitors repositories checking for new package versions to be
 analyzed. This module provides such capabilities.
 """
 import threading
-from multiprocessing import Process, Queue
+from multiprocessing import Process
 import time
 import os
 
@@ -14,6 +14,7 @@ import kiskadee.queue
 from kiskadee.model import Package, Plugin, Version
 
 RUNNING = True
+
 
 class Monitor:
     """Provide kiskadee monitoring objects."""
@@ -31,13 +32,12 @@ class Monitor:
         queue so the runner component can trigger an analysis. Each plugin must
         enqueue its packages in the `packages_queue`.
         """
-
         kiskadee.logger.debug('Kiskadee PID: {}'.format(os.getppid()))
         kiskadee.logger.debug('Starting monitor subprocess')
         kiskadee.logger.debug('monitor PID: {}'.format(os.getpid()))
         plugins = kiskadee.load_plugins()
         for plugin in plugins:
-            self._save_plugin(plugin)
+            self._save_plugin(plugin.Plugin())
             _start_plugin(plugin.Plugin().watch)
 
         while RUNNING:
@@ -164,10 +164,8 @@ class Monitor:
             kiskadee.logger.debug(err)
             return None
 
-
     def _save_plugin(self, plugin):
-        kiskadee.logger.debug(plugin)
-        name = plugin.Plugin().name
+        name = plugin.name
         kiskadee.logger.debug(
                 "MONITOR: Saving {} plugin in database".format(name)
             )
@@ -196,12 +194,15 @@ def daemon():
     _kiskadee_queue = kiskadee.queue.KiskadeeQueue()
     session = kiskadee.database.Database().session
     monitor = Monitor(session)
-    runner = Runner(_kiskadee_queue)
+    runner = Runner()
     monitor_process = Process(
             target=monitor.monitor,
             args=(_kiskadee_queue,)
         )
-    runner_process = Process(target=runner.runner)
+    runner_process = Process(
+            target=runner.runner,
+            args=(_kiskadee_queue,)
+        )
     monitor_process.start()
     runner_process.start()
     runner_process.join()

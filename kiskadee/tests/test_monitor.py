@@ -4,11 +4,10 @@ from sqlalchemy.orm import sessionmaker
 
 from kiskadee import model
 from kiskadee.monitor import Monitor
-from kiskadee.queue import enqueue_package
-from kiskadee.model import Package, Plugin
+from kiskadee.queue import packages_queue
+from kiskadee.model import Package, Plugin, create_analyzers
 import kiskadee.queue
 import kiskadee.plugins.debian
-from kiskadee.runner import create_analyzers
 
 
 class TestMonitor(TestCase):
@@ -53,17 +52,17 @@ class TestMonitor(TestCase):
         model.Base.metadata.drop_all(self.engine)
 
     def test_dequeue_package(self):
-        enqueue_package(self.pkg1)
+        packages_queue.put(self.pkg1)
         _pkg = self.monitor.dequeue_package()
         self.assertTrue(isinstance(_pkg, dict))
 
     def test_return_plugin_name(self):
-        plugin = kiskadee.plugins.debian
-        self.assertEqual(self.monitor._plugin_name(plugin), 'debian')
+        plugin = kiskadee.plugins.debian.Plugin()
+        self.assertEqual(plugin.name, 'debian')
 
     def test_save_some_plugin(self):
         plugin = kiskadee.plugins.debian.Plugin()
-        self.monitor._save_plugin(kiskadee.plugins.debian)
+        self.monitor._save_plugin(plugin)
         _plugins = self.monitor.session.query(Plugin).all()
         self.assertEqual(len(_plugins), 1)
         self.assertEqual(_plugins[0].name, 'debian')
@@ -71,10 +70,9 @@ class TestMonitor(TestCase):
                          plugin.config['description'])
 
     def test_save_package(self):
-        plugin = kiskadee.plugins.debian
-        self.monitor._save_plugin(plugin)
-        enqueue_package(self.pkg1)
-        enqueue_package(self.pkg2)
+        self.monitor._save_plugin(kiskadee.plugins.debian.Plugin())
+        packages_queue.put(self.pkg1)
+        packages_queue.put(self.pkg2)
 
         _pkg = self.monitor.dequeue_package()
         self.monitor._save_analyzed_pkg(_pkg)
@@ -89,18 +87,16 @@ class TestMonitor(TestCase):
         self.assertEqual(_pkgs[1].name, _pkg['name'])
 
     def test_save_version(self):
-        plugin = kiskadee.plugins.debian
-        self.monitor._save_plugin(plugin)
+        self.monitor._save_plugin(kiskadee.plugins.debian.Plugin())
         self.monitor._save_analyzed_pkg(self.pkg1)
         _pkgs = self.monitor.session.query(Package).all()
         _version = _pkgs[0].versions[0].number
         self.assertEqual(_version, self.pkg1['version'])
 
     def test_update_version(self):
-        plugin = kiskadee.plugins.debian
-        self.monitor._save_plugin(plugin)
-        enqueue_package(self.pkg1)
-        enqueue_package(self.pkg3)
+        self.monitor._save_plugin(kiskadee.plugins.debian.Plugin())
+        packages_queue.put(self.pkg1)
+        packages_queue.put(self.pkg3)
 
         _pkg = self.monitor.dequeue_package()
         self.monitor._save_analyzed_pkg(_pkg)

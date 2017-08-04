@@ -2,6 +2,7 @@
 
 import subprocess
 
+
 def run(analyzer, sources):
     """Run a static analyzer on a given package.
 
@@ -11,6 +12,7 @@ def run(analyzer, sources):
     """
     volume = ''.join([sources, ':', '/src'])
     uid = int(subprocess.check_output("echo $UID", shell=True))
-    return subprocess.check_output("docker run -e KISKADEE_UID={} "\
-                                "-v {} {}".format(uid, volume, analyzer),
-                                shell=True, stderr=subprocess.STDOUT)
+    return subprocess.check_output(
+            "docker run -e KISKADEE_UID={} "
+            "-v {} {}".format(uid, volume, analyzer),
+            shell=True, stderr=subprocess.STDOUT)
