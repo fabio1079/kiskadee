@@ -21,23 +21,23 @@ class Package(Base):
     id = Column(Integer,
                 Sequence('packages_id_seq', optional=True), primary_key=True)
     name = Column(Unicode(255), nullable=False)
-    plugin_id = Column(Integer, ForeignKey('plugins.id'), nullable=False)
+    fetcher_id = Column(Integer, ForeignKey('fetchers.id'), nullable=False)
     versions = orm.relationship('Version', backref='packages')
     __table_args__ = (
-            UniqueConstraint('name', 'plugin_id'),
+            UniqueConstraint('name', 'fetcher_id'),
             )
 
 
-class Plugin(Base):
-    """kiskadee plugin abstraction."""
+class Fetcher(Base):
+    """kiskadee fetcher abstraction."""
 
-    __tablename__ = 'plugins'
+    __tablename__ = 'fetchers'
     id = Column(Integer,
-                Sequence('plugins_id_seq', optional=True), primary_key=True)
+                Sequence('fetchers_id_seq', optional=True), primary_key=True)
     name = Column(Unicode(255), nullable=False, unique=True)
     target = Column(Unicode(255), nullable=True)
     description = Column(UnicodeText)
-    packages = orm.relationship('Package', backref='plugins')
+    packages = orm.relationship('Package', backref='fetchers')
 
 
 class Version(Base):

@@ -10,19 +10,19 @@ import kiskadee.queue
 import kiskadee
 
 
-class TestPlugins(TestCase):
+class TestFetchers(TestCase):
     def test_loading(self):
         _config = kiskadee.config
-        _config['debian_plugin'] = {'active': 'no'}
-        _config['juliet_plugin'] = {'active': 'yes'}
-        _config['example_plugin'] = {'active': 'yes'}
+        _config['debian_fetcher'] = {'active': 'no'}
+        _config['juliet_fetcher'] = {'active': 'yes'}
+        _config['example_fetcher'] = {'active': 'yes'}
         kiskadee.config = _config
-        plugins = kiskadee.load_plugins()
-        for plugin in plugins:
-            name_index = len(plugin.__name__.split('.')) - 1
-            name = plugin.__name__.split('.')[name_index]
+        fetchers = kiskadee.load_fetchers()
+        for fetcher in fetchers:
+            name_index = len(fetcher.__name__.split('.')) - 1
+            name = fetcher.__name__.split('.')[name_index]
             self.assertTrue(name != 'debian')
-        kiskadee.config['example_plugin'] = {
+        kiskadee.config['example_fetcher'] = {
                 'target': 'example',
                 'description': 'SAMATE Juliet test suite',
                 'analyzers': 'cppcheck flawfinder',
@@ -30,14 +30,14 @@ class TestPlugins(TestCase):
             }
 
 
-class TestDebianPlugin(TestCase):
+class TestDebianFetcher(TestCase):
 
     def setUp(self):
-        import kiskadee.plugins.debian
-        self.debian_plugin = kiskadee.plugins.debian.Plugin()
-        self.data = self.debian_plugin.config
+        import kiskadee.fetchers.debian
+        self.debian_fetcher = kiskadee.fetchers.debian.Fetcher()
+        self.data = self.debian_fetcher.config
 
-    def mock_download_sources_gz(self):
+    def _download_sources_gz(self):
         path = tempfile.mkdtemp()
         source = 'kiskadee/tests/test_source/Sources.gz'
         shutil.copy2(source, path)
@@ -46,32 +46,32 @@ class TestDebianPlugin(TestCase):
     def test_mount_sources_gz_url(self):
         mirror = self.data['target']
         release = self.data['release']
-        url = self.debian_plugin._sources_gz_url()
+        url = self.debian_fetcher._sources_gz_url()
         expected_url = "%s/dists/%s/main/source/Sources.gz" % (mirror, release)
         self.assertEqual(url, expected_url)
 
     def test_uncompress_sources_gz(self):
         temp_dir = tempfile.mkdtemp()
-        self.debian_plugin._download_sources_gz = self.mock_download_sources_gz
-        temp_dir = self.debian_plugin._download_sources_gz()
-        self.debian_plugin._uncompress_gz(temp_dir)
+        self.debian_fetcher._download_sources_gz = self._download_sources_gz
+        temp_dir = self.debian_fetcher._download_sources_gz()
+        self.debian_fetcher._uncompress_gz(temp_dir)
         files = os.listdir(temp_dir)
         shutil.rmtree(temp_dir)
         self.assertTrue('Sources' in files)
 
     def test_enqueue_a_valid_pkg(self):
         temp_dir = tempfile.mkdtemp()
-        self.debian_plugin._download_sources_gz = self.mock_download_sources_gz
-        temp_dir = self.debian_plugin._download_sources_gz()
-        self.debian_plugin._uncompress_gz(temp_dir)
-        self.debian_plugin._queue_sources_gz_pkgs(temp_dir)
+        self.debian_fetcher._download_sources_gz = self._download_sources_gz
+        temp_dir = self.debian_fetcher._download_sources_gz()
+        self.debian_fetcher._uncompress_gz(temp_dir)
+        self.debian_fetcher._queue_sources_gz_pkgs(temp_dir)
         shutil.rmtree(temp_dir)
 
         some_pkg = kiskadee.queue.packages_queue.get()
         self.assertTrue(isinstance(some_pkg, dict))
         self.assertIn('name', some_pkg)
         self.assertIn('version', some_pkg)
-        self.assertIn('plugin', some_pkg)
+        self.assertIn('fetcher', some_pkg)
         self.assertIn('meta', some_pkg)
         self.assertIn('directory', some_pkg['meta'])
 
@@ -81,33 +81,33 @@ class TestDebianPlugin(TestCase):
         sample_package = {'name': '0ad',
                           'version': '0.0.21-2',
                           'meta': {'directory': 'pool/main/0/0ad'}}
-        url = self.debian_plugin._dsc_url(sample_package)
+        url = self.debian_fetcher._dsc_url(sample_package)
         self.assertEqual(expected_dsc_url, url)
 
     def test_compare_gt_version(self):
         new = '1.1.1'
         old = '1.1.0'
-        result = self.debian_plugin.compare_versions(new, old)
+        result = self.debian_fetcher.compare_versions(new, old)
         self.assertTrue(result)
 
     def test_compare_smallest_version(self):
         new = '8.5-2'
         old = '8.6-0'
-        result = self.debian_plugin.compare_versions(new, old)
+        result = self.debian_fetcher.compare_versions(new, old)
         self.assertFalse(result)
 
     def test_compare_equal_version(self):
         new = '3.3.3-0'
         old = '3.3.3-0'
-        result = self.debian_plugin.compare_versions(new, old)
+        result = self.debian_fetcher.compare_versions(new, old)
         self.assertFalse(result)
 
 
-class TestAnityaPlugin(TestCase):
+class TestAnityaFetcher(TestCase):
 
     def setUp(self):
-        import kiskadee.plugins.anitya
-        self.anitya_plugin = kiskadee.plugins.anitya.Plugin()
+        import kiskadee.fetchers.anitya
+        self.anitya_fetcher = kiskadee.fetchers.anitya.Fetcher()
 
         self.msg = "anitya {'body':{'msg':{'project':{name: 'urlscan',"\
                    "'version':'0.8.5','backend':'GitHub',"\
@@ -125,7 +125,7 @@ class TestAnityaPlugin(TestCase):
             socket.bind("tcp://*:7776")
 
         zmq_server()
-        socket = self.anitya_plugin._connect_to_zmq("7776", "anitya")
+        socket = self.anitya_fetcher._connect_to_zmq("7776", "anitya")
         self.assertIsNotNone(socket)
 
     def test_receive_msg_from_zmq(self):
@@ -144,7 +144,7 @@ class TestAnityaPlugin(TestCase):
             time.sleep(1)
 
         def receive_msg_from_server():
-            client_socket = self.anitya_plugin._connect_to_zmq(
+            client_socket = self.anitya_fetcher._connect_to_zmq(
                     "7776", "anitya")
             if client_socket:
                 response = client_socket.recv_string()
@@ -164,15 +164,15 @@ class TestAnityaPlugin(TestCase):
         self.assertEqual(self.msg1, results[0])
 
     def test_compare_versions(self):
-        is_greater = self.anitya_plugin.compare_versions('0.8.5-2', '0.8.5-1')
+        is_greater = self.anitya_fetcher.compare_versions('0.8.5-2', '0.8.5-1')
         self.assertTrue(is_greater)
 
     def test_load_backend(self):
-        backend = self.anitya_plugin._load_backend('github')
+        backend = self.anitya_fetcher._load_backend('github')
         self.assertIsNotNone(backend)
 
     def test_not_load_backend(self):
-        backend = self.anitya_plugin._load_backend('foo')
+        backend = self.anitya_fetcher._load_backend('foo')
         self.assertEqual(backend, {})
 
     def test_get_sources(self):
@@ -180,14 +180,14 @@ class TestAnityaPlugin(TestCase):
         def mock_github(self, source_data, path):
             return 'kiskadee/tests/test_source/Sources.gz'
 
-        kiskadee.plugins.anitya.Backends.github = mock_github
+        kiskadee.fetchers.anitya.Backends.github = mock_github
         source_data = {'meta': {'backend': 'GitHub'}}
-        source_path = self.anitya_plugin.get_sources(source_data)
+        source_path = self.anitya_fetcher.get_sources(source_data)
         self.assertEqual(source_path, mock_github("self", "foo", "bla"))
 
     def test_create_package_dict(self):
 
-        self.anitya_plugin._create_package_dict(self.msg)
+        self.anitya_fetcher._create_package_dict(self.msg)
         _dict = kiskadee.queue.packages_queue.get()
         self.assertEqual(_dict['name'], 'urlscan')
         self.assertEqual(_dict['version'], '0.8.5')
@@ -196,4 +196,4 @@ class TestAnityaPlugin(TestCase):
                 _dict['meta']['homepage'],
                 'https://github.com/firecat53/urlscan'
         )
-        self.assertEqual(_dict['plugin'].name, 'anitya')
+        self.assertEqual(_dict['fetcher'].name, 'anitya')

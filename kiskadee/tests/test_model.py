@@ -13,13 +13,15 @@ class TestModel(TestCase):
         self.session = Session()
         model.Base.metadata.create_all(self.engine)
         model.create_analyzers(self.session)
-        self.plugin = model.Plugin(name='kiskadee-plugin', target='university')
+        self.fetcher = model.Fetcher(
+                name='kiskadee-fetcher', target='university'
+            )
         self.package = model.Package(name='python-kiskadee')
         self.version = model.Version(number='1.0-rc1')
-        self.plugin.packages.append(self.package)
+        self.fetcher.packages.append(self.package)
         self.package.versions.append(self.version)
         self.session.add(self.package)
-        self.session.add(self.plugin)
+        self.session.add(self.fetcher)
         self.session.add(self.version)
 
         self.analysis = model.Analysis(
@@ -32,9 +34,9 @@ class TestModel(TestCase):
     def tearDown(self):
         model.Base.metadata.drop_all(self.engine)
 
-    def test_query_plugin(self):
-        plugins = self.session.query(model.Plugin).all()
-        self.assertEqual(plugins, [self.plugin])
+    def test_query_fetcher(self):
+        fetchers = self.session.query(model.Fetcher).all()
+        self.assertEqual(fetchers, [self.fetcher])
 
     def test_query_package(self):
         packages = self.session.query(model.Package).all()
@@ -44,12 +46,12 @@ class TestModel(TestCase):
         versions = self.session.query(model.Version).all()
         self.assertEqual(versions, [self.version])
 
-    def test_add_plugin(self):
-        plugins = self.session.query(model.Plugin).all()
-        self.assertEqual(len(plugins), 1)
-        self.session.add(model.Plugin(name='foo', target='bar'))
-        plugins = self.session.query(model.Plugin).all()
-        self.assertEqual(len(plugins), 2)
+    def test_add_fetcher(self):
+        fetchers = self.session.query(model.Fetcher).all()
+        self.assertEqual(len(fetchers), 1)
+        self.session.add(model.Fetcher(name='foo', target='bar'))
+        fetchers = self.session.query(model.Fetcher).all()
+        self.assertEqual(len(fetchers), 2)
 
     def test_add_version_without_package(self):
         version = model.Version(number='3.1')
@@ -57,17 +59,17 @@ class TestModel(TestCase):
         with self.assertRaises(exc.IntegrityError):
             self.session.commit()
 
-    def test_add_package_without_plugin(self):
+    def test_add_package_without_fetcher(self):
         package = model.Package(name='foo-bar')
         self.session.add(package)
         with self.assertRaises(exc.IntegrityError):
             self.session.commit()
 
-    def test_unique_package_in_plugin(self):
+    def test_unique_package_in_fetcher(self):
         package_1 = model.Package(name='foo-bar')
         package_2 = model.Package(name='foo-bar')
-        self.plugin.packages.append(package_1)
-        self.plugin.packages.append(package_2)
+        self.fetcher.packages.append(package_1)
+        self.fetcher.packages.append(package_2)
         with self.assertRaises(exc.IntegrityError):
             self.session.commit()
 
@@ -84,7 +86,7 @@ class TestModel(TestCase):
                     .filter(model.Analyzer.name == "cppcheck").first()
         package = model.Package(
                 name='bla',
-                plugin_id=self.plugin.id
+                fetcher_id=self.fetcher.id
                 )
         package_version = model.Version(
                 number='1.0.1',
@@ -97,7 +99,7 @@ class TestModel(TestCase):
                 version_id=package_version.id
                 )
 
-        self.plugin.packages.append(package)
+        self.fetcher.packages.append(package)
         package.versions.append(package_version)
         package_version.analysis.append(package_analysis)
 
@@ -116,14 +118,14 @@ class TestModel(TestCase):
 
         package = model.Package(
                 name='bla',
-                plugin_id=self.plugin.id
+                fetcher_id=self.fetcher.id
                 )
         package_version = model.Version(
                 number='1.0.1',
                 package_id=package.id
                 )
 
-        self.plugin.packages.append(package)
+        self.fetcher.packages.append(package)
         package.versions.append(package_version)
 
         self.session.add(package)

@@ -1,12 +1,12 @@
 """Continous static analysis package.
 
 kiskadee runs different static analyzers on a set of pre-defined software
-repositories. When the kiskadee package is loaded, we load all the plugin names
-in the plugins subpackages.
+repositories. When the kiskadee package is loaded, we load all the
+fetcher names in the fetchers subpackages.
 
 The following variables and functions are exported:
-    - kiskadee_plugins_list - a list of all enabled plugin names
-    - load_plugins() - a function to load all enabled plugins
+    - kiskadee_fetchers_list - a list of all enabled fetcher names
+    - load_fetchers() - a function to load all enabled fetchers
     - config - a ConfigParser object with kiskadee configurations
 
 Modules:
@@ -20,7 +20,7 @@ Modules:
     - runner
 
 Subpackages:
-    plugins
+    fetchers
 """
 import os
 import importlib
@@ -32,31 +32,31 @@ __version__ = '0.1.dev0'
 
 _my_path = os.path.dirname(os.path.realpath(__file__))
 
-# Handle plugin system
-kiskadee_plugins_list = []
+# Handle fetcher system
+kiskadee_fetchers_list = []
 
-_plugins_path = os.path.join(_my_path, 'plugins')
-_plugins_pkg_files = [f for f in os.listdir(_plugins_path) if
-                      os.path.isfile(os.path.join(_plugins_path, f))]
-_plugins_pkg_files.remove('__init__.py')
-for plugin in _plugins_pkg_files:
-    plugin_name, file_ext = os.path.splitext(plugin)
+_fetchers_path = os.path.join(_my_path, 'fetchers')
+_fetchers_pkg_files = [f for f in os.listdir(_fetchers_path) if
+                       os.path.isfile(os.path.join(_fetchers_path, f))]
+_fetchers_pkg_files.remove('__init__.py')
+for fetcher in _fetchers_pkg_files:
+    fetcher_name, file_ext = os.path.splitext(fetcher)
     if file_ext == '.py':  # We don't want pyc files when running with python 2
-        kiskadee_plugins_list.append(plugin_name)
+        kiskadee_fetchers_list.append(fetcher_name)
 
 
-def load_plugins():
-    """Load kiskadee plugins.
+def load_fetchers():
+    """Load kiskadee fetchers.
 
-    This function loads all active plugins(see kiskadee.conf documentation) and
-    returns a list with each module object imported this way.
+    This function loads all active fetchers(see kiskadee.conf documentation)
+    and returns a list with each module object imported this way.
     """
-    plugins = []
-    for plugin in kiskadee_plugins_list:
-        if config[plugin + '_plugin'].getboolean('active'):
-            plugins.append(importlib.import_module(
-                'kiskadee.plugins.' + plugin))
-    return plugins
+    fetchers = []
+    for fetcher in kiskadee_fetchers_list:
+        if config[fetcher + '_fetcher'].getboolean('active'):
+            fetchers.append(importlib.import_module(
+                'kiskadee.fetchers.' + fetcher))
+    return fetchers
 
 
 # Load kiskadee configurations

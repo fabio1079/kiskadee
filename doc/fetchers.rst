@@ -1,30 +1,30 @@
-Common interface to kiskadee plugins
-====================================
+Common interface to kiskadee fetchers
+=====================================
 
-The Plugin class defines a common behavior to all plugins in kiskadee. This is
+The Fetcher class defines a common behavior to all fetchers in kiskadee. This is
 useful to easly define targets to be monitored by kiskadee. A target is a
 software repository monitored for new packages.  source code is downloaded for
-analysis when necessary. When creating a new plugin, you must inherit from
-`kiskadee.plugins.Plugin` and implement the required abstract methods. Each of
-the behaviors defined in `kiskadee.plugins.Plugin` can be implemented according
-to the target that will be monitored by the new plugin.
+analysis when necessary. When creating a new fetcher, you must inherit from
+`kiskadee.fetchers.Fetcher` and implement the required abstract methods. Each of
+the behaviors defined in `kiskadee.fetchers.Fetcher` can be implemented according
+to the target that will be monitored by the new fetcher.
 
 The class defines the following behaviors:
 
-.. autoclass:: kiskadee.plugins.Plugin()
+.. autoclass:: kiskadee.fetchers.Fetcher()
    :members: compare_versions, get_sources, watch
 
-Plugin example
+Fetcher example
 -----------------------
 
-A simple example of a kiskadee plugin
+A simple example of a kiskadee fetcher
 
 .. code-block:: python
 
     import kiskadee
     import sys
     import kiskadee.queue
-    class Plugin(kiskadee.plugins.Plugin):
+    class Fetcher(kiskadee.fetchers.Fetcher):
         def get_sources(self, source_data):
             return 'kiskadee/tests/test_source/test_source.tar.gz'
 
@@ -34,7 +34,7 @@ A simple example of a kiskadee plugin
             It should not matter, since example will not receive updates.
             """
             example = {}
-            example['plugin'] = sys.modules[__name__]
+            example['fetcher'] = sys.modules[__name__]
             example['version'] = '0.1'
             example['name'] = 'example'
             return example
@@ -46,32 +46,32 @@ A simple example of a kiskadee plugin
             """
             return 0
 
-List of kiskadee plugins
+List of kiskadee fetchers
 ----------------------------
 
-Inside tha package `plugins` you can check which plugins kiskadee have,
-and which targets are monitored with this plugins. This section is a brief
-overview of this plugins.
+Inside tha package `fetchers` you can check which fetchers kiskadee have,
+and which targets are monitored with this fetchers. This section is a brief
+overview of this fetchers.
 
-    - *debian.py*: A plugin to monitor the Debian ftp repository. This plugin
+    - *debian.py*: A fetcher to monitor the Debian ftp repository. This fetcher
       will  every hour downloads the *Sources.gz* file of the repository and
       loads it in memory. This file is a representation of all the packages
       present in the repository. After kiskadee loads it in memory, all the
       packages are compared with the database, and if a new package is
       identified, it source code is downloaded, and a analysis is made.
 
-    - *anitya.py*: A plugin to monitor fedmsg events, published on the
+    - *anitya.py*: A fetcher to monitor fedmsg events, published on the
       Anitya project. The Anitya project monitors upstream releases and
-      broadcast them on fedmsg. The plugin will consume these events, and
+      broadcast them on fedmsg. The fetcher will consume these events, and
       trigger analyses when possible.
 
 
     - *juliet.py*: Juliet is a static analysis test suite provided by
       NIST's SAMATE team. It contains injected, known CWE's in specific
       points and similar code snippets with the injected flaws fixed. This
-      plugin downloads the source code of this test suite, and run static
+      fetcher downloads the source code of this test suite, and run static
       analyzers on it.
 
-    - *example.py*: A simple example of a kiskadee plugin. Can be used as
-      start point for new plugins.
+    - *example.py*: A simple example of a kiskadee fetcher. Can be used as
+      start point for new fetchers.
 

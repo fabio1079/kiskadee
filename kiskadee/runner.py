@@ -40,7 +40,7 @@ class Runner:
                     'RUNNER: dequeued {}-{} from {}'
                     .format(source_to_analysis['name'],
                             source_to_analysis['version'],
-                            source_to_analysis['plugin'].name)
+                            source_to_analysis['fetcher'].name)
                 )
             self.call_analyzers(source_to_analysis)
 
@@ -51,14 +51,14 @@ class Runner:
         the function :func:`analyze`, passing the source dict, the analyzer
         to run the analysis, and the path to a compressed source.
         """
-        plugin = source_to_analysis['plugin']
+        fetcher = source_to_analysis['fetcher']
         source_path = self._path_to_uncompressed_source(
-                source_to_analysis, plugin
+                source_to_analysis, fetcher
         )
         if not source_path:
             return None
 
-        analyzers = plugin.analyzers()
+        analyzers = fetcher.analyzers()
         source_to_analysis['results'] = {}
         for analyzer in analyzers:
             firehose_report = self.analyze(
@@ -80,10 +80,10 @@ class Runner:
         """Run each analyzer on a source_to_analysis.
 
         The `source_to_analysis` dict is in the queue. The keys are:
-            - plugin: the plugin module itself
+            - fetcher: the fetcher module itself
             - name: the package name
             - version: the package version
-            - path: plugin default path for packages
+            - path: fetcher default path for packages
             - return: list with firehose reports
         The `analyzer` is the name of a static analyzer already created on the
         database.
@@ -110,9 +110,9 @@ class Runner:
             return None
     # TODO: remove compressed/uncompressed files after the analysis
 
-    def _path_to_uncompressed_source(self, package, plugin):
+    def _path_to_uncompressed_source(self, package, fetcher):
 
-        if not plugin or not package:
+        if not fetcher or not package:
             return None
 
         kiskadee.logger.debug(
@@ -120,7 +120,7 @@ class Runner:
                 'source...'.format(package['name'])
         )
 
-        compressed_source = plugin.get_sources(package)
+        compressed_source = fetcher.get_sources(package)
 
         if compressed_source:
             kiskadee.logger.debug(

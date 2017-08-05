@@ -1,4 +1,4 @@
-"""Plugin to monitor Anitya events related to packages updates."""
+"""Fetcher to monitor Anitya events related to packages updates."""
 
 import tempfile
 import zmq
@@ -8,20 +8,20 @@ import fedmsg.consumers
 import time
 
 import kiskadee.util
-import kiskadee.plugins
+import kiskadee.fetchers
 import kiskadee.queue
 
 
-class Plugin(kiskadee.plugins.Plugin):
-    """Plugin to monitor Anitya (https://release-monitoring.org) Events."""
+class Fetcher(kiskadee.fetchers.Fetcher):
+    """Fetcher to monitor Anitya (https://release-monitoring.org) Events."""
 
     def watch(self):
         """Start the monitoring process for Anitya reports.
 
-        Each package monitored by the plugin will be
+        Each package monitored by the fetcher will be
         queued using the package_enqueuer decorator.
 
-        The plugin will use zmq as messaging protocol to receive
+        The fetcher will use zmq as messaging protocol to receive
         the fedmsg-hub events. Kiskadee and fedmsg-hub runs in different
         processes, so we need something to enable the
         comunication between then.  When a message come to fedmsg-hub,
@@ -29,7 +29,7 @@ class Plugin(kiskadee.plugins.Plugin):
         and kiskadee will consume this message.
 
         """
-        kiskadee.logger.debug("Starting anitya plugin")
+        kiskadee.logger.debug("Starting anitya fetcher")
         socket = self._connect_to_zmq(
                 self.config["zmq_port"],
                 self.config["zmq_topic"])
@@ -86,7 +86,7 @@ class Plugin(kiskadee.plugins.Plugin):
                 source_dict = {
                         'name': project.get('name'),
                         'version': project.get('version'),
-                        'plugin': kiskadee.plugins.anitya.Plugin(),
+                        'fetcher': kiskadee.fetchers.anitya.Fetcher(),
                         'meta': {
                             'backend': project.get('backend'),
                             'homepage': project.get('homepage')

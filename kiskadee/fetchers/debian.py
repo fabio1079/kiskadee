@@ -1,4 +1,4 @@
-"""Plugin to monitor Debian Project Packages."""
+"""Fetcher to monitor Debian Project Packages."""
 
 import os
 import tempfile
@@ -16,16 +16,16 @@ import kiskadee.util
 RUNNING = True
 
 
-class Plugin(kiskadee.plugins.Plugin):
-    """Plugin to monitor Debian Project Packages."""
+class Fetcher(kiskadee.fetchers.Fetcher):
+    """Fetcher to monitor Debian Project Packages."""
 
     def watch(self):
         """Start the monitoring process for Debian Repositories.
 
-        Each package monitored by the plugin will be
+        Each package monitored by the fetcher will be
         queued using the package_enqueuer decorator.
         """
-        kiskadee.logger.debug("Starting Debian plugin")
+        kiskadee.logger.debug("Starting Debian fetcher")
         while RUNNING:
             url = self._sources_gz_url()
             try:
@@ -79,7 +79,7 @@ class Plugin(kiskadee.plugins.Plugin):
     def _create_package_dict(self, src):
         return {'name': src["Package"],
                 'version': self._parse_version(src["Version"]),
-                'plugin': kiskadee.plugins.debian.Plugin(),
+                'fetcher': kiskadee.fetchers.debian.Fetcher(),
                 'meta': {'directory': src['Directory']}
                 }
 

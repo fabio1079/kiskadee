@@ -11,7 +11,7 @@ import os
 import kiskadee.database
 from kiskadee.runner import Runner
 import kiskadee.queue
-from kiskadee.model import Package, Plugin, Version
+from kiskadee.model import Package, Fetcher, Version
 
 RUNNING = True
 
@@ -29,16 +29,16 @@ class Monitor:
 
         The packages are dequeued from the `package_queue`. When a package
         needs to be analyzed, this package is enqueued in the `analyses_queue`
-        queue so the runner component can trigger an analysis. Each plugin must
-        enqueue its packages in the `packages_queue`.
+        queue so the runner component can trigger an analysis.
+        Each fetcher must enqueue its packages in the `packages_queue`.
         """
         kiskadee.logger.debug('Kiskadee PID: {}'.format(os.getppid()))
         kiskadee.logger.debug('Starting monitor subprocess')
         kiskadee.logger.debug('monitor PID: {}'.format(os.getpid()))
-        plugins = kiskadee.load_plugins()
-        for plugin in plugins:
-            self._save_plugin(plugin.Plugin())
-            _start_plugin(plugin.Plugin().watch)
+        fetchers = kiskadee.load_fetchers()
+        for fetcher in fetchers:
+            self._save_fetcher(fetcher.Fetcher())
+            _start_fetcher(fetcher.Fetcher().watch)
 
         while RUNNING:
             self.kiskadee_queue = kiskadee_queue
@@ -72,15 +72,15 @@ class Monitor:
         return {}
 
     def _send_to_runner(self, pkg):
-        _name = pkg['plugin'].name
-        _plugin = self._query(Plugin).filter(Plugin.name == _name).first()
+        _name = pkg['fetcher'].name
+        _fetcher = self._query(Fetcher).filter(Fetcher.name == _name).first()
         _package = (
                 self._query(Package)
                 .filter(Package.name == pkg['name']).first()
             )
 
-        if _plugin:
-            pkg["plugin_id"] = _plugin.id
+        if _fetcher:
+            pkg["fetcher_id"] = _fetcher.id
             if not _package:
                 kiskadee.logger.debug(
                         "MONITOR: Sending package {}_{} "
@@ -90,8 +90,8 @@ class Monitor:
             else:
                 new_version = pkg['version']
                 analysed_version = _package.versions[-1].number
-                plugin = pkg['plugin']
-                if (plugin.compare_versions(new_version, analysed_version)):
+                fetcher = pkg['fetcher']
+                if (fetcher.compare_versions(new_version, analysed_version)):
                     self.kiskadee_queue.enqueue_analysis(pkg)
 
     def _save_analyzed_pkg(self, pkg):
@@ -133,7 +133,7 @@ class Monitor:
 
     def _save_pkg(self, pkg):
         _package = Package(name=pkg['name'],
-                           plugin_id=pkg['plugin_id'])
+                           fetcher_id=pkg['fetcher_id'])
         self.session.add(_package)
         self.session.commit()
         _version = Version(number=pkg['version'],
@@ -164,23 +164,26 @@ class Monitor:
             kiskadee.logger.debug(err)
             return None
 
-    def _save_plugin(self, plugin):
-        name = plugin.name
+    def _save_fetcher(self, fetcher):
+        name = fetcher.name
         kiskadee.logger.debug(
-                "MONITOR: Saving {} plugin in database".format(name)
+                "MONITOR: Saving {} fetcher in database".format(name)
             )
-        if not self.session.query(Plugin).filter(Plugin.name == name).first():
-            _plugin = Plugin(name=name,
-                             target=plugin.config['target'],
-                             description=plugin.config['description'])
-            self.session.add(_plugin)
+        if not self.session.query(Fetcher)\
+                .filter(Fetcher.name == name).first():
+            _fetcher = Fetcher(
+                    name=name,
+                    target=fetcher.config['target'],
+                    description=fetcher.config['description']
+                )
+            self.session.add(_fetcher)
             self.session.commit()
 
     def _query(self, arg):
         return self.session.query(arg)
 
 
-def _start_plugin(module, joinable=False, timeout=None):
+def _start_fetcher(module, joinable=False, timeout=None):
     module_as_a_thread = threading.Thread(target=module)
     module_as_a_thread.daemon = True
     module_as_a_thread.start()

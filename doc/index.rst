@@ -28,7 +28,7 @@ potential false positives are ranked last.
    monitor
    runner
    analyzers
-   plugins
+   fetchers
    config_file
 
 

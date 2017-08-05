@@ -1,7 +1,7 @@
 import unittest
 
 from kiskadee.runner import Runner
-import kiskadee.plugins.example
+import kiskadee.fetchers.example
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from kiskadee import model
@@ -17,13 +17,15 @@ class TestAnalyzers(unittest.TestCase):
         self.session = Session()
         model.Base.metadata.create_all(self.engine)
         create_analyzers(self.session)
-        self.plugin = kiskadee.plugins.debian.Plugin()
+        self.fetcher = kiskadee.fetchers.debian.Fetcher()
         self.deb_pkg = {'name': 'test',
                         'version': '1.0.0',
-                        'plugin': kiskadee.plugins.debian.Plugin()
+                        'fetcher': kiskadee.fetchers.debian.Fetcher()
                         }
-        self.plugin = model.Plugin(name='kiskadee-plugin', target='university')
-        self.session.add(self.plugin)
+        self.fetcher = model.Fetcher(
+                name='kiskadee-fetcher', target='university'
+            )
+        self.session.add(self.fetcher)
         self.session.commit()
         kiskadee_queue = KiskadeeQueue()
         self.runner = Runner()
@@ -34,11 +36,11 @@ class TestAnalyzers(unittest.TestCase):
         source_to_analysis = {
                 'name': 'test',
                 'version': '1.0.0',
-                'plugin': kiskadee.plugins.example.Plugin()
+                'fetcher': kiskadee.fetchers.example.Fetcher()
         }
 
         source_path = self.runner._path_to_uncompressed_source(
-                source_to_analysis, kiskadee.plugins.example.Plugin()
+                source_to_analysis, kiskadee.fetchers.example.Fetcher()
             )
         firehose_report = self.runner.analyze(
                 self.deb_pkg, "cppcheck", source_path)
@@ -48,7 +50,7 @@ class TestAnalyzers(unittest.TestCase):
         source_to_analysis = {
                 'name': 'test',
                 'version': '1.0.0',
-                'plugin': kiskadee.plugins.example.Plugin()
+                'fetcher': kiskadee.fetchers.example.Fetcher()
         }
 
         self.runner.call_analyzers(source_to_analysis)
@@ -63,11 +65,11 @@ class TestAnalyzers(unittest.TestCase):
         source_to_analysis = {
                 'name': 'test',
                 'version': '1.0.0',
-                'plugin': kiskadee.plugins.example
+                'fetcher': kiskadee.fetchers.example
         }
 
         source_path = self.runner._path_to_uncompressed_source(
-                source_to_analysis, kiskadee.plugins.example.Plugin()
+                source_to_analysis, kiskadee.fetchers.example.Fetcher()
         )
 
         self.assertIsNotNone(source_path)
@@ -77,7 +79,7 @@ class TestAnalyzers(unittest.TestCase):
         source_to_analysis = {
                 'name': 'test',
                 'version': '1.0.0',
-                'plugin': kiskadee.plugins.example
+                'fetcher': kiskadee.fetchers.example
         }
 
         source_path = self.runner._path_to_uncompressed_source(

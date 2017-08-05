@@ -9,7 +9,7 @@ class TestQueue(TestCase):
         def my_dict():
             return {
                     'name': 'bar',
-                    'plugin': kiskadee.plugins.example.Plugin(),
+                    'fetcher': kiskadee.fetchers.example.Fetcher(),
                     'version': '1.0.0'
                    }
 

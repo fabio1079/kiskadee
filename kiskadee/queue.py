@@ -42,10 +42,10 @@ def package_enqueuer(func):
     def wrapper(*args, **kwargs):
         package = func(*args, **kwargs)
         packages_queue.put(package)
-        plugin = package['plugin'].name
+        fetcher = package['fetcher'].name
         kiskadee.logger.debug(
-                "{} plugin: Sending package {}_{} for monitor"
-                .format(plugin, package['name'], package['version'])
+                "{} fetcher: Sending package {}_{} for monitor"
+                .format(fetcher, package['name'], package['version'])
             )
         time.sleep(2)
     return wrapper

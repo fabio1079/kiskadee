@@ -1,4 +1,4 @@
-"""Plugin to analyze Juliet test cases.
+"""Fetcher to analyze Juliet test cases.
 
 Juliet is a static analysis test suite provided by NIST's SAMATE team. It
 contains injected, known CWE's in specific points and similar code snippets
@@ -9,8 +9,8 @@ import tempfile
 import kiskadee.queue
 
 
-class Plugin(kiskadee.plugins.Plugin):
-    """Plugin to analyze Juliet test cases."""
+class Fetcher(kiskadee.fetchers.Fetcher):
+    """Fetcher to analyze Juliet test cases."""
 
     def get_sources(self, source_data):
         """Download Juliet 1.2 from SARD's website."""
@@ -28,7 +28,7 @@ class Plugin(kiskadee.plugins.Plugin):
         It should not matter, since Juliet does not receive updates frequently.
         """
         juliet = {}
-        juliet['plugin'] = kiskadee.plugins.juliet.Plugin()
+        juliet['fetcher'] = kiskadee.fetchers.juliet.Fetcher()
         juliet['version'] = '1.2'
         juliet['name'] = 'juliet'
         return juliet
