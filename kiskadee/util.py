@@ -9,18 +9,8 @@
 
 import os
 import urllib.request
-from contextlib import contextmanager
 
 import kiskadee
-
-
-@contextmanager
-def chdir(path):
-    """Context manager decorator for temporary directories."""
-    initial_dir = os.getcwd()
-    os.chdir(path)
-    yield
-    os.chdir(initial_dir)
 
 
 def download(path, url, file_name):
@@ -32,16 +22,16 @@ def download(path, url, file_name):
     :return: The absolute path to the downloaded file.
     """
     try:
-        with chdir(path):
-            in_file = urllib.request.urlopen(url)
-            data = in_file.read()
-            with open(file_name, 'wb') as info:
-                info.write(data)
-        return ''.join([path, '/', file_name])
+        in_file = urllib.request.urlopen(url)
+        data = in_file.read()
+        download_path = os.path.join(path, file_name)
+        with open(download_path, 'wb') as info:
+            info.write(data)
+        return download_path
     except Exception as err:
         kiskadee.logger.debug(
                 "Cannot download {} "
-                "source code".format(file_name)
+                "file".format(file_name)
         )
         kiskadee.logger.debug(err)
-        return {}
+        return None

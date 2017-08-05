@@ -131,6 +131,8 @@ class Runner:
                     )
                 )
             uncompressed_source_path = tempfile.mkdtemp()
+            kiskadee.logger.debug(uncompressed_source_path)
+            kiskadee.logger.debug(compressed_source)
             shutil.unpack_archive(compressed_source, uncompressed_source_path)
             kiskadee.logger.debug(
                     'ANALYSIS: Unpacking {} source in {} path'

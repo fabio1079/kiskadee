@@ -11,6 +11,7 @@ from debian.deb822 import Sources
 import subprocess
 
 import kiskadee.queue
+import kiskadee.util
 
 RUNNING = True
 
@@ -113,11 +114,7 @@ class Plugin(kiskadee.plugins.Plugin):
 
         """
         path = tempfile.mkdtemp()
-        in_file = urllib.request.urlopen(url)
-        data = in_file.read()
-        with open(''.join([path, '/', 'Sources.gz']), 'wb') as info:
-            info.write(data)
-        return path
+        return os.path.dirname(kiskadee.util.download(path, url, 'Sources.gz'))
 
     def _uncompress_gz(self, path):
         """Extract Some .gz file."""

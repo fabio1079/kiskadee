@@ -5,11 +5,7 @@ contains injected, known CWE's in specific points and similar code snippets
 with the injected flaws fixed.
 """
 
-import urllib.request
-import shutil
-import os.path
 import tempfile
-import sys
 import kiskadee.queue
 
 
@@ -20,12 +16,10 @@ class Plugin(kiskadee.plugins.Plugin):
         """Download Juliet 1.2 from SARD's website."""
         juliet_url = 'https://samate.nist.gov/SRD/testsuites/juliet/'
         juliet_filename = 'Juliet_Test_Suite_v1.2_for_C_Cpp.zip'
-        zipfile_path = os.path.join(tempfile.mkdtemp(), juliet_filename)
 
-        with urllib.request.urlopen(juliet_url + juliet_filename) as response,\
-                open(zipfile_path, 'wb') as out_file:
-            shutil.copyfileobj(response, out_file)
-        return zipfile_path
+        return kiskadee.util.download(
+            tempfile.mkdtemp(), juliet_url + juliet_filename, juliet_filename
+            )
 
     @kiskadee.queue.package_enqueuer
     def watch(self):
@@ -34,7 +28,7 @@ class Plugin(kiskadee.plugins.Plugin):
         It should not matter, since Juliet does not receive updates frequently.
         """
         juliet = {}
-        juliet['plugin'] = sys.modules[__name__]
+        juliet['plugin'] = kiskadee.plugins.juliet.Plugin()
         juliet['version'] = '1.2'
         juliet['name'] = 'juliet'
         return juliet
