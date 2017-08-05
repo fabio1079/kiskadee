@@ -1,4 +1,11 @@
 # Change Log
+## [0.2.3] - 2017-08-05
+### Added
+- Run monitor and runner as separate processes.
+- Fix docker issues.
+- Fix anitya and debian plugin issues.
+- Rename plugin package to fetcher.
+- Remove temporary directories used on analysis.
 
 ## [0.2.1] - 2017-07-24
 ### Added
