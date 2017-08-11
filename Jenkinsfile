@@ -10,13 +10,13 @@ pipeline {
     }
     stage('build-docker-images') {
       steps {
-        sh 'docker build . --file util/dockerfiles/cppcheck/Dockerfile -t cppcheck '
-        sh 'docker build . --file util/dockerfiles/flawfinder/Dockerfile -t flawfinder '
+        sh '(cd util/dockerfiles/cppcheck &&  docker build . -t cppcheck)'
+        sh '(cd util/dockerfiles/flawfinder && docker build . -t flawfinder)'
       }
     }
     stage('Test') {
       steps {
-        sh 'source bin/activate && python setup.py test'
+        sh "source bin/activate && python setup.py test"
       }
     }
   }
