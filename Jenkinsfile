@@ -18,6 +18,20 @@ pipeline {
       steps {
         sh "source bin/activate && python kiskadee_coverage.py"
       }
+
+    post {
+        success {
+          // publish html
+          publishHTML target: [
+              allowMissing: false,
+              alwaysLinkToLastBuild: false,
+              keepAll: true,
+              reportDir: 'covhtml',
+              reportFiles: 'index.html',
+              reportName: 'coverage report'
+            ]
+        }
+      }
     }
   }
 }
