@@ -12,3 +12,5 @@ packaging
 pyyaml
 flake8
 pydocstyle
+coverage
+nose

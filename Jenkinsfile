@@ -16,7 +16,7 @@ pipeline {
     }
     stage('Test') {
       steps {
-        sh "source bin/activate && python setup.py test"
+        sh "source bin/activate && python kiskadee_coverage.py"
       }
     }
   }
