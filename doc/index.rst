@@ -25,6 +25,7 @@ potential false positives are ranked last.
 
    introduction
    firehose
+   architecture
    monitor
    runner
    analyzers

@@ -108,7 +108,6 @@ class Runner:
             kiskadee.logger.debug('RUNNER: could not generate analysis')
             kiskadee.logger.debug(err)
             return None
-    # TODO: remove compressed/uncompressed files after the analysis
 
     def _path_to_uncompressed_source(self, package, fetcher):
 
@@ -131,17 +130,23 @@ class Runner:
                     )
                 )
             uncompressed_source_path = tempfile.mkdtemp()
-            kiskadee.logger.debug(uncompressed_source_path)
-            kiskadee.logger.debug(compressed_source)
-            shutil.unpack_archive(compressed_source, uncompressed_source_path)
-            kiskadee.logger.debug(
-                    'ANALYSIS: Unpacking {} source in {} path'
-                    .format(package['name'], uncompressed_source_path)
+            try:
+                shutil.unpack_archive(
+                        compressed_source,
+                        uncompressed_source_path
                     )
-            if not compressed_source.find("kiskadee/tests") > -1:
-                shutil.rmtree(os.path.dirname(compressed_source))
-            kiskadee.logger.debug(
-                    'ANALYSIS: Unpacked {} source'.format(package['name'])
+                kiskadee.logger.debug(
+                        'ANALYSIS: Unpacking {} source in {} path'
+                        .format(package['name'], uncompressed_source_path)
+                        )
+                if not compressed_source.find("kiskadee/tests") > -1:
+                    shutil.rmtree(os.path.dirname(compressed_source))
+                kiskadee.logger.debug(
+                        'ANALYSIS: Unpacked {} source'.format(package['name'])
+                        )
+                kiskadee.logger.debug(
+                        'ANALYSIS: Remove {} temp directory'
+                        .format(os.path.dirname(compressed_source))
                     )
             kiskadee.logger.debug(
                     'ANALYSIS: Remove {} temp directory'
