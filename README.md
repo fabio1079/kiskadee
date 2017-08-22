@@ -22,9 +22,10 @@ Red Hat distribution), maybe you will not have to install it.
 ### Virtual Environment
 
 Create a virtualenv to kiskadee. `dnf` is a package manager for the Fedora
-distribution, if you not use Fedora, use your package manage to install the
-virtualenv and pip packages. The virtualenv package will create a isolate
-environment for our python dependencies.
+distribution, if you not use Fedora, use your package manager to install the
+virtualenv and pip packages (On Debian and Ubuntu is apt).
+The virtualenv package will create a isolate environment
+for our python dependencies.
 
     sudo pip install virtualenv
     virtualenv -p /usr/bin/python3 .
@@ -42,13 +43,14 @@ To run the static analyzers, you must have
 If you have configured the Docker engineer properly,
 run the *docker_build.sh* script. It will build the images for you.
 
-chmod u+x docker\_build.sh
-
-./docker\_build.sh
+	chmod u+x docker_build.sh
+	./docker_build.sh
 
 ### Database
 Now we will create the kiskadee database. You will need to install the
-postgresql packages for your system.
+postgresql packages for your system. If you use Fedora, follow the next
+steps, if not, you will have to find out how install postgresql on your
+system.
 
 	sudo dnf install postgresql-server postgresql-contrib
 	sudo systemctl enable postgresql
@@ -57,10 +59,8 @@ postgresql packages for your system.
 
 To install on Ubuntu use this [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04).
 
-With postgresql installed, you will need to create the kiskadee role. This
-role will be used to log in on the database:
-
-Now create the database:
+With postgresql installed, you will need to create the kiskadee role and
+the kiskadee database.
 
     sudo su - postgres
     createdb kiskadee
@@ -68,11 +68,20 @@ Now create the database:
     # choose a password
     psql -U postgres -c "grant all privileges on database kiskadee to kiskadee"
     # go back to your user (ctrl+d)
-    echo "localhost:5432:kiskadee:kiskadee:<password>" > ~/.pgpass
+    echo "localhost:5432:kiskadee:kiskadee:<your_password>" > ~/.pgpass
     chmod 600 ~/.pgpass
 
-You will need to edit the *pg_hba.conf* to permits the kiskadee user to login
-on the database. On Linux systems this file normally stays at the
+Restart the postgresql service:
+
+	sudo systemctl restart postgresql
+
+Test the database connection:
+
+	psql -U kiskadee -d kiskadee
+
+If you was not able to log in on the database, you will need to edit 
+the *pg_hba.conf* and change some rules defined by the postgresql package. 
+On Linux systems this file normally stays at the
 `/var/lib/pgsql/data/`. Open this file and change:
 
 	# "local" is for Unix domain socket connections only
@@ -105,8 +114,8 @@ configured. Leave the shell with ctrl+d.
 
 ### Running
 
-Kiskadee read environment variables from  the `util/kiskadee.conf` file.
-If everything goes well till now, open the kiskadee.conf file, and set as
+Kiskadee reads environment variables from  the `util/kiskadee.conf` file.
+If everything goes well till now, open the *kiskadee.conf* file, and set as
 active (`active = yes`) only the *example_fetcher*, the other fetchers will
 stay as `active = no`.
 
