@@ -69,10 +69,10 @@ database.
     sudo su - postgres
     createdb kiskadee
     createuser kiskadee -P
-    # choose a password
+    # use kiskadee as password.
     psql -U postgres -c "grant all privileges on database kiskadee to kiskadee"
     # go back to your user (ctrl+d)
-    echo "localhost:5432:kiskadee:kiskadee:<your_password>" > ~/.pgpass
+    echo "localhost:5432:kiskadee:kiskadee:kiskadee" > ~/.pgpass
     chmod 600 ~/.pgpass
 
 Restart the postgresql service:
@@ -132,6 +132,11 @@ Kiskadee will decompress the example source, and run the analyzers defined on
 the *kiskadee.conf* file. You can use any postgresql client to access the
 database that you have created,  and check the analysis maded by kiskadee.
 
+### Running API
+
+To run the kiskadee api just execute the command:
+
+	kiskadee_api
 
 ## Tests and coverage
 
