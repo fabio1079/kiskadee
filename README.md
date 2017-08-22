@@ -7,12 +7,17 @@ into a Firehose database.
 
 ### Dependencies
 
-Install some package dependencies. The name of the dependencies are compatible
+The name of the dependencies are compatible
 with the Fedora distribution. If you use another operational system,
-you will have to find the compatible name for the dependencies.
+you will have to find the compatible names for the dependencies.
 The `redhat-rpm-config`
-package, is a specific Fedora dependency. If you not use Fedora (or a
+package, is a specific Fedora dependency, if you not use Fedora (or a
 Red Hat distribution), maybe you will not have to install it.
+
+`dnf` is a package manager for the Fedora distribution
+(On Debian and Ubuntu is apt),
+if you not use Fedora, use the package manager available for your system,
+to install the dependencies below.
 
      - openssl-devel
      - python3-devel
@@ -21,10 +26,8 @@ Red Hat distribution), maybe you will not have to install it.
 
 ### Virtual Environment
 
-Create a virtualenv to kiskadee. `dnf` is a package manager for the Fedora
-distribution, if you not use Fedora, use your package manager to install the
-virtualenv and pip packages (On Debian and Ubuntu is apt).
-The virtualenv package will create a isolate environment
+Create a [virtualenv](https://virtualenv.pypa.io/en/stable/) to kiskadee.
+The virtualenv package will create a isolated environment
 for our python dependencies.
 
     sudo pip install virtualenv
@@ -60,7 +63,7 @@ system.
 To install on Ubuntu use this [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04).
 
 With postgresql installed, you will need to create the kiskadee role and
-the kiskadee database.
+database.
 
     sudo su - postgres
     createdb kiskadee
@@ -79,8 +82,8 @@ Test the database connection:
 
 	psql -U kiskadee -d kiskadee
 
-If you was not able to log in on the database, you will need to edit 
-the *pg_hba.conf* and change some rules defined by the postgresql package. 
+If you was not able to log in on the database, you will need to edit
+the *pg_hba.conf* and change some rules defined by the postgresql package.
 On Linux systems this file normally stays at the
 `/var/lib/pgsql/data/`. Open this file and change:
 
@@ -112,7 +115,7 @@ Test the database connection:
 If you was able to get into the psql shell, the database is properly
 configured. Leave the shell with ctrl+d.
 
-### Running
+### Running our first analysis
 
 Kiskadee reads environment variables from  the `util/kiskadee.conf` file.
 If everything goes well till now, open the *kiskadee.conf* file, and set as
@@ -122,35 +125,20 @@ stay as `active = no`.
 Now run kiskadee by typing `kiskadee` on
 the terminal. If the Docker images was properly build, and the Docker client
 was properly configured on your machine, kiskadee will be able to analysis a
-example source code. This code is in the kiskadee/tests/test\_source/ directory.
+example source code. This code is in the *kiskadee/tests/test_source/* directory.
 
-## Fetchers
-
-### Debian Fetcher
-If you intend to use the debian fetcher, you will have to install the
-`devscripts` package, in order use the necessary Debian tools to run the
-fetcher.
+Kiskadee will decompress the example source, and run the analyzers defined on
+the *kiskadee.conf* file. You can use any postgresql client to access the
+database that you have created,  and check the analysis maded by kiskadee.
 
 
-### Anitya Fetcher
-If you intend to run the anitya fetcher, you will have to install fedmsg-hub,
-in order to kiskadee be able to consume the fedmsg events.
-To install fedmsg-hub follow this steps inside the kiskadee root path:
+## Tests and coverage
 
-    # Run this inside the kiskadee's virtualenv
-    sudo mkdir -p /etc/fedmsg.d/
-    sudo cp util/base.py util/endpoints.py  /etc/fedmsg.d/
-    sudo cp util/anityaconsumer.py /etc/fedmsg.d/
-    PYTHONPATH=`pwd` fedmsg-hub
+To check kiskadee tests and coverage just run:
 
-With this steps, fedmsg-hub will instantiate `AnityaConsumer` and publish
-the monitored events using ZeroMQ. When kiskadee starts it will consume
-the messages published by the consumer, and will run the analysis.
+	python kiskadee_coverage.py
 
-The events that comes to the anitya fetcher are published by Anitya, on this
-[page](https://apps.fedoraproject.org/datagrepper/raw?category=anitya.)
-
-For more info about the Anitya service, read kiskadee documentation.
+To check kiskadee coverage open the file *covhtml/index.html*.
 
 ## Repositories
 
@@ -175,8 +163,35 @@ To build the documentation just entry in the doc directory, and run
 To access the documentation open the `index.html` file, inside the
 doc/\_build/html.
 
-## License
+## Fetchers
 
+### Debian Fetcher
+If you intend to use the debian fetcher, you will have to install the
+`devscripts` package, in order use the necessary Debian tools to run the
+fetcher.
+
+### Anitya Fetcher
+If you intend to run the anitya fetcher, you will have to install fedmsg-hub,
+in order to kiskadee be able to consume the fedmsg events.
+To install fedmsg-hub follow this steps inside the kiskadee root path:
+
+    # Run this inside the kiskadee's virtualenv
+    sudo mkdir -p /etc/fedmsg.d/
+    sudo cp util/base.py util/endpoints.py  /etc/fedmsg.d/
+    sudo cp util/anityaconsumer.py /etc/fedmsg.d/
+    PYTHONPATH=`pwd` fedmsg-hub
+
+With this steps, fedmsg-hub will instantiate `AnityaConsumer` and publish
+the monitored events using ZeroMQ. When kiskadee starts it will consume
+the messages published by the consumer, and will run the analysis.
+
+The events that comes to the anitya fetcher are published by Anitya, on this
+[page](https://apps.fedoraproject.org/datagrepper/raw?category=anitya.)
+
+For more info about the Anitya service, read kiskadee documentation.
+
+
+## License
 Copyright (C) 2017 the AUTHORS (see the AUTHORS file)
 
 This program is free software: you can redistribute it and/or modify
