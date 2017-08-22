@@ -25,9 +25,3 @@ and this was a scope decision made by the kiskadee community.
         :align: center
 
 ..
-
-*Figure One: Kiskadee architecture.*
-<<<<<<< HEAD
-=======
-
->>>>>>> f1162e6... Add an architecture section to the docs.
