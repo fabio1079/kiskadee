@@ -3,49 +3,125 @@
 kiskadee is a continuous static analysis tool which writes the analysis results
 into a Firehose database.
 
-## Running
+## Setup
 
-To run kiskadee, you must have docker installed and running. Use the
-dockerfiles in the `util` directory to build the images for each static
-analyzer. The name of the image must be equal of the analyzer name.
-You can accomplish that by doing
-
-    docker build . -t cppcheck
-
-With the Docker images build, create a virtualenv to kiskadee
-
-    sudo dnf install virtualenv
-    virtualenv -p /usr/bin/python3
-    source bin/activate
+### Dependencies
 
 Install some package dependencies. The name of the dependencies are compatible
-with the Fedora distribution. If you use another distribution, you will have
-to find the compatible name for the dependencies. The `redhat-rpm-config` 
-package, is a specific Fedora dependency. If you are not in Fedora (or a
+with the Fedora distribution. If you use another operational system,
+you will have to find the compatible name for the dependencies.
+The `redhat-rpm-config`
+package, is a specific Fedora dependency. If you not use Fedora (or a
 Red Hat distribution), maybe you will not have to install it.
 
-    sudo dnf install openssl-devel python3-devel gcc redhat-rpm-config
+     - openssl-devel
+     - python3-devel
+     - gcc
+     - redhat-rpm-config python-pip
 
-Kiskadee use postgresql as database. You will need to create a database named
-kiskadee, with a role kiskadee as owner.
+### Virtual Environment
 
-Install python dependencies and run kiskadee
+Create a virtualenv to kiskadee. `dnf` is a package manager for the Fedora
+distribution, if you not use Fedora, use your package manage to install the
+virtualenv and pip packages. The virtualenv package will create a isolate
+environment for our python dependencies.
+
+    sudo pip install virtualenv
+    virtualenv -p /usr/bin/python3 .
+    source bin/activate
+
+Install the python dependencies using pip
 
     pip install -e .
     pip install "fedmsg[consumers]"
 
+### Docker Images
 
-If you are using distribution with selinux, be aware that you must set
-permissions so the container can access external files.
+To run the static analyzers, you must have
+[Docker](https://www.docker.com/community-edition) installed and running.
+If you have configured the Docker engineer properly,
+run the *docker_build.sh* script. It will build the images for you.
 
-Kiskadee looks for its configuration file under `util/kiskadee.conf`. 
+chmod u+x docker\_build.sh
+
+./docker\_build.sh
+
+### Database
+Now we will create the kiskadee database. You will need to install the
+postgresql packages for your system.
+
+	sudo dnf install postgresql-server postgresql-contrib
+	sudo systemctl enable postgresql
+	sudo postgresql-setup initdb
+	sudo systemctl start postgresql
+
+To install on Ubuntu use this [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04).
+
+With postgresql installed, you will need to create the kiskadee role. This
+role will be used to log in on the database:
+
+Now create the database:
+
+    sudo su - postgres
+    createdb kiskadee
+    createuser kiskadee -P
+    # choose a password
+    psql -U postgres -c "grant all privileges on database kiskadee to kiskadee"
+    # go back to your user (ctrl+d)
+    echo "localhost:5432:kiskadee:kiskadee:<password>" > ~/.pgpass
+    chmod 600 ~/.pgpass
+
+You will need to edit the *pg_hba.conf* to permits the kiskadee user to login
+on the database. On Linux systems this file normally stays at the
+`/var/lib/pgsql/data/`. Open this file and change:
+
+	# "local" is for Unix domain socket connections only
+	local   all             all                                     peer
+	# IPv4 local connections:
+	host    all             all             127.0.0.1/32            ident
+	# IPv6 local connections:
+	host    all             all             ::1/128                 ident
+
+to:
+
+	# "local" is for Unix domain socket connections only
+	local   all             all                                     md5
+	# IPv4 local connections:
+	host    all             all             127.0.0.1/32            md5
+	# IPv6 local connections:
+	host    all             all             ::1/128                 md5
+
+
+After this change, restarts the postgresql service:
+
+	sudo systemctl restart postgresql
+
+Test the database connection:
+
+	psql -U kiskadee -d kiskadee
+
+If you was able to get into the psql shell, the database is properly
+configured. Leave the shell with ctrl+d.
+
+### Running
+
+Kiskadee read environment variables from  the `util/kiskadee.conf` file.
 If everything goes well till now, open the kiskadee.conf file, and set as
-active only the example fetcher. Now run kiskadee by typing `kiskadee` on
+active (`active = yes`) only the *example_fetcher*, the other fetchers will
+stay as `active = no`.
+
+Now run kiskadee by typing `kiskadee` on
 the terminal. If the Docker images was properly build, and the Docker client
 was properly configured on your machine, kiskadee will be able to analysis a
-exemple source code. This code is in the kiskadee/tests/test\_source/ directory.
+example source code. This code is in the kiskadee/tests/test\_source/ directory.
 
-To run the API just run the command `kiskadee_api`.
+## Fetchers
+
+### Debian Fetcher
+If you intend to use the debian fetcher, you will have to install the
+`devscripts` package, in order use the necessary Debian tools to run the
+fetcher.
+
 
 ### Anitya Fetcher
 If you intend to run the anitya fetcher, you will have to install fedmsg-hub,
@@ -67,22 +143,18 @@ The events that comes to the anitya fetcher are published by Anitya, on this
 
 For more info about the Anitya service, read kiskadee documentation.
 
-### Debian Fetcher
-If you intend to use the debian fetcher, you will have to install the
-`devscripts` package, in order use the necessary Debian tools to run the
-fetcher.
-
-## Development
+## Repositories
 
 Kiskadee daemon and API development are hosted at [pagure](https://pagure.io/kiskadee).
 
 Kiskadee frontend is hosted at [pagure](https://pagure.io/kiskadee/kiskadee_ui).
 Feel free to open issues and pull requests there.
 
-We also have mirrors on [gitlab](https://gitlab.com/kiskadee/kiskadee) and 
+We also have mirrors on [gitlab](https://gitlab.com/kiskadee/kiskadee) and
 [github](https://github.com/LSS-USP/kiskadee).
 
 Kiskadee have a CI environment hosted at this [url](http://143.107.45.126:30130/blue/organizations/jenkins/LSS-USP%2Fkiskadee/activity).
+
 ## Documentation
 
 [kiskadee documentation is hosted at pagure.](docs.pagure.org/kiskadee)
@@ -91,7 +163,7 @@ To build the documentation just entry in the doc directory, and run
 
     make html
 
-To access the documentation open the `index.html` file, inside the 
+To access the documentation open the `index.html` file, inside the
 doc/\_build/html.
 
 ## License

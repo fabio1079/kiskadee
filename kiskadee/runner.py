@@ -148,11 +148,11 @@ class Runner:
                         'ANALYSIS: Remove {} temp directory'
                         .format(os.path.dirname(compressed_source))
                     )
-            kiskadee.logger.debug(
-                    'ANALYSIS: Remove {} temp directory'
-                    .format(os.path.dirname(compressed_source))
-                )
-            return uncompressed_source_path
+                return uncompressed_source_path
+            except Exception as err:
+                kiskadee.logger.debug('something went wrong')
+                kiskadee.logger.debug(err)
+                return None
         else:
             kiskadee.logger.debug('RUNNER: invalid compressed source')
             return None
