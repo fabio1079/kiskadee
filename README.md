@@ -6,30 +6,25 @@ into a Firehose database.
 ## Setup
 
 ### Dependencies
-
-The name of the dependencies are compatible
+Install some package dependencies. The name of the dependencies are compatible
 with the Fedora distribution. If you use another operational system,
-you will have to find the compatible names for the dependencies.
+you will have to find the compatible name for the dependencies.
 The `redhat-rpm-config`
-package, is a specific Fedora dependency, if you not use Fedora (or a
+package, is a specific Fedora dependency. If you not use Fedora (or a
 Red Hat distribution), maybe you will not have to install it.
-
-`dnf` is a package manager for the Fedora distribution
-(On Debian and Ubuntu is apt),
-if you not use Fedora, use the package manager available for your system,
-to install the dependencies below.
 
      - openssl-devel
      - python3-devel
      - gcc
-     - redhat-rpm-config python-pip
+     - redhat-rpm-config 
      - python-pip
 
 ### Virtual Environment
 
-Create a [virtualenv](https://virtualenv.pypa.io/en/stable/) to kiskadee.
-The virtualenv package will create a isolated environment
-for our python dependencies.
+Create a virtualenv to kiskadee. `dnf` is a package manager for the Fedora
+distribution, if you not use Fedora, use your package manage to install the
+virtualenv and pip packages. The virtualenv package will create a isolate
+environment for our python dependencies.
 
     sudo pip install virtualenv
     virtualenv -p /usr/bin/python3 .
@@ -52,9 +47,7 @@ run the *docker_build.sh* script. It will build the images for you.
 
 ### Database
 Now we will create the kiskadee database. You will need to install the
-postgresql packages for your system. If you use Fedora, follow the next
-steps, if not, you will have to find out how install postgresql on your
-system.
+postgresql packages for your system.
 
 	sudo dnf install postgresql-server postgresql-contrib
 	sudo systemctl enable postgresql
@@ -63,8 +56,10 @@ system.
 
 To install on Ubuntu use this [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04).
 
-With postgresql installed, you will need to create the kiskadee role and
-database.
+With postgresql installed, you will need to create the kiskadee role. This
+role will be used to log in on the database:
+
+Now create the database:
 
     sudo su - postgres
     createdb kiskadee
