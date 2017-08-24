@@ -85,6 +85,7 @@ class Runner:
             - version: the package version
             - path: fetcher default path for packages
             - return: list with firehose reports
+
         The `analyzer` is the name of a static analyzer already created on the
         database.
         The `source_path` is the directory to a uncompressed source, returned

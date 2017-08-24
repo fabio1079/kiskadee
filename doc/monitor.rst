@@ -8,4 +8,4 @@ The class defines the following public behaviors:
 
 
 .. autoclass:: kiskadee.monitor.Monitor()
-    :members: monitor, initialize
+    :members: monitor
