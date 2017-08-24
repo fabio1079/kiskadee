@@ -132,12 +132,6 @@ Kiskadee will decompress the example source, and run the analyzers defined on
 the *kiskadee.conf* file. You can use any postgresql client to access the
 database that you have created,  and check the analysis maded by kiskadee.
 
-### Running API
-
-To run the kiskadee api just execute the command:
-
-	kiskadee_api
-
 ## Tests and coverage
 
 To check kiskadee tests and coverage just run:
