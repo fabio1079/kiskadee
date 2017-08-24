@@ -23,6 +23,7 @@ to install the dependencies below.
      - python3-devel
      - gcc
      - redhat-rpm-config python-pip
+     - python-pip
 
 ### Virtual Environment
 

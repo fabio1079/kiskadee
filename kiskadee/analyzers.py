@@ -1,7 +1,7 @@
 """This module provides functions to run static analyzers."""
 
 import subprocess
-
+import os
 
 def run(analyzer, sources):
     """Run a static analyzer on a given package.
@@ -11,7 +11,7 @@ def run(analyzer, sources):
     a analysis results.
     """
     volume = ''.join([sources, ':', '/src'])
-    uid = int(subprocess.check_output("echo $UID", shell=True))
+    uid = os.getuid()
     return subprocess.check_output(
             "docker run -e KISKADEE_UID={} "
             "-v {} {}".format(uid, volume, analyzer),
