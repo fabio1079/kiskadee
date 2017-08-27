@@ -3,6 +3,7 @@
 import subprocess
 import os
 
+
 def run(analyzer, sources):
     """Run a static analyzer on a given package.
 

@@ -40,17 +40,18 @@ def package_analysis(pkg_name, version):
     """Get the a analysis of some package version."""
     if request.method == 'GET':
         db_session = kiskadee_db_session()
-        package = (
+        package_id = (
                 db_session.query(Package)
                 .filter(Package.name == pkg_name).first().id
             )
-        version = (
+        version_id = (
                 db_session.query(Version)
-                .filter(Version.package_id == package).first().id
+                .filter(Version.number == version)
+                .filter(Version.package_id == package_id).first().id
             )
         analysis = (
                 db_session.query(Analysis)
-                .filter(Analysis.version_id == version).first()
+                .filter(Analysis.version_id == version_id).first()
             )
 
         analysis_schema = AnalysisSchema()

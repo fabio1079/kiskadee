@@ -1,4 +1,13 @@
 # Change Log
+
+## [0.3.0] - 2017-08-27
+### Added
+- Add endpoint to get a list of analyzed packages.
+- Add endpoint to get a analyzed package by it name and version.
+- Create page to show the list of analyzed packages.
+- Save analysis as JSON.
+- Update README.
+
 ## [0.2.3] - 2017-08-05
 ### Added
 - Run monitor and runner as separate processes.

@@ -4,7 +4,6 @@ from marshmallow import Schema, fields
 from kiskadee.model import Package, Fetcher, Analysis, Version
 
 
-
 class AnalysisSchema(Schema):
     """Provide a serializer to the Analysis model."""
 
@@ -31,6 +30,7 @@ class VersionSchema(Schema):
         """Serialize a Package object."""
         print('MAKING OBJECT FROM', data)
         return Version(**data)
+
 
 class FetcherSchema(Schema):
     """Provide a serializer to the Fetcher model."""
