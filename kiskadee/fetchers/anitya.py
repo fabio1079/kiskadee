@@ -22,7 +22,7 @@ class Fetcher(kiskadee.fetchers.Fetcher):
         queued using the package_enqueuer decorator.
 
         The fetcher will use zmq as messaging protocol to receive
-        the fedmsg-hub events. Kiskadee and fedmsg-hub runs in different
+        the fedmsg-hub events. kiskadee and fedmsg-hub runs in different
         processes, so we need something to enable the
         comunication between then.  When a message come to fedmsg-hub,
         the AnityaConsumer instance, will publish this event to zmq server,

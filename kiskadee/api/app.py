@@ -1,4 +1,4 @@
-"""Kiskadee API."""
+"""kiskadee API."""
 from flask import Flask, jsonify
 from flask import request
 from flask_cors import CORS

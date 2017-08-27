@@ -49,22 +49,21 @@ A simple example of a kiskadee fetcher
 List of kiskadee fetchers
 ----------------------------
 
-Inside tha package `fetchers` you can check which fetchers kiskadee have,
-and which targets are monitored with this fetchers. This section is a brief
-overview of this fetchers.
-
-    - *debian.py*: A fetcher to monitor the Debian ftp repository. This fetcher
-      will  every hour downloads the *Sources.gz* file of the repository and
-      loads it in memory. This file is a representation of all the packages
-      present in the repository. After kiskadee loads it in memory, all the
-      packages are compared with the database, and if a new package is
-      identified, it source code is downloaded, and a analysis is made.
+Inside tha package `fetchers` you can check the available fetchers and which
+targets are monitored with each fetcher. This section is a brief overview of
+the available fetchers.
 
     - *anitya.py*: A fetcher to monitor fedmsg events, published on the
       Anitya project. The Anitya project monitors upstream releases and
-      broadcast them on fedmsg. The fetcher will consume these events, and
+      broadcasts them on fedmsg. The fetcher will consume these events, and
       trigger analyses when possible.
 
+    - *debian.py*: A fetcher to monitor the Debian ftp repository. This fetcher
+      will  download Debian *Sources.gz* hourly, and load it in memory. This
+      file is a representation of all the packages available in the repository.
+      After kiskadee loads it in memory, all the package  versions are compared
+      with the ones in the database, and if a new package is identified, its
+      source code is downloaded, and a new analysis is triggered.
 
     - *juliet.py*: Juliet is a static analysis test suite provided by
       NIST's SAMATE team. It contains injected, known CWE's in specific

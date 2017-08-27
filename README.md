@@ -118,7 +118,7 @@ configured. Leave the shell with ctrl+d.
 
 ### Running our first analysis
 
-Kiskadee reads environment variables from  the `util/kiskadee.conf` file.
+kiskadee reads environment variables from  the `util/kiskadee.conf` file.
 If everything goes well till now, open the *kiskadee.conf* file, and set as
 active (`active = yes`) only the *example_fetcher*, the other fetchers will
 stay as `active = no`.
@@ -128,7 +128,7 @@ the terminal. If the Docker images was properly build, and the Docker client
 was properly configured on your machine, kiskadee will be able to analysis a
 example source code. This code is in the *kiskadee/tests/test_source/* directory.
 
-Kiskadee will decompress the example source, and run the analyzers defined on
+kiskadee will decompress the example source, and run the analyzers defined on
 the *kiskadee.conf* file. You can use any postgresql client to access the
 database that you have created,  and check the analysis maded by kiskadee.
 
@@ -149,15 +149,15 @@ To check kiskadee coverage open the file *covhtml/index.html*.
 
 ## Repositories
 
-Kiskadee daemon and API development are hosted at [pagure](https://pagure.io/kiskadee).
+kiskadee daemon and API development are hosted at [pagure](https://pagure.io/kiskadee).
 
-Kiskadee frontend is hosted at [pagure](https://pagure.io/kiskadee/kiskadee_ui).
+kiskadee frontend is hosted at [pagure](https://pagure.io/kiskadee/kiskadee_ui).
 Feel free to open issues and pull requests there.
 
 We also have mirrors on [gitlab](https://gitlab.com/kiskadee/kiskadee) and
 [github](https://github.com/LSS-USP/kiskadee).
 
-Kiskadee have a CI environment hosted at this [url](http://143.107.45.126:30130/blue/organizations/jenkins/LSS-USP%2Fkiskadee/activity).
+kiskadee have a CI environment hosted at this [url](http://143.107.45.126:30130/blue/organizations/jenkins/LSS-USP%2Fkiskadee/activity).
 
 ## Documentation
 

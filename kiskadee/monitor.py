@@ -29,10 +29,10 @@ class Monitor:
 
         The packages are dequeued from the `package_queue`. When a package
         needs to be analyzed, this package is enqueued in the `analyses_queue`
-        queue so the runner component can trigger an analysis.
-        Each fetcher must enqueue its packages in the `packages_queue`.
+        so the runner component can trigger an analysis.  Each fetcher must
+        enqueue its packages in the `packages_queue`.
         """
-        kiskadee.logger.debug('Kiskadee PID: {}'.format(os.getppid()))
+        kiskadee.logger.debug('kiskadee PID: {}'.format(os.getppid()))
         kiskadee.logger.debug('Starting monitor subprocess')
         kiskadee.logger.debug('monitor PID: {}'.format(os.getpid()))
         fetchers = kiskadee.load_fetchers()
