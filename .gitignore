@@ -22,3 +22,7 @@ reports
 # documentation
 doc/_build
 doc/kiskadee
+
+# tests coverage files
+htmlcov
+.coverage
