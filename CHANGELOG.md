@@ -1,26 +1,32 @@
 # Change Log
 
+## [0.3.1] - 2017-09-07
+### Fixed
+- Set package version.
+
 ## [0.3.0] - 2017-08-27
 ### Added
 - Add endpoint to get a list of analyzed packages.
 - Add endpoint to get a analyzed package by it name and version.
 - Create page to show the list of analyzed packages.
+### Changed
 - Save analysis as JSON.
-- Update README.
 
 ## [0.2.3] - 2017-08-05
-### Added
+### Changed
 - Run monitor and runner as separate processes.
+- Rename plugin package to fetcher.
+### Fixed
 - Fix docker issues.
 - Fix anitya and debian plugin issues.
-- Rename plugin package to fetcher.
 - Remove temporary directories used on analysis.
 
 ## [0.2.1] - 2017-07-24
-### Added
+### Changed
 - Improve kiskadee log messages.
-- save a package only when it be analyzed.
-- fix debian plugin missing packages.
+- Save a package only when it is analyzed.
+### Fixed
+- Fix debian plugin missing packages.
 
 ## [0.2] - 2017-07-12
 ### Added
