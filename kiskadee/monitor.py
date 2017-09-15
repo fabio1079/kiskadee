@@ -12,7 +12,8 @@ import json
 import kiskadee.database
 from kiskadee.runner import Runner
 import kiskadee.queue
-from kiskadee.model import Package, Fetcher, Version
+from kiskadee.model import Package, Fetcher, Version, Reports
+import re
 
 RUNNING = True
 
@@ -143,6 +144,28 @@ class Monitor:
         self.session.commit()
         return _package
 
+    def _save_reports(self, analysis):
+        try:
+            reports = analysis.raw
+            report_dictionary = {
+                'warnings': re.subn('warning', '', reports)[1], # get number of matches
+                'styles': re.subn('style', '', reports)[1],
+                'errors':re.subn('error', '', reports)[1]
+            }
+            for key, value in report_dictionary.items():
+                _reports = kiskadee.model.Reports()
+                _reports.report_type = key
+                _reports.counter = value
+                _reports.analysis_id = analysis.id
+                self.session.add(_reports)
+                self.session.commit()
+        except Exception as err:
+            kiskadee.logger.debug(
+                    "MONITOR: Failed to get analysis reports"
+                )
+            kiskadee.logger.debug(err)
+        return
+
     def _save_analysis(self, pkg, analyzer, result, version):
         _analysis = kiskadee.model.Analysis()
         try:
@@ -153,6 +176,7 @@ class Monitor:
             _analysis.raw = json.loads(result)
             self.session.add(_analysis)
             self.session.commit()
+            self._save_reports(_analysis)
             kiskadee.logger.debug(
                     "MONITOR: Saved analysis done by {} for package: {}_{}"
                     .format(analyzer, pkg["name"], pkg["version"])
