@@ -12,7 +12,7 @@ def to_firehose(bytes_input, analyzer):
     """Parser the analyzer report to Firehose format.
 
     :bytes_input: The analyzer report, as a byte string
-    :returns: A xml.etree.ElementTree object, representing the firehose report
+    :returns: A json as string.
     """
     in_memory_file = io.StringIO(str(bytes_input, 'utf-8'))
     analyzer_module = import_firehose_parser(analyzer)
