@@ -12,7 +12,7 @@ import json
 import kiskadee.database
 from kiskadee.runner import Runner
 import kiskadee.queue
-from kiskadee.model import Package, Fetcher, Version, Reports
+from kiskadee.model import Package, Fetcher, Version
 import re
 
 RUNNING = True
@@ -144,24 +144,29 @@ class Monitor:
         self.session.commit()
         return _package
 
-    def _save_reports(self, analysis):
+    def _save_reports(self, analysis, pkg):
         try:
             reports = analysis.raw
             report_dictionary = {
-                'warnings': re.subn('warning', '', reports)[1], # get number of matches
+                'warnings': re.subn('warning', '', reports)[1],
                 'styles': re.subn('style', '', reports)[1],
-                'errors':re.subn('error', '', reports)[1]
+                'errors': re.subn('error', '', reports)[1]
             }
-            for key, value in report_dictionary.items():
-                _reports = kiskadee.model.Reports()
-                _reports.report_type = key
-                _reports.counter = value
-                _reports.analysis_id = analysis.id
-                self.session.add(_reports)
-                self.session.commit()
+            _reports = kiskadee.model.Reports()
+            _reports.warnings = report_dictionary['warnings']
+            _reports.styles = report_dictionary['styles']
+            _reports.errors = report_dictionary['errors']
+            _reports.analysis_id = analysis.id
+            self.session.add(_reports)
+            self.session.commit()
+            kiskadee.logger.debug(
+                    "MONITOR: Saved analysis reports for {} package"
+                    .format(pkg["name"])
+                )
         except Exception as err:
             kiskadee.logger.debug(
-                    "MONITOR: Failed to get analysis reports"
+                    "MONITOR: Failed to get analysis reports to {} package"
+                    .format(pkg["name"])
                 )
             kiskadee.logger.debug(err)
         return
@@ -176,7 +181,7 @@ class Monitor:
             _analysis.raw = json.loads(result)
             self.session.add(_analysis)
             self.session.commit()
-            self._save_reports(_analysis)
+            self._save_reports(_analysis, pkg)
             kiskadee.logger.debug(
                     "MONITOR: Saved analysis done by {} for package: {}_{}"
                     .format(analyzer, pkg["name"], pkg["version"])

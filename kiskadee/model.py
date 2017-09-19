@@ -7,11 +7,6 @@ import kiskadee
 
 Base = declarative_base()
 
-"""class TypeEnum(enum.Enum):
-    Enum for to use on TypeReport class
-    error = 1
-    style = 2
-    warning = 3"""
 
 class Package(Base):
     """Software packages abstraction.
@@ -30,6 +25,7 @@ class Package(Base):
     __table_args__ = (
             UniqueConstraint('name', 'fetcher_id'),
             )
+
 
 class Fetcher(Base):
     """kiskadee fetcher abstraction."""
@@ -77,16 +73,21 @@ class Analysis(Base):
     version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)
     analyzer_id = Column(Integer, ForeignKey('analyzers.id'), nullable=False)
     raw = Column(JSON)
-    report = orm.relationship('Reports', backref='analysis')
+    report = orm.relationship('Reports', uselist=False, back_populates='analysis')
+
 
 class Reports(Base):
-    """Abstraction of a analysis report"""
+    """Abstraction of a analysis report."""
+
     __tablename__ = 'reports'
     id = Column(Integer,
                 Sequence('reports_id_seq', optional=True), primary_key=True)
-    report_type = Column(Unicode(100), nullable=False)
-    counter = Column(Integer)
+    warnings = Column(Integer)
+    styles = Column(Integer)
+    errors = Column(Integer)
     analysis_id = Column(Integer, ForeignKey('analysis.id'), nullable=False)
+    analysis = orm.relationship('Analysis', back_populates='report')
+
 
 def create_analyzers(_session):
     """Create the analyzers on database.

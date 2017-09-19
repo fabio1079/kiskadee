@@ -7,6 +7,7 @@ from kiskadee.database import Database
 from kiskadee.model import Package, Fetcher, Version, Analysis
 from kiskadee.api.serializers import PackageSchema, FetcherSchema,\
         AnalysisSchema
+import json
 
 kiskadee = Flask(__name__)
 
@@ -56,6 +57,7 @@ def package_analysis(pkg_name, version):
 
         analysis_schema = AnalysisSchema()
         result = analysis_schema.dump(analysis)
+        result.data['raw'] = json.loads(result.data['raw'])
         return jsonify({'analysis': result.data})
 
 
