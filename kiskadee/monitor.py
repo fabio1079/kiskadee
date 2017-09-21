@@ -146,7 +146,7 @@ class Monitor:
 
     def _save_reports(self, analysis, pkg):
         try:
-            reports = analysis.raw
+            reports = analysis['raw']
             report_dictionary = {
                 'warnings': re.subn('warning', '', reports)[1],
                 'styles': re.subn('style', '', reports)[1],
@@ -156,7 +156,7 @@ class Monitor:
             _reports.warnings = report_dictionary['warnings']
             _reports.styles = report_dictionary['styles']
             _reports.errors = report_dictionary['errors']
-            _reports.analysis_id = analysis.id
+            _reports.analysis_id = analysis['id']
             self.session.add(_reports)
             self.session.commit()
             kiskadee.logger.debug(

@@ -4,7 +4,7 @@ from flask import request
 from flask_cors import CORS
 
 from kiskadee.database import Database
-from kiskadee.model import Package, Fetcher, Version, Analysis, Reports
+from kiskadee.model import Package, Fetcher, Version, Analysis
 from kiskadee.api.serializers import PackageSchema, FetcherSchema,\
         AnalysisSchema
 import json

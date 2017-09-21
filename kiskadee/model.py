@@ -73,7 +73,8 @@ class Analysis(Base):
     version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)
     analyzer_id = Column(Integer, ForeignKey('analyzers.id'), nullable=False)
     raw = Column(JSON)
-    report = orm.relationship('Reports', uselist=False, back_populates='analysis')
+    report = orm.relationship('Reports',
+                              uselist=False, back_populates='analysis')
 
 
 class Reports(Base):
@@ -82,10 +83,10 @@ class Reports(Base):
     __tablename__ = 'reports'
     id = Column(Integer,
                 Sequence('reports_id_seq', optional=True), primary_key=True)
+    analysis_id = Column(Integer, ForeignKey('analysis.id'), nullable=False)
     warnings = Column(Integer)
     styles = Column(Integer)
     errors = Column(Integer)
-    analysis_id = Column(Integer, ForeignKey('analysis.id'), nullable=False)
     analysis = orm.relationship('Analysis', back_populates='report')
 
 

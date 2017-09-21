@@ -15,7 +15,7 @@ class ModelTestCase(unittest.TestCase):
         model.Base.metadata.create_all(self.engine)
         model.create_analyzers(self.session)
         self.fetcher = model.Fetcher(
-                name='kiskadee-fetcher', target='university'
+              name='kiskadee-fetcher', target='university'
             )
         self.package = model.Package(name='python-kiskadee')
         self.version = model.Version(number='1.0-rc1')
@@ -27,9 +27,17 @@ class ModelTestCase(unittest.TestCase):
 
         self.analysis = model.Analysis(
                 analyzer_id=1,
-                version_id=self.version.id,
+                version_id=1,
                 raw=""
                 )
+        self.session.add(self.analysis)
+        self.report = model.Reports(
+                analysis_id=1,
+                warnings=0,
+                styles=0,
+                errors=0
+        )
+        self.session.add(self.report)
         self.session.commit()
 
     def tearDown(self):
@@ -48,6 +56,10 @@ class ModelTestCase(unittest.TestCase):
         versions = self.session.query(model.Version).all()
         self.assertEqual(versions, [self.version])
 
+    def test_query_report(self):
+        reports = self.session.query(model.Reports).all()
+        self.assertEqual(reports, [self.report])
+
     def test_add_fetcher(self):
         fetchers = self.session.query(model.Fetcher).all()
         self.assertEqual(len(fetchers), 1)
@@ -58,6 +70,16 @@ class ModelTestCase(unittest.TestCase):
     def test_add_version_without_package(self):
         version = model.Version(number='3.1')
         self.session.add(version)
+        with self.assertRaises(exc.IntegrityError):
+            self.session.commit()
+
+    def test_add_report_without_analysis(self):
+        report = model.Reports(
+                warnings=0,
+                styles=0,
+                errors=0
+        )
+        self.session.add(report)
         with self.assertRaises(exc.IntegrityError):
             self.session.commit()
 

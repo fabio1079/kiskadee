@@ -21,7 +21,29 @@ class ApiTestCase(unittest.TestCase):
         fetcher = kiskadee.model.Fetcher(
                 name='kiskadee-fetcher', target='university'
         )
+        model.Base.metadata.create_all(self.engine)
+        model.create_analyzers(self.session)
+        fetcher = kiskadee.model.Fetcher(
+                name='kiskadee-fetcher', target='university', id=1
+        )
+        pkg = kiskadee.model.Package(
+                name='kiskadee-package', fetcher_id=1, id=1
+        )
+        version = kiskadee.model.Version(
+                number='7.23', package_id=1, id=1
+        )
+        analysis = kiskadee.model.Analysis(
+                version_id=1, analyzer_id=1,
+                raw="{\"metadata\": \"test\"}"
+        )
+        report = model.Reports(
+            analysis_id=1, warnings=1, styles=1, errors=1
+        )
         self.session.add(fetcher)
+        self.session.add(pkg)
+        self.session.add(version)
+        self.session.add(analysis)
+        self.session.add(report)
         self.session.commit()
         self.runner = Runner()
         self.monitor = Monitor(self.session)
@@ -72,6 +94,19 @@ class ApiTestCase(unittest.TestCase):
         self.assertIn('location', pkg_first_analysis)
         self.assertIn('cwe', pkg_first_analysis)
         self.assertIn('message', pkg_first_analysis)
+
+    def test_get_specific_analysis(self):
+
+        def mock_kiskadee_db_session():
+            return self.session
+
+        kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
+        response = self.app.get("/analysis/kiskadee-package/7.23/")
+        response_as_json = json.loads(response.get_data(as_text=True))
+        self.assertIn("analysis", response_as_json)
+        #  On the first analysis of response,
+        #  check if exists some report attribute
+        self.assertIn("report", response_as_json['analysis'][0])
 
 
 if __name__ == '__main__':

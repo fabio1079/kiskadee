@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from kiskadee import model
 from kiskadee.monitor import Monitor
 from kiskadee.queue import packages_queue
-from kiskadee.model import Package, Fetcher, create_analyzers
+from kiskadee.model import Package, Fetcher, create_analyzers, Reports
 import kiskadee.queue
 import kiskadee.fetchers.debian
 from kiskadee.database import Database
@@ -46,6 +46,9 @@ class MonitorTestCase(unittest.TestCase):
                             'cppcheck': '<>',
                             'flawfinder': '><'},
                      'fetcher_id': 1}
+        self.analysis = {'analyzer_id': 1,
+                         'id': 1,
+                         'raw': 'warning, style, error'}
 
     def tearDown(self):
         self.session.close()
@@ -85,6 +88,15 @@ class MonitorTestCase(unittest.TestCase):
         _pkgs = self.monitor.session.query(Package).all()
         self.assertEqual(len(_pkgs), 2)
         self.assertEqual(_pkgs[1].name, _pkg['name'])
+
+    def test_save_reports(self):
+        self.monitor._save_reports(self.analysis, self.pkg1)
+        _report = self.monitor.session.query(Reports).all()
+        self.assertEqual(len(_report), 1)
+        self.assertEqual(_report[0].analysis_id, 1)
+        self.assertEqual(_report[0].warnings, 1)
+        self.assertEqual(_report[0].styles, 1)
+        self.assertEqual(_report[0].errors, 1)
 
     def test_save_version(self):
         self.monitor._save_fetcher(kiskadee.fetchers.debian.Fetcher())
