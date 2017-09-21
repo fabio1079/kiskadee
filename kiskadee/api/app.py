@@ -4,7 +4,7 @@ from flask import request
 from flask_cors import CORS
 
 from kiskadee.database import Database
-from kiskadee.model import Package, Fetcher, Version, Analysis
+from kiskadee.model import Package, Fetcher, Version, Analysis, Reports
 from kiskadee.api.serializers import PackageSchema, FetcherSchema,\
         AnalysisSchema
 import json
@@ -52,13 +52,13 @@ def package_analysis(pkg_name, version):
             )
         analysis = (
                 db_session.query(Analysis)
-                .filter(Analysis.version_id == version_id).first()
+                .filter(Analysis.version_id == version_id).all()
             )
-
-        analysis_schema = AnalysisSchema()
-        result = analysis_schema.dump(analysis)
-        result.data['raw'] = json.loads(result.data['raw'])
-        return jsonify({'analysis': result.data})
+        analysis_schema = AnalysisSchema(many=True)
+        results = analysis_schema.dump(analysis)
+        for data in results.data:
+            data['raw'] = json.loads(data['raw'])
+        return jsonify({'analysis': results.data})
 
 
 def kiskadee_db_session():

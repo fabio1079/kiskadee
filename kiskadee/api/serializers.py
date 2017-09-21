@@ -9,8 +9,9 @@ class ReportsSchema(Schema):
 
     id = fields.Int()
     analysis_id = fields.Int()
-    report_type = fields.Str()
-    counter = fields.Int()
+    warnings = fields.Int()
+    styles = fields.Int()
+    errors = fields.Int()
 
     def make_object(self, data):
         """Serialize a Reports object."""
@@ -25,7 +26,7 @@ class AnalysisSchema(Schema):
     version_id = fields.Int()
     analyzer_id = fields.Int()
     raw = fields.Dict()
-    reports = fields.Nested(ReportsSchema, many=True)
+    report = fields.Nested(ReportsSchema)
 
     def make_object(self, data):
         """Serialize a Analysis object."""
