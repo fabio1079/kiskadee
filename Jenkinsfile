@@ -10,12 +10,12 @@ pipeline {
     }
     stage('build-docker-images') {
       steps {
-        sh 'make analyzers'
+        sh 'source bin/activate && make analyzers'
       }
     }
     stage('Test') {
       steps {
-        sh "make check"
+        sh "source bin/activate && make check"
       }
 
     post {
