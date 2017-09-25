@@ -5,19 +5,17 @@ pipeline {
     stage('Build') {
       steps {
         sh 'virtualenv -p /usr/bin/python3 .'
-	sh 'source bin/activate && pip install -e .'
+	    sh 'source bin/activate && pip install -e .'
       }
     }
     stage('build-docker-images') {
       steps {
-        sh '(cd util/dockerfiles/cppcheck &&  docker build . -t cppcheck)'
-        sh '(cd util/dockerfiles/flawfinder && docker build . -t flawfinder)'
+        sh 'make analyzers'
       }
     }
     stage('Test') {
       steps {
-        sh "chmod u+x run_tests_and_coverage.sh"
-        sh "source bin/activate && ./run_tests_and_coverage.sh"
+        sh "make check"
       }
 
     post {
