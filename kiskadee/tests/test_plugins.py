@@ -1,4 +1,4 @@
-from unittest import TestCase
+import unittest
 import os
 import shutil
 import tempfile
@@ -10,7 +10,7 @@ import kiskadee.queue
 import kiskadee
 
 
-class TestFetchers(TestCase):
+class FetchersTestCase(unittest.TestCase):
     def test_loading(self):
         _config = kiskadee.config
         _config['debian_fetcher'] = {'active': 'no'}
@@ -30,7 +30,7 @@ class TestFetchers(TestCase):
             }
 
 
-class TestDebianFetcher(TestCase):
+class DebianFetcherTestCase(unittest.TestCase):
 
     def setUp(self):
         import kiskadee.fetchers.debian
@@ -103,7 +103,7 @@ class TestDebianFetcher(TestCase):
         self.assertFalse(result)
 
 
-class TestAnityaFetcher(TestCase):
+class TestAnityaFetcher(unittest.TestCase):
 
     def setUp(self):
         import kiskadee.fetchers.anitya
@@ -197,3 +197,7 @@ class TestAnityaFetcher(TestCase):
                 'https://github.com/firecat53/urlscan'
         )
         self.assertEqual(_dict['fetcher'].name, 'anitya')
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -2,17 +2,18 @@ import unittest
 
 from kiskadee.runner import Runner
 import kiskadee.fetchers.example
-from sqlalchemy import create_engine
+import kiskadee.fetchers.debian
 from sqlalchemy.orm import sessionmaker
 from kiskadee import model
 from kiskadee.model import create_analyzers
 from kiskadee.queue import KiskadeeQueue
+from kiskadee.database import Database
 
 
-class TestAnalyzers(unittest.TestCase):
+class AnalyzersTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.engine = create_engine('sqlite:///:memory:')
+        self.engine = Database('db_test').engine
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         model.Base.metadata.create_all(self.engine)
@@ -31,6 +32,10 @@ class TestAnalyzers(unittest.TestCase):
         self.runner = Runner()
         self.runner.kiskadee_queue = kiskadee_queue
 
+    def tearDown(self):
+        self.session.close()
+        model.Base.metadata.drop_all()
+
     def test_run_analyzer(self):
 
         source_to_analysis = {
@@ -42,8 +47,7 @@ class TestAnalyzers(unittest.TestCase):
         source_path = self.runner._path_to_uncompressed_source(
                 source_to_analysis, kiskadee.fetchers.example.Fetcher()
             )
-        firehose_report = self.runner.analyze(
-                self.deb_pkg, "cppcheck", source_path)
+        firehose_report = self.runner.analyze("cppcheck", source_path)
         self.assertIsNotNone(firehose_report)
 
     def test_generate_a_firehose_report(self):
@@ -88,3 +92,7 @@ class TestAnalyzers(unittest.TestCase):
         )
 
         self.assertIsNone(source_path)
+
+
+if __name__ == '__main__':
+    unittest.main()

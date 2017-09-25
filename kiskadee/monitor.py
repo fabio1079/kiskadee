@@ -7,6 +7,7 @@ import threading
 from multiprocessing import Process
 import time
 import os
+import json
 
 import kiskadee.database
 from kiskadee.runner import Runner
@@ -149,7 +150,7 @@ class Monitor:
                     filter(kiskadee.model.Analyzer.name == analyzer).first()
             _analysis.analyzer_id = _analyzer.id
             _analysis.version_id = version.id
-            _analysis.raw = result
+            _analysis.raw = json.loads(result)
             self.session.add(_analysis)
             self.session.commit()
             kiskadee.logger.debug(

@@ -1,23 +1,23 @@
 import json
 import unittest
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 import kiskadee.model as model
+from kiskadee.model import Fetcher
 import kiskadee
 from kiskadee.api.app import kiskadee as kiskadee_api
 import kiskadee.api.app
+from kiskadee.database import Database
 
 
 class ApiTestCase(unittest.TestCase):
 
     def setUp(self):
         kiskadee_api.testing = True
-        self.engine = create_engine('sqlite:///:memory:')
+        self.engine = Database('db_test').engine
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         self.app = kiskadee_api.test_client()
-        model.Base.metadata.create_all(self.engine)
         model.create_analyzers(self.session)
         fetcher = model.Fetcher(
                 name='kiskadee-fetcher', target='university'
@@ -25,10 +25,15 @@ class ApiTestCase(unittest.TestCase):
         self.session.add(fetcher)
         self.session.commit()
 
+    def tearDown(self):
+        self.session.close()
+        model.Base.metadata.drop_all()
+
     def test_get_fetchers(self):
         def mock_kiskadee_db_session():
             return self.session
 
+        print(self.session.query(Fetcher).all())
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
         response = self.app.get("/fetchers")
         self.assertIn("fetchers", json.loads(response.data.decode("utf-8")))

@@ -2,7 +2,7 @@
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, UnicodeText, UniqueConstraint,\
-                       Sequence, Unicode, ForeignKey, orm
+                       Sequence, Unicode, ForeignKey, orm, JSON
 
 import kiskadee
 
@@ -73,7 +73,7 @@ class Analysis(Base):
                 Sequence('analysis_id_seq', optional=True), primary_key=True)
     version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)
     analyzer_id = Column(Integer, ForeignKey('analyzers.id'), nullable=False)
-    raw = Column(UnicodeText)
+    raw = Column(JSON)
 
 
 def create_analyzers(_session):

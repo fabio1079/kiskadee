@@ -1,14 +1,15 @@
-from unittest import TestCase
-from sqlalchemy import create_engine, exc
+import unittest
+from sqlalchemy import exc
 from sqlalchemy.orm import sessionmaker
 
 from kiskadee import model
+from kiskadee.database import Database
 
 
-class TestModel(TestCase):
+class ModelTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.engine = create_engine('sqlite:///:memory:')
+        self.engine = Database('db_test').engine
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         model.Base.metadata.create_all(self.engine)
@@ -32,7 +33,8 @@ class TestModel(TestCase):
         self.session.commit()
 
     def tearDown(self):
-        model.Base.metadata.drop_all(self.engine)
+        self.session.close()
+        model.Base.metadata.drop_all()
 
     def test_query_fetcher(self):
         fetchers = self.session.query(model.Fetcher).all()
@@ -155,3 +157,7 @@ class TestModel(TestCase):
         self.assertEqual(len(analysis), 2)
         self.assertEqual(analysis[0].raw, "<>")
         self.assertEqual(analysis[1].raw, "><")
+
+
+if __name__ == '__main__':
+    unittest.main()

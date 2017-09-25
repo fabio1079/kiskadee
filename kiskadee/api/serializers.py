@@ -10,7 +10,7 @@ class AnalysisSchema(Schema):
     id = fields.Int()
     version_id = fields.Int()
     analyzer_id = fields.Int()
-    raw = fields.Str()
+    raw = fields.Dict()
 
     def make_object(self, data):
         """Serialize a Analysis object."""

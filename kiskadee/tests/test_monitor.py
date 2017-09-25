@@ -1,5 +1,4 @@
-from unittest import TestCase
-from sqlalchemy import create_engine
+import unittest
 from sqlalchemy.orm import sessionmaker
 
 from kiskadee import model
@@ -8,17 +7,18 @@ from kiskadee.queue import packages_queue
 from kiskadee.model import Package, Fetcher, create_analyzers
 import kiskadee.queue
 import kiskadee.fetchers.debian
+from kiskadee.database import Database
 
 
-class TestMonitor(TestCase):
+class MonitorTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.engine = create_engine('sqlite:///:memory:')
+        self.engine = Database('db_test').engine
         Session = sessionmaker(bind=self.engine)
-        session = Session()
-        self.monitor = Monitor(session)
+        self.session = Session()
+        self.monitor = Monitor(self.session)
         model.Base.metadata.create_all(self.engine)
-        create_analyzers(self.monitor.session)
+        create_analyzers(self.session)
         self.pkg1 = {
                 'name': 'curl',
                 'version': '7.52.1-5',
@@ -48,8 +48,8 @@ class TestMonitor(TestCase):
                      'fetcher_id': 1}
 
     def tearDown(self):
-        # model.metadata.drop_all(self.engine)
-        model.Base.metadata.drop_all(self.engine)
+        self.session.close()
+        model.Base.metadata.drop_all()
 
     def test_dequeue_package(self):
         packages_queue.put(self.pkg1)
@@ -114,3 +114,7 @@ class TestMonitor(TestCase):
         _current_version = _pkg_versions[-1].number
         self.assertEqual(self.pkg1['version'], _first_version)
         self.assertEqual(_pkg['version'], _current_version)
+
+
+if __name__ == '__main__':
+    unittest.main()

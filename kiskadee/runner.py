@@ -61,9 +61,7 @@ class Runner:
         analyzers = fetcher.analyzers()
         source_to_analysis['results'] = {}
         for analyzer in analyzers:
-            firehose_report = self.analyze(
-                    source_to_analysis, analyzer, source_path
-            )
+            firehose_report = self.analyze(analyzer, source_path)
             if firehose_report:
                 source_to_analysis['results'][analyzer] = firehose_report
 
@@ -76,15 +74,8 @@ class Runner:
             self.kiskadee_queue.enqueue_result(source_to_analysis)
         shutil.rmtree(source_path)
 
-    def analyze(self, source_to_analysis, analyzer, source_path):
-        """Run each analyzer on a source_to_analysis.
-
-        The `source_to_analysis` dict is in the queue. The keys are:
-            - fetcher: the fetcher module itself
-            - name: the package name
-            - version: the package version
-            - path: fetcher default path for packages
-            - return: list with firehose reports
+    def analyze(self, analyzer, source_path):
+        """Run each analyzer on some sorce code.
 
         The `analyzer` is the name of a static analyzer already created on the
         database.
@@ -112,7 +103,7 @@ class Runner:
 
     def _path_to_uncompressed_source(self, package, fetcher):
 
-        if not fetcher or not package:
+        if not (fetcher and package):
             return None
 
         kiskadee.logger.debug(
@@ -140,6 +131,7 @@ class Runner:
                         'ANALYSIS: Unpacking {} source in {} path'
                         .format(package['name'], uncompressed_source_path)
                         )
+                # not delete the source code used on tests.
                 if not compressed_source.find("kiskadee/tests") > -1:
                     shutil.rmtree(os.path.dirname(compressed_source))
                 kiskadee.logger.debug(
