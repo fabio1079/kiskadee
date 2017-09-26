@@ -68,9 +68,11 @@ database.
 
     sudo su - postgres
     createdb kiskadee
+    createdb kiskadee_test
     createuser kiskadee -P
     # use kiskadee as password.
     psql -U postgres -c "grant all privileges on database kiskadee to kiskadee"
+    psql -U postgres -c "grant all privileges on database kiskadee_test to kiskadee"
     # go back to your user (ctrl+d)
     echo "localhost:5432:kiskadee:kiskadee:kiskadee" > ~/.pgpass
     chmod 600 ~/.pgpass
