@@ -45,10 +45,11 @@ Install the python dependencies using pip
 To run the static analyzers, you must have
 [Docker](https://www.docker.com/community-edition) installed and running.
 If you have configured the Docker engineer properly,
-run the *docker_build.sh* script. It will build the images for you.
+run the analyzers target in the Makefile. It will build the images for you.
 
-	chmod u+x docker_build.sh
-	./docker_build.sh
+```
+make analyzers
+```
 
 ### Database
 Now we will create the kiskadee database. You will need to install the
@@ -56,64 +57,80 @@ postgresql packages for your system. If you use Fedora, follow the next
 steps, if not, you will have to find out how install postgresql on your
 system.
 
-	sudo dnf install postgresql-server postgresql-contrib
-	sudo systemctl enable postgresql
-	sudo postgresql-setup initdb
-	sudo systemctl start postgresql
+```
+sudo dnf install postgresql-server postgresql-contrib
+sudo systemctl enable postgresql
+sudo postgresql-setup initdb
+sudo systemctl start postgresql
+```
 
-To install on Ubuntu use this [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04).
+To install on Ubuntu, use this [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04).
 
 With postgresql installed, you will need to create the kiskadee role and
 database.
 
-    sudo su - postgres
-    createdb kiskadee
-    createdb kiskadee_test
-    createuser kiskadee -P
-    # use kiskadee as password.
-    psql -U postgres -c "grant all privileges on database kiskadee to kiskadee"
-    psql -U postgres -c "grant all privileges on database kiskadee_test to kiskadee"
-    # go back to your user (ctrl+d)
-    echo "localhost:5432:kiskadee:kiskadee:kiskadee" > ~/.pgpass
-    chmod 600 ~/.pgpass
+```
+sudo su - postgres
+createdb kiskadee
+createdb kiskadee_test
+createuser kiskadee -P
+# use kiskadee as password.
+psql -U postgres -c "grant all privileges on database kiskadee to kiskadee"
+psql -U postgres -c "grant all privileges on database kiskadee_test to kiskadee"
+# go back to your user (ctrl+d)
+echo "localhost:5432:kiskadee:kiskadee:kiskadee" > ~/.pgpass
+chmod 600 ~/.pgpass
+```
 
 Restart the postgresql service:
 
-	sudo systemctl restart postgresql
+```
+sudo systemctl restart postgresql
+```
 
 Test the database connection:
 
-	psql -U kiskadee -d kiskadee
+```
+psql -U kiskadee -d kiskadee
+```
 
 If you was not able to log in on the database, you will need to edit
 the *pg_hba.conf* and change some rules defined by the postgresql package.
 On Linux systems this file normally stays at the
 `/var/lib/pgsql/data/`. Open this file and change:
 
-	# "local" is for Unix domain socket connections only
-	local   all             all                                     peer
-	# IPv4 local connections:
-	host    all             all             127.0.0.1/32            ident
-	# IPv6 local connections:
-	host    all             all             ::1/128                 ident
+```
+# "local" is for Unix domain socket connections only
+local   all             all                                     peer
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            ident
+# IPv6 local connections:
+host    all             all             ::1/128                 ident
+```
 
 to:
 
-	# "local" is for Unix domain socket connections only
-	local   all             all                                     md5
-	# IPv4 local connections:
-	host    all             all             127.0.0.1/32            md5
-	# IPv6 local connections:
-	host    all             all             ::1/128                 md5
+```
+# "local" is for Unix domain socket connections only
+local   all             all                                     md5
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            md5
+# IPv6 local connections:
+host    all             all             ::1/128                 md5
+```
 
 
-After this change, restarts the postgresql service:
+After this change, restart postgresql service:
 
-	sudo systemctl restart postgresql
+```
+sudo systemctl restart postgresql
+```
 
 Test the database connection:
 
-	psql -U kiskadee -d kiskadee
+```
+psql -U kiskadee -d kiskadee
+```
 
 If you was able to get into the psql shell, the database is properly
 configured. Leave the shell with ctrl+d.
@@ -138,14 +155,18 @@ database that you have created,  and check the analysis maded by kiskadee.
 
 To run the kiskadee api just execute the command:
 
-	kiskadee_api
+```
+kiskadee_api
+```
 
 ## Tests and coverage
 
 To check kiskadee tests and coverage just run:
 
-	chmod u+x run_tests_and_coverage.sh
-	./run_tests_and_coverage.sh
+```
+chmod u+x run_tests_and_coverage.sh
+./run_tests_and_coverage.sh
+```
 
 To check kiskadee coverage open the file *covhtml/index.html*.
 
@@ -167,7 +188,9 @@ kiskadee have a CI environment hosted at this [url](http://143.107.45.126:30130/
 
 To build the documentation just entry in the doc directory, and run
 
-    make html
+```
+make html
+```
 
 To access the documentation open the `index.html` file, inside the
 doc/\_build/html.
@@ -184,11 +207,13 @@ If you intend to run the anitya fetcher, you will have to install fedmsg-hub,
 in order to kiskadee be able to consume the fedmsg events.
 To install fedmsg-hub follow this steps inside the kiskadee root path:
 
-    # Run this inside the kiskadee's virtualenv
-    sudo mkdir -p /etc/fedmsg.d/
-    sudo cp util/base.py util/endpoints.py  /etc/fedmsg.d/
-    sudo cp util/anityaconsumer.py /etc/fedmsg.d/
-    PYTHONPATH=`pwd` fedmsg-hub
+```
+# Run this inside the kiskadee's virtualenv
+sudo mkdir -p /etc/fedmsg.d/
+sudo cp util/base.py util/endpoints.py  /etc/fedmsg.d/
+sudo cp util/anityaconsumer.py /etc/fedmsg.d/
+PYTHONPATH=`pwd` fedmsg-hub
+```
 
 With this steps, fedmsg-hub will instantiate `AnityaConsumer` and publish
 the monitored events using ZeroMQ. When kiskadee starts it will consume
