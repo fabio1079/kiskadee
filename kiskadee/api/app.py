@@ -56,8 +56,6 @@ def package_analysis(pkg_name, version):
             )
         analysis_schema = AnalysisSchema(many=True)
         results = analysis_schema.dump(analysis)
-        for data in results.data:
-            data['raw'] = json.loads(data['raw'])
         return jsonify({'analysis': results.data})
 
 

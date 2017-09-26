@@ -73,20 +73,18 @@ class Analysis(Base):
     version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)
     analyzer_id = Column(Integer, ForeignKey('analyzers.id'), nullable=False)
     raw = Column(JSON)
-    report = orm.relationship('Reports',
+    report = orm.relationship('Report',
                               uselist=False, back_populates='analysis')
 
 
-class Reports(Base):
+class Report(Base):
     """Abstraction of a analysis report."""
 
     __tablename__ = 'reports'
     id = Column(Integer,
                 Sequence('reports_id_seq', optional=True), primary_key=True)
     analysis_id = Column(Integer, ForeignKey('analysis.id'), nullable=False)
-    warnings = Column(Integer)
-    styles = Column(Integer)
-    errors = Column(Integer)
+    results = Column(JSON)
     analysis = orm.relationship('Analysis', back_populates='report')
 
 

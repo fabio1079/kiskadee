@@ -10,12 +10,17 @@ import os
 import json
 
 import kiskadee.database
+from kiskadee.report import  CppCheckReport
 from kiskadee.runner import Runner
 import kiskadee.queue
-from kiskadee.model import Package, Fetcher, Version
+from kiskadee.model import Package, Fetcher, Version, Report
 import re
 
 RUNNING = True
+
+REPORTERS = {
+    'cppcheck': CppCheckReport
+}
 
 
 class Monitor:
@@ -144,19 +149,13 @@ class Monitor:
         self.session.commit()
         return _package
 
-    def _save_reports(self, analysis, pkg):
+    def _save_reports(self, analysis, pkg, analyzer_name):
         try:
-            reports = analysis['raw']
-            report_dictionary = {
-                'warnings': re.subn('warning', '', reports)[1],
-                'styles': re.subn('style', '', reports)[1],
-                'errors': re.subn('error', '', reports)[1]
-            }
-            _reports = kiskadee.model.Reports()
-            _reports.warnings = report_dictionary['warnings']
-            _reports.styles = report_dictionary['styles']
-            _reports.errors = report_dictionary['errors']
-            _reports.analysis_id = analysis['id']
+            results = analysis.raw['results']
+            analyzer_report = REPORTERS[analyzer_name](results)
+            _reports = Report()
+            _reports.results = json.dumps(analyzer_report.compute_reports())
+            _reports.analysis_id = analysis.id
             self.session.add(_reports)
             self.session.commit()
             kiskadee.logger.debug(
@@ -181,7 +180,7 @@ class Monitor:
             _analysis.raw = json.loads(result)
             self.session.add(_analysis)
             self.session.commit()
-            self._save_reports(_analysis, pkg)
+            self._save_reports(_analysis, pkg, _analyzer.name)
             kiskadee.logger.debug(
                     "MONITOR: Saved analysis done by {} for package: {}_{}"
                     .format(analyzer, pkg["name"], pkg["version"])
