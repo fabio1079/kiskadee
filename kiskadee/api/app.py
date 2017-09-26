@@ -35,7 +35,7 @@ def packages():
         return jsonify({'packages': result.data})
 
 
-@kiskadee.route('/analysis/<pkg_name>/<version>/')
+@kiskadee.route('/analysis/<pkg_name>/<version>')
 def package_analysis(pkg_name, version):
     """Get the a analysis of some package version."""
     if request.method == 'GET':

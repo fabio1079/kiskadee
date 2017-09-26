@@ -5,7 +5,6 @@ import kiskadee.fetchers.example
 import kiskadee.fetchers.debian
 from sqlalchemy.orm import sessionmaker
 from kiskadee import model
-from kiskadee.model import create_analyzers
 from kiskadee.queue import KiskadeeQueue
 from kiskadee.database import Database
 
@@ -17,7 +16,7 @@ class AnalyzersTestCase(unittest.TestCase):
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         model.Base.metadata.create_all(self.engine)
-        create_analyzers(self.session)
+        model.create_analyzers(self.session)
         self.fetcher = kiskadee.fetchers.debian.Fetcher()
         self.deb_pkg = {'name': 'test',
                         'version': '1.0.0',
@@ -62,8 +61,7 @@ class AnalyzersTestCase(unittest.TestCase):
 
         self.assertEqual(analyzed_pkg['name'], source_to_analysis['name'])
         self.assertIn('cppcheck', analyzed_pkg['results'])
-        # TODO: fix issue #44
-        # self.assertIn('flawfinder', analyzed_pkg['results'])
+        self.assertIn('flawfinder', analyzed_pkg['results'])
 
     def test_path_to_uncompressed_source(self):
 
