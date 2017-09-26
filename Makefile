@@ -1,3 +1,6 @@
+# bash is needed to run pushd/popd for the analyzers target
+SHELL:=/bin/bash
+
 help:
 	@printf "Available targets: check, analyzers, clean\n\n"
 
