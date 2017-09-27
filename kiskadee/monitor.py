@@ -10,16 +10,16 @@ import os
 import json
 
 import kiskadee.database
-from kiskadee.report import  CppCheckReport
+from kiskadee.report import CppcheckReport, FlawfinderReport
 from kiskadee.runner import Runner
 import kiskadee.queue
 from kiskadee.model import Package, Fetcher, Version, Report
-import re
 
 RUNNING = True
 
 REPORTERS = {
-    'cppcheck': CppCheckReport
+    'cppcheck': CppcheckReport,
+    'flawfinder': FlawfinderReport
 }
 
 
@@ -151,16 +151,25 @@ class Monitor:
 
     def _save_reports(self, analysis, pkg, analyzer_name):
         try:
-            results = analysis.raw['results']
+            results = analysis['results']
             analyzer_report = REPORTERS[analyzer_name](results)
             _reports = Report()
-            _reports.results = json.dumps(analyzer_report.compute_reports())
-            _reports.analysis_id = analysis.id
+            _reports.results = json.dumps(
+                    analyzer_report
+                    ._compute_reports(analyzer_name)
+                )
+            _reports.analysis_id = analysis['id']
             self.session.add(_reports)
             self.session.commit()
             kiskadee.logger.debug(
                     "MONITOR: Saved analysis reports for {} package"
                     .format(pkg["name"])
+                )
+        except KeyError as key:
+            kiskadee.logger.debug(
+                    "ERROR: There's no reporter " +
+                    "to get reports from {} analyzer. ".format(key) +
+                    "Make shure to import or implement them."
                 )
         except Exception as err:
             kiskadee.logger.debug(
@@ -180,14 +189,19 @@ class Monitor:
             _analysis.raw = json.loads(result)
             self.session.add(_analysis)
             self.session.commit()
-            self._save_reports(_analysis, pkg, _analyzer.name)
+            dict_analysis = {
+                    'results': _analysis.raw['results'],
+                    'id': _analysis.id
+                }
+            self._save_reports(dict_analysis, pkg, _analyzer.name)
             kiskadee.logger.debug(
                     "MONITOR: Saved analysis done by {} for package: {}_{}"
                     .format(analyzer, pkg["name"], pkg["version"])
                 )
+            return
         except Exception as err:
             kiskadee.logger.debug(
-                    "MONITOR: The required analyzer was" +
+                    "MONITOR: The required analyzer was " +
                     "not registered in kiskadee"
                 )
             kiskadee.logger.debug(err)

@@ -56,6 +56,11 @@ def package_analysis(pkg_name, version):
             )
         analysis_schema = AnalysisSchema(many=True)
         results = analysis_schema.dump(analysis)
+        for result in results.data:
+            report = result['report']
+            if (report is not None) and ('results' in report.keys()):
+                report['results'] = json\
+                    .loads(report['results'])
         return jsonify({'analysis': results.data})
 
 

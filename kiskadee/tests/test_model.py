@@ -31,11 +31,8 @@ class ModelTestCase(unittest.TestCase):
                 raw=""
                 )
         self.session.add(self.analysis)
-        self.report = model.Reports(
+        self.report = model.Report(
                 analysis_id=1,
-                warnings=0,
-                styles=0,
-                errors=0
         )
         self.session.add(self.report)
         self.session.commit()
@@ -57,7 +54,7 @@ class ModelTestCase(unittest.TestCase):
         self.assertEqual(versions, [self.version])
 
     def test_query_report(self):
-        reports = self.session.query(model.Reports).all()
+        reports = self.session.query(model.Report).all()
         self.assertEqual(reports, [self.report])
 
     def test_add_fetcher(self):
@@ -74,10 +71,7 @@ class ModelTestCase(unittest.TestCase):
             self.session.commit()
 
     def test_add_report_without_analysis(self):
-        report = model.Reports(
-                warnings=0,
-                styles=0,
-                errors=0
+        report = model.Report(
         )
         self.session.add(report)
         with self.assertRaises(exc.IntegrityError):

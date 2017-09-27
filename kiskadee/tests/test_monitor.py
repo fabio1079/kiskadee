@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from kiskadee import model
 from kiskadee.monitor import Monitor
 from kiskadee.queue import packages_queue
-from kiskadee.model import Package, Fetcher, create_analyzers, Reports
+from kiskadee.model import Package, Fetcher, create_analyzers, Report, Analysis
 import kiskadee.queue
 import kiskadee.fetchers.debian
 from kiskadee.database import Database
@@ -46,9 +46,17 @@ class MonitorTestCase(unittest.TestCase):
                             'cppcheck': '<>',
                             'flawfinder': '><'},
                      'fetcher_id': 1}
-        self.analysis = {'analyzer_id': 1,
-                         'id': 1,
-                         'raw': 'warning, style, error'}
+        self.analysis = {
+                'analyzer_id': 1,
+                'id': 1,
+                'raw': {
+                    'results': [
+                        {'severity': 'warning'},
+                        {'severity': 'style'},
+                        {'severity': 'error'}
+                    ]
+                }
+            }
 
     def tearDown(self):
         self.session.close()
@@ -90,13 +98,40 @@ class MonitorTestCase(unittest.TestCase):
         self.assertEqual(_pkgs[1].name, _pkg['name'])
 
     def test_save_reports(self):
-        self.monitor._save_reports(self.analysis, self.pkg1)
-        _report = self.monitor.session.query(Reports).all()
+        _fetcher = model.Fetcher(
+                name='kiskadee-fetcher', target='university'
+            )
+        _pkg = model.Package(
+                name='kiskadee-package', fetcher_id=1
+            )
+        _version = model.Version(
+                number='1.0-rc1', package_id=1
+                )
+        _raw = {
+            'results': [
+                {'severity': 'warning'},
+                {'severity': 'style'},
+                {'severity': 'error'}
+            ]
+        }
+        _analysis = Analysis(
+                version_id=1,
+                analyzer_id=1,
+                id=1,
+                raw=_raw
+            )
+        self.session.add(_fetcher)
+        self.session.add(_pkg)
+        self.session.add(_version)
+        self.session.add(_analysis)
+        self.session.commit()
+        _dict_analysis = {
+                'results': _raw['results'],
+                'id': 1
+            }
+        self.monitor._save_reports(_dict_analysis, self.pkg1, 'cppcheck')
+        _report = self.monitor.session.query(Report).all()
         self.assertEqual(len(_report), 1)
-        self.assertEqual(_report[0].analysis_id, 1)
-        self.assertEqual(_report[0].warnings, 1)
-        self.assertEqual(_report[0].styles, 1)
-        self.assertEqual(_report[0].errors, 1)
 
     def test_save_version(self):
         self.monitor._save_fetcher(kiskadee.fetchers.debian.Fetcher())
