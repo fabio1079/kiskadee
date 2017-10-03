@@ -9,10 +9,8 @@ import kiskadee
 import inspect
 
 
-class Fetcher():
+class Fetcher(abc.ABC):
     """Abstract Fetcher class."""
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         """Return a new kiskadee Fetcher.
