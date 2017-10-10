@@ -7,6 +7,7 @@ from kiskadee.queue import packages_queue
 from kiskadee.model import Package, Fetcher, create_analyzers, Report, Analysis
 import kiskadee.queue
 import kiskadee.fetchers.debian
+import kiskadee.fetchers.anitya
 from kiskadee.database import Database
 
 
@@ -42,6 +43,17 @@ class MonitorTestCase(unittest.TestCase):
                      'version': '7.52.2-5',
                      'fetcher': kiskadee.fetchers.debian,
                      'meta': {'directory': 'pool/main/c/curl'},
+                     'results': {
+                            'cppcheck': '<>',
+                            'flawfinder': '><'},
+                     'fetcher_id': 1}
+        self.pkg4 = {'name': 'urlanitya',
+                     'version': '0.11',
+                     'fetcher': kiskadee.fetchers.anitya,
+                     'meta': {
+                            'backend': 'gitHub',
+                            'homepage': 'https://github.com/GesielFreitas/Cros'
+                        },
                      'results': {
                             'cppcheck': '<>',
                             'flawfinder': '><'},
@@ -161,6 +173,17 @@ class MonitorTestCase(unittest.TestCase):
         _current_version = _pkg_versions[-1].number
         self.assertEqual(self.pkg1['version'], _first_version)
         self.assertEqual(_pkg['version'], _current_version)
+
+    def test_save_package_anitya(self):
+        self.monitor._save_fetcher(kiskadee.fetchers.anitya.Fetcher())
+        packages_queue.put(self.pkg4)
+
+        _pkg = self.monitor.dequeue_package()
+        self.monitor._save_analyzed_pkg(_pkg)
+
+        _pkgs = self.monitor.session.query(Package).all()
+        self.assertEqual(len(_pkgs), 1)
+        self.assertEqual(_pkgs[0].homepage, _pkg['meta']['homepage'])
 
 
 if __name__ == '__main__':
