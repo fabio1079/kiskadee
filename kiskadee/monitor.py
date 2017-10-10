@@ -139,14 +139,13 @@ class Monitor:
             return None
 
     def _save_pkg(self, pkg):
-
+        homepage = None
         if ('meta' in pkg) and ('homepage' in pkg['meta']):
-                _package = Package(name=pkg['name'],
-                                   homepage=pkg['meta']['homepage'],
-                                   fetcher_id=pkg['fetcher_id'])
-        else:
-            _package = Package(name=pkg['name'],
-                               fetcher_id=pkg['fetcher_id'])
+            homepage = pkg['meta']['homepage']
+
+        _package = Package(name=pkg['name'],
+                            homepage=homepage,
+                            fetcher_id=pkg['fetcher_id'])
 
         self.session.add(_package)
         self.session.commit()
