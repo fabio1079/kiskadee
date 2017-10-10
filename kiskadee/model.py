@@ -20,6 +20,7 @@ class Package(Base):
     id = Column(Integer,
                 Sequence('packages_id_seq', optional=True), primary_key=True)
     name = Column(Unicode(255), nullable=False)
+    homepage = Column(Unicode(255), nullable=True)
     fetcher_id = Column(Integer, ForeignKey('fetchers.id'), nullable=False)
     versions = orm.relationship('Version', backref='packages')
     __table_args__ = (

@@ -50,6 +50,7 @@ class Monitor:
         while RUNNING:
             self.kiskadee_queue = kiskadee_queue
             pkg = self.dequeue_package()
+
             if pkg:
                 self._send_to_runner(pkg)
             time.sleep(2)
@@ -104,7 +105,6 @@ class Monitor:
     def _save_analyzed_pkg(self, pkg):
         if not pkg:
             return {}
-
         _package = (
                 self._query(Package)
                 .filter(Package.name == pkg['name']).first()
@@ -139,8 +139,16 @@ class Monitor:
             return None
 
     def _save_pkg(self, pkg):
-        _package = Package(name=pkg['name'],
-                           fetcher_id=pkg['fetcher_id'])
+        _fetcher = self.session.query(Fetcher)\
+                .filter(Fetcher.id == pkg['fetcher_id']).first()
+        if _fetcher.name == "anitya":
+            _package = Package(name=pkg['name'],
+                               homepage=pkg['meta']['homepage'],
+                               fetcher_id=pkg['fetcher_id'])
+        else:
+            _package = Package(name=pkg['name'],
+                               fetcher_id=pkg['fetcher_id'])
+
         self.session.add(_package)
         self.session.commit()
         _version = Version(number=pkg['version'],
