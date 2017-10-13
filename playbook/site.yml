@@ -1,0 +1,10 @@
+---
+# TODO: fix a static IP on Vagrantfile
+- hosts: vm
+  remote_user: root
+  roles:
+    - common
+    - docker
+    - git
+    - python
+    - database

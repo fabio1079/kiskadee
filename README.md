@@ -22,8 +22,8 @@ to install the dependencies below.
      - openssl-devel
      - python3-devel
      - gcc
-     - redhat-rpm-config python-pip
-     - python-pip
+     - redhat-rpm-config
+     - python3-pip
 
 ### Virtual Environment
 

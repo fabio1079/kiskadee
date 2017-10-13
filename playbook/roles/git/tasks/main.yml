@@ -1,0 +1,14 @@
+- name: Create kiskadee user
+  user:
+    name: kiskadee
+    group: wheel
+    shell: /bin/bash
+
+- name: Clone kiskadee repository
+  git:
+    repo: https://pagure.io/kiskadee.git
+    dest: /home/kiskadee/kiskadee
+    force: yes
+  become: yes
+  become_user: kiskadee
+

@@ -1,0 +1,63 @@
+- name: Enable postgresql
+  service:
+    name: postgresql
+    enabled: yes
+
+- name: initialize postgresql configuration
+  command: postgresql-setup initdb
+  ignore_errors: yes
+
+- name: Start postgresql
+  service:
+    name: postgresql
+    state: started
+
+- name: setup database password
+  shell: psql -U postgres -c "create user kiskadee with PASSWORD 'kiskadee';"
+  become: true
+  become_user: postgres
+  ignore_errors: yes
+
+- name: save database password
+  shell: echo "localhost:5432:kiskadee:kiskadee:kiskadee" > ~/.pgpass
+  become: true
+  become_user: kiskadee
+
+- name: change pgpass permissions
+  file:
+    path: /home/kiskadee/.pgpass
+    mode: 0600
+
+- name: create development database
+  shell: psql -U postgres -c "create database kiskadee with owner kiskadee;"
+  become: true
+  become_user: postgres
+  ignore_errors: yes
+
+- name: grant privileges on development database
+  shell: psql -U postgres -c "grant all privileges on database kiskadee to kiskadee"
+  become: true
+  become_user: postgres
+
+- name: create test database
+  shell: psql -U postgres -c "create database kiskadee_test with owner kiskadee;"
+  become: true
+  become_user: postgres
+  ignore_errors: yes
+
+- name: grant privileges on test database
+  shell: psql -U postgres -c "grant all privileges on database kiskadee_test to kiskadee"
+  become: true
+  become_user: postgres
+
+- name: configure pg_hba.conf
+  template:
+    src: pg_hba.conf
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    force: yes
+    mode: 0644
+
+- name: Start postgresql
+  service:
+    name: postgresql
+    state: restarted
