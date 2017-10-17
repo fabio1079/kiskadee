@@ -8,7 +8,7 @@ import os
 # https://github.com/zzzeek/sqlalchemy/blob/master/setup.py
 kiskadeefile = os.path.join(os.path.dirname(__file__),
                             'kiskadee', '__init__.py')
-# os.environ['TMPDIR'] = '/tmp'
+
 with open(kiskadeefile) as stream:
     regex = re.compile(r".*__version__ = '(.*?)'", re.S)
     __version__ = regex.match(stream.read()).group(1)

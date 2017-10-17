@@ -134,13 +134,13 @@ class Runner:
                 # not delete the source code used on tests.
                 if not compressed_source.find("kiskadee/tests") > -1:
                     shutil.rmtree(os.path.dirname(compressed_source))
+                    kiskadee.logger.debug(
+                            'ANALYSIS: Remove {} temp directory'
+                            .format(os.path.dirname(compressed_source))
+                        )
                 kiskadee.logger.debug(
                         'ANALYSIS: Unpacked {} source'.format(package['name'])
                         )
-                kiskadee.logger.debug(
-                        'ANALYSIS: Remove {} temp directory'
-                        .format(os.path.dirname(compressed_source))
-                    )
                 return uncompressed_source_path
             except Exception as err:
                 kiskadee.logger.debug('Something went wrong')
