@@ -139,12 +139,11 @@ class Monitor:
             return None
 
     def _save_pkg(self, pkg):
-        _fetcher = self.session.query(Fetcher)\
-                .filter(Fetcher.id == pkg['fetcher_id']).first()
-        if _fetcher.name == "anitya":
-            _package = Package(name=pkg['name'],
-                               homepage=pkg['meta']['homepage'],
-                               fetcher_id=pkg['fetcher_id'])
+
+        if ('meta' in pkg) and ('homepage' in pkg['meta']):
+                _package = Package(name=pkg['name'],
+                                   homepage=pkg['meta']['homepage'],
+                                   fetcher_id=pkg['fetcher_id'])
         else:
             _package = Package(name=pkg['name'],
                                fetcher_id=pkg['fetcher_id'])
