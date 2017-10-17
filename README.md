@@ -40,6 +40,21 @@ Install the python dependencies using pip
     pip install -e .
     pip install "fedmsg[consumers]"
 
+### Environment variables
+
+Kiskadee database migration tool(alembic) get its database configuration
+from a environment variable named DATABASE_TYPE.
+If this variable is not defined, then it will assume its running on a developemnt
+environment, but for others environments such as test, homologation or
+production be sure to set which one are being used.
+
+Only set DATABASE_TYPE if kiskadee is running on a non development environment.
+```bash
+export DATABASE_TYPE=db_test
+```
+
+> To see which data each one of those alembic will use take a look on: util/kiskadee.conf
+
 ### Docker Images
 
 To run the static analyzers, you must have
@@ -223,6 +238,41 @@ The events that comes to the anitya fetcher are published by Anitya, on this
 [page](https://apps.fedoraproject.org/datagrepper/raw?category=anitya.)
 For more info about the Anitya service, read kiskadee documentation.
 
+## Migrations
+
+Kiskadee uses alembic as its tool for database migration, it has a solid
+documentation on: http://alembic.zzzcomputing.com/en/latest
+
+For short, the most used commands are:
+
+**To create a new migration**
+```bash
+alembic revision -m "migration description"
+```
+
+**To autogenerate a new migration**
+```bash
+alembic revision --autogenerate
+```
+
+or
+
+```bash
+alembic revision --autogenerate -m "some migration description"
+```
+
+**To execute the migrations**
+```bash
+alembic upgrade head
+alembic upgrade +2
+alembic upgrade -1
+alembic upgrade some_revision_id+2
+```
+
+**Downgrading**
+```bash
+alembic downgrade base
+```
 
 ## License
 Copyright (C) 2017 the AUTHORS (see the AUTHORS file)

@@ -16,19 +16,24 @@ class Database:
         Base.metadata.bind = self.engine
 
     def _create_engine(self, db):
-        driver = kiskadee.config[db]['driver']
-        username = kiskadee.config[db]['username']
-        password = kiskadee.config[db]['password']
-        hostname = kiskadee.config[db]['hostname']
-        port = kiskadee.config[db]['port']
-        dbname = kiskadee.config[db]['dbname']
-        return create_engine('%s://%s:%s@%s:%s/%s' % (driver,
-                                                      username,
-                                                      password,
-                                                      hostname,
-                                                      port,
-                                                      dbname))
+        uri = get_database_uri(db)
+        return create_engine(uri)
 
     def _create_session(self, engine):
         DBSession = orm.sessionmaker(bind=engine)
         return DBSession()
+
+
+def get_database_uri(db):
+    """Return the Database URI of the current session."""
+    config = kiskadee.config[db]
+
+    driver = config['driver']
+    username = config['username']
+    password = config['password']
+    hostname = config['hostname']
+    port = config['port']
+    dbname = config['dbname']
+
+    return '%s://%s:%s@%s:%s/%s' % (driver, username, password,
+                                    hostname, port, dbname)
