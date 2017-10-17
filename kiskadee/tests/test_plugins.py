@@ -38,7 +38,8 @@ class DebianFetcherTestCase(unittest.TestCase):
         self.data = self.debian_fetcher.config
 
     def _download_sources_gz(self):
-        path = tempfile.mkdtemp()
+        tmp_path = tempfile.gettempdir()
+        path = tempfile.mkdtemp(dir=tmp_path)
         source = 'kiskadee/tests/test_source/Sources.gz'
         shutil.copy2(source, path)
         return path
@@ -51,7 +52,8 @@ class DebianFetcherTestCase(unittest.TestCase):
         self.assertEqual(url, expected_url)
 
     def test_uncompress_sources_gz(self):
-        temp_dir = tempfile.mkdtemp()
+        tmp_path = tempfile.gettempdir()
+        temp_dir = tempfile.mkdtemp(dir=tmp_path)
         self.debian_fetcher._download_sources_gz = self._download_sources_gz
         temp_dir = self.debian_fetcher._download_sources_gz()
         self.debian_fetcher._uncompress_gz(temp_dir)
@@ -60,7 +62,8 @@ class DebianFetcherTestCase(unittest.TestCase):
         self.assertTrue('Sources' in files)
 
     def test_enqueue_a_valid_pkg(self):
-        temp_dir = tempfile.mkdtemp()
+        tmp_path = tempfile.gettempdir()
+        temp_dir = tempfile.mkdtemp(dir=tmp_path)
         self.debian_fetcher._download_sources_gz = self._download_sources_gz
         temp_dir = self.debian_fetcher._download_sources_gz()
         self.debian_fetcher._uncompress_gz(temp_dir)

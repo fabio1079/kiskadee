@@ -39,7 +39,8 @@ class Fetcher(kiskadee.fetchers.Fetcher):
 
     def get_sources(self, source_data):
         """Download packages from some Anitya Backend."""
-        path = tempfile.mkdtemp()
+        tmp_path = tempfile.gettempdir()
+        path = tempfile.mkdtemp(dir=tmp_path)
         backend_name = source_data.get('meta').get('backend').lower()
         run_backend = self._load_backend(backend_name)
         if run_backend:

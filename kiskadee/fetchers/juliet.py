@@ -16,9 +16,12 @@ class Fetcher(kiskadee.fetchers.Fetcher):
         """Download Juliet 1.2 from SARD's website."""
         juliet_url = 'https://samate.nist.gov/SRD/testsuites/juliet/'
         juliet_filename = 'Juliet_Test_Suite_v1.2_for_C_Cpp.zip'
+        tmp_path = tempfile.gettempdir()
 
         return self.download(
-            tempfile.mkdtemp(), juliet_url + juliet_filename, juliet_filename
+            tempfile.mkdtemp(dir=tmp_path),
+            juliet_url + juliet_filename,
+            juliet_filename
             )
 
     @kiskadee.queue.package_enqueuer

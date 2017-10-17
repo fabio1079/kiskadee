@@ -1,4 +1,5 @@
 import unittest
+import tempfile
 
 from kiskadee.runner import Runner
 import kiskadee.fetchers.example
@@ -74,7 +75,8 @@ class AnalyzersTestCase(unittest.TestCase):
         source_path = self.runner._path_to_uncompressed_source(
                 source_to_analysis, kiskadee.fetchers.example.Fetcher()
         )
-
+        tmp_path = tempfile.gettempdir()
+        self.assertTrue(source_path.find(tmp_path) >= 0)
         self.assertIsNotNone(source_path)
 
     def test_invalid_path_to_uncompressed_source(self):

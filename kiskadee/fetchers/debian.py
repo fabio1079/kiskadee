@@ -38,7 +38,8 @@ class Fetcher(kiskadee.fetchers.Fetcher):
 
     def get_sources(self, source_data):
         """Download packages from some debian mirror."""
-        path = tempfile.mkdtemp()
+        tmp_path = tempfile.gettempdir()
+        path = tempfile.mkdtemp(dir=tmp_path)
         url = self._dsc_url(source_data)
         try:
             subprocess.check_output(
@@ -112,7 +113,8 @@ class Fetcher(kiskadee.fetchers.Fetcher):
         :returns: The path to the Sources.gz file
 
         """
-        path = tempfile.mkdtemp()
+        tmp_path = tempfile.gettempdir()
+        path = tempfile.mkdtemp(dir=tmp_path)
         return os.path.dirname(self.download(path, url, 'Sources.gz'))
 
     def _uncompress_gz(self, path):

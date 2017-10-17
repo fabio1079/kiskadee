@@ -120,7 +120,8 @@ class Runner:
                         os.path.dirname(compressed_source)
                     )
                 )
-            uncompressed_source_path = tempfile.mkdtemp()
+            tmp_path = tempfile.gettempdir()
+            uncompressed_source_path = tempfile.mkdtemp(dir=tmp_path)
             try:
                 shutil.unpack_archive(
                         compressed_source,
