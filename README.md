@@ -29,11 +29,26 @@ to install the dependencies below.
 
 Create a [virtualenv](https://virtualenv.pypa.io/en/stable/) to kiskadee.
 The virtualenv package will create a isolated environment
-for our python dependencies.
+for our python dependencies. To know more about virtualenvs and why to
+use them we suggest [reading this article](Python Virtual Environments - a Primer).
 
-    sudo pip install virtualenv
-    virtualenv -p /usr/bin/python3 .
-    source bin/activate
+    sudo pip install virtualenv virtualenvwrapper
+
+Then is necessary to export some variables. For comfort purposes we suggest to put
+the following lines in the end of your `.bashrc`, or similar.
+
+    export WORKON_HOME=$HOME/.virtualenvs
+    source /usr/local/bin/virtualenvwrapper.sh
+
+    echo -e "\n# virtualenv and virtualenvwrapper" >> ~/.bashrc
+    echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.bashrc
+    echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
+
+Then just execute
+
+    source ~/.bashrc
+    mkvirtualenv kiskadee -p python3
+    workon kiskadee
 
 Install the python dependencies using pip
 
