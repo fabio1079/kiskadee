@@ -29,8 +29,12 @@ to install the dependencies below.
 
 Create a [virtualenv](https://virtualenv.pypa.io/en/stable/) to kiskadee.
 The virtualenv package will create a isolated environment
-for our python dependencies. To know more about virtualenvs and why to
-use them we suggest [reading this article](Python Virtual Environments - a Primer).
+for our python dependencies. 
+
+You can use virtualenv or virtualenvwrapper, so just choose one 
+of your preference and follow the tutorial bellow.
+
+#### virtualenvwrapper
 
     sudo pip install virtualenv virtualenvwrapper
 
@@ -54,6 +58,21 @@ Install the python dependencies using pip
 
     pip install -e .
     pip install "fedmsg[consumers]"
+
+
+#### virtualenv
+
+    sudo pip install virtualenv
+    virtualenv -p /usr/bin/python3 .
+    source bin/activate
+
+Install the python dependencies using pip
+
+    pip install -e .
+    pip install "fedmsg[consumers]"
+
+To know more about virtualenvs and why to
+use them we suggest [reading this article](Python Virtual Environments - a Primer).
 
 ### Docker Images
 
