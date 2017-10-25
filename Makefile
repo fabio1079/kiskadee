@@ -23,5 +23,9 @@ analyzers:
 		popd; \
 	done
 
+deploy:
+	echo "Installing kiskadee...";
+	ansible-playbook -i playbook/${INVENTORY} playbook/site.yml -f 10;
+
 clean:
 	rm -rf htmlcov .coverage

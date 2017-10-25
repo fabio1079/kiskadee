@@ -1,5 +1,16 @@
 # Change Log
 
+## [Unreleased]
+### Added
+- Several API improvements.
+- Include ansible playbooks for easy deploy.
+- Use alembic to manage migrations.
+### Changed
+- Convert files to firehose in memory.
+- Use PostgreSQL JSON type to save analyses.
+### Removed
+- Python2 support.
+
 ## [0.3.1] - 2017-09-07
 ### Fixed
 - Set package version.

@@ -1,0 +1,19 @@
+- name: install yum
+  dnf:
+    name: yum
+
+- name: install fedora dependencies
+  dnf: name={{ item }} state=installed
+  with_items:
+    - openssl-devel
+    - python2-devel
+    - python3-devel
+    - gcc
+    - redhat-rpm-config
+    - python3-pip
+    - dnf-plugins-core
+    - git
+    - postgresql-server
+    - postgresql-contrib
+    - libselinux-python
+  ignore_errors: yes

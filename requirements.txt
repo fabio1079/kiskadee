@@ -18,3 +18,5 @@ marshmallow
 flask-cors
 coverage
 nose
+ansible
+alembic

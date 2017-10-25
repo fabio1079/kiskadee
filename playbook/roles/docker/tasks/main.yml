@@ -1,0 +1,16 @@
+- name: Configure docker repository
+  command:  dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+- name: Install docker engine
+  dnf: name=docker-ce
+
+- name: Start docker service
+  service:
+    name: docker
+    state: started
+
+- name: Change docker socket permitions
+  file:
+    path: /var/run/docker.sock
+    mode: 0777
+
