@@ -1,3 +1,5 @@
+%define debug_package %{nil}
+
 Name:           kiskadee
 Version:        0.3.1
 Release:        1%{?dist}
@@ -30,8 +32,12 @@ Requires: docker
 
 
 %files
-%license add-license-file-here
-%doc add-docs-here
+%license LICENSE
+%doc doc
+%{_bindir}/%{name}
+%{_bindir}/%{name}_api
+%{python3_sitelib}/%{name}/
+%{python3_sitelib}/%{name}-%{version}-py3.6.egg-info/
 
 
 
