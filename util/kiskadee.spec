@@ -15,13 +15,28 @@ BuildRequires: gcc
 BuildRequires: redhat-rpm-config
 
 Requires: docker
+Requires: python3-psutil
+Requires: python3-psycopg2
+Requires: python3-firehose
+Requires: python3-sqlalchemy
+Requires: python-debian
+Requires: python3-chardet
+Requires: python3-packaging
+Requires: python3-PyYAML
+Requires: python3-flask-restless
+Requires: python3-marshmallow
+Requires: python3-nose
+
+# BUG: https://bugzilla.redhat.com/show_bug.cgi?id=1114413
+#Requires: python3-flask-cors
+#We will need to port this to python3.
+#We need this to consume fedmsg messages.
+#Requires: python2-fedmsg-consumers
 
 %description
 
-
 %prep
 %autosetup
-
 
 %build
 %py3_build
@@ -37,8 +52,7 @@ Requires: docker
 %{_bindir}/%{name}
 %{_bindir}/%{name}_api
 %{python3_sitelib}/%{name}/
-%{python3_sitelib}/%{name}-%{version}-py3.6.egg-info/
-
+%{python3_sitelib}/%{name}*.egg-info/
 
 
 %changelog
