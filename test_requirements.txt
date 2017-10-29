@@ -1,2 +1,4 @@
 coverage
 nose
+flake8
+pydocstyle

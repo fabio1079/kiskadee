@@ -5,13 +5,10 @@ firehose>=0.5
 sqlalchemy
 python-debian
 chardet
-Sphinx
 fedmsg
 fedmsg[consumers]
 packaging
 pyyaml
-flake8
-pydocstyle
 flask
 Flask-Restless
 marshmallow
