@@ -26,12 +26,10 @@ Requires: python3-PyYAML
 Requires: python3-flask-restless
 Requires: python3-marshmallow
 Requires: python3-nose
+Requires: python2-fedmsg-consumers
 
 # BUG: https://bugzilla.redhat.com/show_bug.cgi?id=1114413
 #Requires: python3-flask-cors
-#We will need to port this to python3.
-#We need this to consume fedmsg messages.
-#Requires: python2-fedmsg-consumers
 
 %description
 
