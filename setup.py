@@ -22,6 +22,14 @@ def get_requirements(requirements_file='requirements.txt'):
                 if not line.startswith('#')
                 ]
 
+def get_test_requirements(test_requirements_file='test_requirements.txt'):
+    with open(test_requirements_file) as f:
+        return [
+                line.rstrip().split('#')[0]
+                for line in f.readlines()
+                if not line.startswith('#')
+                ]
+
 setup(
     name='kiskadee',
     version=__version__,
@@ -52,9 +60,5 @@ setup(
                 'anityaconsumer = kiskadee.fetchers.anitya:AnityaConsumer')},
     install_requires=get_requirements(),
     test_suite='nose.collector',
-    tests_require=[
-        'nose',
-        'flake8',
-        'pydocstyle'
-        ]
+    tests_require=get_test_requirements()
         )
