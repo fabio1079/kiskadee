@@ -27,9 +27,7 @@ kiskadee have a CI environment hosted at this
 
 ## Communication
 
-### IRC
-
-#kiskadee @ freenode
+Join us on IRC: #kiskadee @ freenode
 
 ## License
 Copyright (C) 2017 the AUTHORS (see the AUTHORS file)
