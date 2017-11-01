@@ -1,8 +1,3 @@
-.. kiskadee documentation master file, created by
-   sphinx-quickstart on Thu May 25 20:00:01 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 kiskadee documentation
 ======================
 
@@ -31,6 +26,8 @@ potential false positives are ranked last.
    analyzers
    fetchers
    config_file
+   installing
+   development
 
 
 Indices and tables

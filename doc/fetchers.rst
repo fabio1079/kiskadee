@@ -49,8 +49,8 @@ A simple example of a kiskadee fetcher
 List of kiskadee fetchers
 ----------------------------
 
-Inside tha package `fetchers` you can check the available fetchers and which
-targets are monitored with each fetcher. This section is a brief overview of
+Inside the `fetchers` package you can check all available fetchers and what
+targets are monitored by each fetcher. This section is a brief overview of
 the available fetchers.
 
     - *anitya.py*: A fetcher to monitor fedmsg events, published on the

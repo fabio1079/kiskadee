@@ -1,312 +1,35 @@
 # kiskadee
 
-kiskadee is a continuous static analysis tool which writes the analysis results
-into a Firehose database.
-
-## Setup
-
-### Dependencies
-
-The name of the dependencies are compatible
-with the Fedora distribution. If you use another operational system,
-you will have to find the compatible names for the dependencies.
-The `redhat-rpm-config`
-package, is a specific Fedora dependency, if you not use Fedora (or a
-Red Hat distribution), maybe you will not have to install it.
-
-`dnf` is a package manager for the Fedora distribution
-(On Debian and Ubuntu is apt),
-if you not use Fedora, use the package manager available for your system,
-to install the dependencies below.
-
-     - openssl-devel
-     - python3-devel
-     - gcc
-     - redhat-rpm-config
-     - python3-pip
-
-### Virtual Environment
-
-Create a [virtualenv](https://virtualenv.pypa.io/en/stable/) to kiskadee.
-The virtualenv package will create a isolated environment
-for our python dependencies. 
-
-You can use virtualenv or virtualenvwrapper, so just choose one 
-of your preference and follow the tutorial bellow.
-
-#### virtualenvwrapper
-
-    sudo pip install virtualenv virtualenvwrapper
-
-Then is necessary to export some variables. For comfort purposes we suggest to put
-the following lines in the end of your `.bashrc`, or similar.
-
-    export WORKON_HOME=$HOME/.virtualenvs
-    source /usr/local/bin/virtualenvwrapper.sh
-
-    echo -e "\n# virtualenv and virtualenvwrapper" >> ~/.bashrc
-    echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.bashrc
-    echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
-
-Then just execute
-
-    source ~/.bashrc
-    mkvirtualenv kiskadee -p python3
-    workon kiskadee
-
-Install the python dependencies using pip
-
-    pip install -e .
-    pip install "fedmsg[consumers]"
-
-
-#### virtualenv
-
-    sudo pip install virtualenv
-    virtualenv -p /usr/bin/python3 .
-    source bin/activate
-
-Install the python dependencies using pip
-
-    pip install -e .
-    pip install "fedmsg[consumers]"
-
-To know more about virtualenvs and why to
-use them we suggest [reading this article](Python Virtual Environments - a Primer).
-
-### Environment variables
-
-Kiskadee database migration tool(alembic) get its database configuration
-from a environment variable named DATABASE_TYPE.
-If this variable is not defined, then it will assume its running on a developemnt
-environment, but for others environments such as test, homologation or
-production be sure to set which one are being used.
-
-Only set DATABASE_TYPE if kiskadee is running on a non development environment.
-```bash
-export DATABASE_TYPE=db_test
-```
-
-> To see which data each one of those alembic will use take a look on: util/kiskadee.conf
-
-### Docker Images
-
-To run the static analyzers, you must have
-[Docker](https://www.docker.com/community-edition) installed and running.
-If you have configured the Docker engineer properly,
-run the analyzers target in the Makefile. It will build the images for you.
-
-```
-make analyzers
-```
-
-### Database
-Now we will create the kiskadee database. You will need to install the
-postgresql packages for your system. If you use Fedora, follow the next
-steps, if not, you will have to find out how install postgresql on your
-system.
-
-```
-sudo dnf install postgresql-server postgresql-contrib
-sudo systemctl enable postgresql
-sudo postgresql-setup initdb
-sudo systemctl start postgresql
-```
-
-To install on Ubuntu, use this [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04).
-
-With postgresql installed, you will need to create the kiskadee role and
+kiskadee is a continuous static analysis tool which writes the analysis
+results into a
+[firehose](https://github.com/fedora-static-analysis/firehose)
 database.
-
-```
-sudo su - postgres
-createdb kiskadee
-createdb kiskadee_test
-createuser kiskadee -P
-# use kiskadee as password.
-psql -U postgres -c "grant all privileges on database kiskadee to kiskadee"
-psql -U postgres -c "grant all privileges on database kiskadee_test to kiskadee"
-# go back to your user (ctrl+d)
-echo "localhost:5432:kiskadee:kiskadee:kiskadee" > ~/.pgpass
-chmod 600 ~/.pgpass
-```
-
-Restart the postgresql service:
-
-```
-sudo systemctl restart postgresql
-```
-
-Test the database connection:
-
-```
-psql -U kiskadee -d kiskadee
-```
-
-If you was not able to log in on the database, you will need to edit
-the *pg_hba.conf* and change some rules defined by the postgresql package.
-On Linux systems this file normally stays at the
-`/var/lib/pgsql/data/`. Open this file and change:
-
-```
-# "local" is for Unix domain socket connections only
-local   all             all                                     peer
-# IPv4 local connections:
-host    all             all             127.0.0.1/32            ident
-# IPv6 local connections:
-host    all             all             ::1/128                 ident
-```
-
-to:
-
-```
-# "local" is for Unix domain socket connections only
-local   all             all                                     md5
-# IPv4 local connections:
-host    all             all             127.0.0.1/32            md5
-# IPv6 local connections:
-host    all             all             ::1/128                 md5
-```
-
-
-After this change, restart postgresql service:
-
-```
-sudo systemctl restart postgresql
-```
-
-Test the database connection:
-
-```
-psql -U kiskadee -d kiskadee
-```
-
-If you was able to get into the psql shell, the database is properly
-configured. Leave the shell with ctrl+d.
-
-### Running our first analysis
-
-kiskadee reads environment variables from  the `util/kiskadee.conf` file.
-If everything goes well till now, open the *kiskadee.conf* file, and set as
-active (`active = yes`) only the *example_fetcher*, the other fetchers will
-stay as `active = no`.
-
-Now run kiskadee by typing `kiskadee` on
-the terminal. If the Docker images was properly build, and the Docker client
-was properly configured on your machine, kiskadee will be able to analysis a
-example source code. This code is in the *kiskadee/tests/test_source/* directory.
-
-kiskadee will decompress the example source, and run the analyzers defined on
-the *kiskadee.conf* file. You can use any postgresql client to access the
-database that you have created,  and check the analysis maded by kiskadee.
-
-### Running API
-
-To run the kiskadee api just execute the command:
-
-```
-kiskadee_api
-```
-
-## Tests and coverage
-
-To check kiskadee tests and coverage just run:
-
-```
-chmod u+x run_tests_and_coverage.sh
-./run_tests_and_coverage.sh
-```
-
-To check kiskadee coverage open the file *covhtml/index.html*.
-
-## Repositories
-
-kiskadee daemon and API development are hosted at [pagure](https://pagure.io/kiskadee).
-
-kiskadee frontend is hosted at [pagure](https://pagure.io/kiskadee/kiskadee_ui).
-Feel free to open issues and pull requests there.
-
-We also have mirrors on [gitlab](https://gitlab.com/kiskadee/kiskadee) and
-[github](https://github.com/LSS-USP/kiskadee).
-
-kiskadee have a CI environment hosted at this [url](http://143.107.45.126:30130/blue/organizations/jenkins/LSS-USP%2Fkiskadee/activity).
 
 ## Documentation
 
-[kiskadee documentation is hosted at pagure.](docs.pagure.org/kiskadee)
+For more information on the project, installation or development
+environment setup, refer to the full [kiskadee
+documentation](docs.pagure.org/kiskadee).
 
-To build the documentation just entry in the doc directory, and run
+## Repositories
 
-```
-make html
-```
+kiskadee core and API development are hosted at [pagure](https://pagure.io/kiskadee).
 
-To access the documentation open the `index.html` file, inside the
-doc/\_build/html.
+kiskadee frontend is hosted at [pagure](https://pagure.io/kiskadee/kiskadee_ui).
 
-## Fetchers
+We maintain mirrors on [gitlab](https://gitlab.com/kiskadee/kiskadee)
+and [github](https://github.com/LSS-USP/kiskadee) since earlier
+development used both at some point for CI purposes. **Do not open
+issues or pull requests on these mirrors**.
 
-### Debian Fetcher
-If you intend to use the debian fetcher, you will have to install the
-`devscripts` package, in order use the necessary Debian tools to run the
-fetcher.
+kiskadee have a CI environment hosted at this
+[url](http://143.107.45.126:30130/blue/organizations/jenkins/LSS-USP%2Fkiskadee/activity).
 
-### Anitya Fetcher
-If you intend to run the anitya fetcher, you will have to install fedmsg-hub,
-in order to kiskadee be able to consume the fedmsg events.
-To install fedmsg-hub follow this steps inside the kiskadee root path:
+## Communication
 
-```
-# Run this inside the kiskadee's virtualenv
-sudo mkdir -p /etc/fedmsg.d/
-sudo cp util/base.py util/endpoints.py  /etc/fedmsg.d/
-sudo cp util/anityaconsumer.py /etc/fedmsg.d/
-PYTHONPATH=`pwd` fedmsg-hub
-```
+### IRC
 
-With this steps, fedmsg-hub will instantiate `AnityaConsumer` and publish
-the monitored events using ZeroMQ. When kiskadee starts it will consume
-the messages published by the consumer, and will run the analysis.
-
-The events that comes to the anitya fetcher are published by Anitya, on this
-[page](https://apps.fedoraproject.org/datagrepper/raw?category=anitya.)
-For more info about the Anitya service, read kiskadee documentation.
-
-## Migrations
-
-Kiskadee uses alembic as its tool for database migration, it has a solid
-documentation on: http://alembic.zzzcomputing.com/en/latest
-
-For short, the most used commands are:
-
-**To create a new migration**
-```bash
-alembic revision -m "migration description"
-```
-
-**To autogenerate a new migration**
-```bash
-alembic revision --autogenerate
-```
-
-or
-
-```bash
-alembic revision --autogenerate -m "some migration description"
-```
-
-**To execute the migrations**
-```bash
-alembic upgrade head
-alembic upgrade +2
-alembic upgrade -1
-alembic upgrade some_revision_id+2
-```
-
-**Downgrading**
-```bash
-alembic downgrade base
-```
+#kiskadee @ freenode
 
 ## License
 Copyright (C) 2017 the AUTHORS (see the AUTHORS file)
