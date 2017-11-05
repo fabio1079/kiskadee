@@ -3,10 +3,8 @@ docker
 psycopg2
 firehose>=0.5
 sqlalchemy
-python-debian
 chardet
 fedmsg
-fedmsg[consumers]
 packaging
 pyyaml
 flask
