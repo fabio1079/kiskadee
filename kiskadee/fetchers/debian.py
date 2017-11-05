@@ -59,7 +59,7 @@ class Fetcher(kiskadee.fetchers.Fetcher):
             subprocess.check_output(['dpkg', '--compare-versions', new, 'gt',
                                      old])
             return True
-        except:
+        except Exception as err:
             return False
 
     def _source_path(self, path):

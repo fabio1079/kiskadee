@@ -143,10 +143,11 @@ class Monitor:
         if ('meta' in pkg) and ('homepage' in pkg['meta']):
             homepage = pkg['meta']['homepage']
 
-        _package = Package(name=pkg['name'],
-                            homepage=homepage,
-                            fetcher_id=pkg['fetcher_id'])
-
+        _package = Package(
+                name=pkg['name'],
+                homepage=homepage,
+                fetcher_id=pkg['fetcher_id']
+                )
         self.session.add(_package)
         self.session.commit()
         _version = Version(number=pkg['version'],
