@@ -3,7 +3,7 @@
 Name:           kiskadee
 Version:        0.4.0
 Release:        1%{?dist}
-Summary:        kiskadee is a continuous static analysis tool which writes the analysis results into a Firehose database.
+Summary:        A continuous static analysis system
 
 License:        GPLv3
 URL:            https://pagure.io/kiskadee
@@ -59,9 +59,7 @@ ranked first and potential false positives are ranked last.
 
 %install
 %py3_install
-mkdir $RPM_BUILD_ROOT/%{_sysconfdir}
-install util/kiskadee.conf $RPM_BUILD_ROOT/%{_sysconfdir}/kiskadee.conf
-
+install -m 644 util/kiskadee.conf -D $RPM_BUILD_ROOT%{_sysconfdir}/kiskadee.conf
 
 %files
 %license LICENSE
@@ -72,7 +70,6 @@ install util/kiskadee.conf $RPM_BUILD_ROOT/%{_sysconfdir}/kiskadee.conf
 %{python3_sitelib}/%{name}*.egg-info/
 %config %{_sysconfdir}/kiskadee.conf
 
-
 %changelog
 * Wed Oct 25 2017 David Carlos <ddavidcarlos1392@gmail.com>
--
+- Initial packaging work for Fedora
