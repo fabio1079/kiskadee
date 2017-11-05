@@ -1,5 +1,4 @@
 psutil
-docker
 psycopg2
 firehose>=0.5
 sqlalchemy
