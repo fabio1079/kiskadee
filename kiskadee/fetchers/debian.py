@@ -11,7 +11,6 @@ from debian.deb822 import Sources
 import subprocess
 
 import kiskadee.queue
-import kiskadee.util
 
 RUNNING = True
 
@@ -114,7 +113,7 @@ class Fetcher(kiskadee.fetchers.Fetcher):
 
         """
         path = tempfile.mkdtemp()
-        return os.path.dirname(kiskadee.util.download(path, url, 'Sources.gz'))
+        return os.path.dirname(self.download(path, url, 'Sources.gz'))
 
     def _uncompress_gz(self, path):
         """Extract Some .gz file."""

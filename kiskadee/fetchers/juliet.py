@@ -17,7 +17,7 @@ class Fetcher(kiskadee.fetchers.Fetcher):
         juliet_url = 'https://samate.nist.gov/SRD/testsuites/juliet/'
         juliet_filename = 'Juliet_Test_Suite_v1.2_for_C_Cpp.zip'
 
-        return kiskadee.util.download(
+        return self.download(
             tempfile.mkdtemp(), juliet_url + juliet_filename, juliet_filename
             )
 

@@ -4,9 +4,11 @@ Each kiskadee fetcher must be a module in this package that implements the
 Fetcher class here defined.
 """
 
+import os
 import abc
-import kiskadee
 import inspect
+import kiskadee
+import urllib.request
 
 
 class Fetcher(abc.ABC):
@@ -67,3 +69,26 @@ class Fetcher(abc.ABC):
             return kiskadee.config[fetcher_name].get('analyzers').split()
         else:
             return self.config.get('analyzers').split()
+
+    def download(self, path, url, file_name):
+        """Download something from the internet.
+
+        :path: The path where the file will be placed when downloaded.
+        :url: Url of the file.
+        :file_name: The name of the file that will be saved on the disc.
+        :return: The absolute path to the downloaded file.
+        """
+        try:
+            in_file = urllib.request.urlopen(url)
+            data = in_file.read()
+            download_path = os.path.join(path, file_name)
+            with open(download_path, 'wb') as info:
+                info.write(data)
+            return download_path
+        except Exception as err:
+            kiskadee.logger.debug(
+                    "Cannot download {} "
+                    "file".format(file_name)
+            )
+            kiskadee.logger.debug(err)
+            return None

@@ -7,7 +7,6 @@ from packaging import version
 import fedmsg.consumers
 import time
 
-import kiskadee.util
 import kiskadee.fetchers
 import kiskadee.queue
 
@@ -119,7 +118,7 @@ class Backends():
         source_version = ''.join([source_data.get('version'), '.tar.gz'])
         homepage = source_data.get('meta').get('homepage')
         url = ''.join([homepage, '/archive/', source_version])
-        return kiskadee.util.download(path, url, source_version)
+        return self.download(path, url, source_version)
 
 
 class AnityaConsumer(fedmsg.consumers.FedmsgConsumer):

@@ -8,7 +8,6 @@ import kiskadee.queue
 import kiskadee.analyzers
 import kiskadee.model
 import kiskadee.database
-import kiskadee.util
 import kiskadee.converter
 
 RUNNING = True

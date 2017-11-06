@@ -1,5 +1,7 @@
 # Change Log
 
+## [Unreleased]
+
 ## [0.4.0]
 ### Added
 - Several API improvements.

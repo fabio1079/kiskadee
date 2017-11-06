@@ -13,7 +13,6 @@ Modules:
     - analyzers
     - converter
     - database
-    - util
     - model
     - monitor
     - queue
@@ -28,7 +27,7 @@ import configparser
 import logging
 import sys
 
-__version__ = '0.4.0'
+__version__ = '0.4.1~dev'
 
 _my_path = os.path.dirname(os.path.realpath(__file__))
 
