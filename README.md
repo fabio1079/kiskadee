@@ -9,7 +9,7 @@ database.
 
 For more information on the project, installation or development
 environment setup, refer to the full [kiskadee
-documentation](docs.pagure.org/kiskadee).
+documentation](https://docs.pagure.org/kiskadee).
 
 ## Repositories
 
