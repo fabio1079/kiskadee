@@ -36,33 +36,66 @@ def packages():
         return jsonify({'packages': result.data})
 
 
-@kiskadee.route('/analysis/<pkg_name>/<version>')
-def package_analysis(pkg_name, version):
-    """Get the a analysis of some package version."""
-    if request.method == 'GET':
-        db_session = kiskadee_db_session()
-        package_id = (
-                db_session.query(Package)
-                .filter(Package.name == pkg_name).first().id
-            )
-        version_id = (
-                db_session.query(Version)
-                .filter(Version.number == version)
-                .filter(Version.package_id == package_id).first().id
-            )
-        analysis = (
-                db_session.query(Analysis)
-                .filter(Analysis.version_id == version_id).all()
-            )
-        analysis_schema = AnalysisSchema(many=True)
-        results = analysis_schema.dump(analysis)
-        for result in results.data:
-            report = result['report']
-            if (report is not None) and ('results' in report.keys()):
-                report['results'] = json\
-                    .loads(report['results'])
-        return jsonify({'analysis': results.data})
+@kiskadee.route('/analysis/<pkg_name>/<version>', methods=['GET'])
+def package_analysis_overview(pkg_name, version):
+    """Get the a analysis list of some package version."""
+    db_session = kiskadee_db_session()
+    package_id = (
+            db_session.query(Package)
+            .filter(Package.name == pkg_name).first().id
+        )
+    version_id = (
+            db_session.query(Version)
+            .filter(Version.number == version)
+            .filter(Version.package_id == package_id).first().id
+        )
+    analysis = (
+            db_session.query(Analysis)
+            .filter(Analysis.version_id == version_id).all()
+        )
+    analysis_schema = AnalysisSchema(many=True)
+    results = analysis_schema.dump(analysis)
+    result_data = []
+    for result in results.data:
+        current_data = {
+            'analyzer_id': result['analyzer_id'],
+            'id': result['id'],
+            'version': result['raw']['metadata']['generator']['version'],
+            'name': result['raw']['metadata']['generator']['name']
+        }
+        result_data.append(current_data)
+    return jsonify({'analysis': result_data})
 
+
+@kiskadee.route('/analysis/<pkg_name>/<version>/<analysis_id>/results', methods=['GET'])
+def analysis_results(pkg_name, version, analysis_id):
+    """Get the analysis results from a specific analyzer."""
+    db_session = kiskadee_db_session()
+    analysis = (
+            db_session.query(Analysis)
+            .get(analysis_id)
+        )
+    analysis_schema = AnalysisSchema()
+    results = analysis_schema.dump(analysis)
+    response = results.data['raw']['results']
+    return jsonify({'analysis_results': response})
+
+
+@kiskadee.route('/analysis/<pkg_name>/<version>/<analysis_id>/reports', methods=['GET'])
+def analysis_reports(pkg_name, version, analysis_id):
+    """Get the analysis results from a specific analyzer."""
+    db_session = kiskadee_db_session()
+    analysis = (
+            db_session.query(Analysis)
+            .get(analysis_id)
+        )
+    analysis_schema = AnalysisSchema()
+    results = analysis_schema.dump(analysis)
+    report = results.data['report']
+    if (report is not None) and ('results' in report.keys()):
+        report['results'] = json\
+            .loads(report['results'])
+    return jsonify({'analysis_report': report})
 
 def kiskadee_db_session():
     """Return a kiskadee database session."""
