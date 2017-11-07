@@ -4,7 +4,13 @@ from __future__ import with_statement
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
-from os import environ
+import os
+
+# We need this to import kiskadee without installing it
+import sys
+import pathlib
+kiskadee_path = pathlib.Path(__file__).parents[1]
+sys.path.insert(0, os.path.abspath(kiskadee_path))
 
 from kiskadee.database import get_database_uri
 from kiskadee.model import Base
@@ -29,7 +35,7 @@ target_metadata = Base.metadata
 # ... etc.
 
 try:
-    database_type = environ['DATABASE_TYPE']
+    database_type = os.environ['DATABASE_TYPE']
 except KeyError:
     database_type = 'db_development'
 
