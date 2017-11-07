@@ -1,7 +1,7 @@
 """kiskadee API."""
 from flask import Flask, jsonify
 from flask import request
-#from flask_cors import CORS
+from flask_cors import CORS
 
 from kiskadee.database import Database
 from kiskadee.model import Package, Fetcher, Version, Analysis
@@ -11,7 +11,7 @@ import json
 
 kiskadee = Flask(__name__)
 
-#CORS(kiskadee)
+CORS(kiskadee)
 
 
 @kiskadee.route('/fetchers')

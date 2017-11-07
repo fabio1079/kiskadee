@@ -7,6 +7,7 @@ fedmsg
 packaging
 pyyaml
 flask
+flask_cors
 Flask-Restless
 marshmallow
 flask-cors
