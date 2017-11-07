@@ -174,6 +174,22 @@ class ModelTestCase(unittest.TestCase):
         self.assertEqual(analysis[0].raw, "<>")
         self.assertEqual(analysis[1].raw, "><")
 
+    def test_it_hash_a_user_password(self):
+        u = model.User()
+
+        old_password = 'foobar'
+        u.password_hash = old_password
+        u.hash_password('test')
+
+        self.assertNotEqual(u.password_hash, old_password)
+        self.assertGreater(len(u.password_hash), 100)
+
+    def test_it_verify_a_user_password(self):
+        u = model.User()
+        u.hash_password('test')
+
+        self.assertTrue(u.verify_password('test'))
+        self.assertFalse(u.verify_password('wrong password'))
 
 if __name__ == '__main__':
     unittest.main()

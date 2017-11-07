@@ -2,7 +2,8 @@
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, UnicodeText, UniqueConstraint,\
-                       Sequence, Unicode, ForeignKey, orm, JSON
+                       Sequence, Unicode, ForeignKey, orm, JSON, String
+from passlib.apps import custom_app_context as pwd_context
 import kiskadee
 
 Base = declarative_base()
@@ -105,3 +106,25 @@ def create_analyzers(_session):
             new_analyzer.version = version
             _session.add(new_analyzer)
     _session.commit()
+
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer,
+                Sequence('users_id_seq', optional=True), primary_key=True)
+    name = Column(Unicode(255), nullable=False)
+    email = Column(String(255), nullable=False, unique=True)
+    password_hash = Column(String(128))
+
+    def hash_password(self, password):
+        """Takes a plain password as argument
+        and stores a hash of it with the user.
+        """
+        self.password_hash = pwd_context.hash(password)
+
+    def verify_password(self, password):
+        """Takes a plain password as argument and returns
+        True if the password is correct
+        False if not.
+        """
+        return pwd_context.verify(password, self.password_hash)

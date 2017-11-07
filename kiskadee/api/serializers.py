@@ -1,8 +1,8 @@
 """Provide objects to serialize the kiskadee models."""
 
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate, exceptions
 from kiskadee.model import Package, Fetcher, Analysis, Version,\
-        Report, Analyzer
+        Report, Analyzer, User
 
 
 class ReportsSchema(Schema):
@@ -88,3 +88,51 @@ class PackageSchema(Schema):
         """Serialize a Package object."""
         print('MAKING OBJECT FROM', data)
         return Package(**data)
+
+
+class UserSchema(Schema):
+    """Provide a serializer to the User model."""
+
+    id = fields.Int(dump_only=True)
+    name = fields.Str(required=True, validate=validate.Length(min=4, max=255))
+    email = fields.Str(
+        required=True,
+        validate=[validate.Email(error='Not a valid email address'),
+                  validate.Length(min=4, max=255)])
+    password = fields.Str(load_only=True,
+                          validate=validate.Length(min=4, max=255))
+
+    def make_object(self, data):
+        """Serialize a User object."""
+        print('MAKING OBJECT FROM', data)
+        return User(**data)
+
+    @classmethod
+    def create(cls, **data):
+        """User factory that creates a User object without saving it.
+
+        If the given data has errors it raises an
+        marshmallow.exceptions.ValidationError, else create an User model
+        and return it widthout saving.
+
+        :data: User model attributes
+        """
+        validation = UserSchema().load(data)
+
+        if bool(validation.errors):
+            raise exceptions.ValidationError(validation.errors)
+
+        password = validation.data.get('password')
+        if password is not None:
+            del validation.data['password']
+
+        user = User(**validation.data)
+
+        if password is not None:
+            user.hash_password(str(password))
+        else:
+            raise exceptions.ValidationError({
+                'password': 'Missing data for required field.'
+            })
+
+        return user

@@ -13,3 +13,5 @@ Flask-Restless
 marshmallow
 alembic
 python-debian
+passlib
+bcrypt

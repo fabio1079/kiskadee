@@ -1,12 +1,13 @@
 """kiskadee API."""
-from flask import Flask, jsonify
+from flask import Flask, jsonify, abort, make_response
 from flask import request
 from flask_cors import CORS
+from marshmallow.exceptions import ValidationError
 
 from kiskadee.database import Database
-from kiskadee.model import Package, Fetcher, Version, Analysis
+from kiskadee.model import Package, Fetcher, Version, Analysis, User
 from kiskadee.api.serializers import PackageSchema, FetcherSchema,\
-        AnalysisSchema
+        AnalysisSchema, UserSchema
 import json
 from sqlalchemy.orm import eagerload
 
@@ -103,6 +104,149 @@ def analysis_reports(pkg_name, version, analysis_id):
         report['results'] = json\
             .loads(report['results'])
     return jsonify({'analysis_report': report})
+
+
+@kiskadee.route('/users', methods=['GET'])
+def get_users():
+    """Get the list of users
+
+    GET /users
+
+    Possible status code:
+        - 200 Ok -> Users list
+    """
+    db_session = kiskadee_db_session()
+    users = db_session.query(User).all()
+    user_schema = UserSchema(many=True)
+    result = user_schema.dump(users)
+
+    return make_response(jsonify({'users': result.data}), 200)
+
+
+@kiskadee.route('/users', methods=['POST'])
+def create_user():
+    """Create a new user
+
+    POST /users
+
+    Possible status code:
+        - 201 Created -> User created
+        - 400 Bad Request -> Validation error
+        - 403 Forbidden -> User already exists
+    """
+    db_session = kiskadee_db_session()
+    data = request.get_json()
+
+    # Verify is user already exists
+    if data.get('email'):
+        user = db_session.query(User).filter_by(email=data.get('email')).first()
+
+        if user is not None:
+            return make_response(jsonify({'error': 'user already exists'}), 403)
+
+    # Try to create user
+    try:
+        user = UserSchema.create(**data)
+    except ValidationError as error:
+        return make_response(jsonify({
+            'error': 'Validation error',
+            'validations': error.args[0]
+        }), 400)
+
+    db_session.add(user)
+    db_session.commit()
+
+    user_schema = UserSchema()
+    result = user_schema.dump(user)
+
+    return make_response(jsonify({'user': result.data}), 201)
+
+
+@kiskadee.route('/users/<user_id>', methods=['GET'])
+def get_user_data(user_id):
+    """Get the user data
+
+    GET /users/:id
+
+    Possible status code:
+        - 200 Ok -> User data
+        - 404 Not Found -> User not found
+    """
+    db_session = kiskadee_db_session()
+    user = db_session.query(User).filter_by(id=user_id).first()
+
+    if user is None:
+        return make_response(jsonify({'error': 'user not found'}), 404)
+
+    user_schema = UserSchema()
+    result = user_schema.dump(user)
+
+    return make_response(jsonify({'user': result.data}), 200)
+
+
+@kiskadee.route('/users/<user_id>', methods=['PUT'])
+def update_user(user_id):
+    """Updates a user
+
+    PUT /users/:id
+
+    Possible status code:
+        - 200 Ok -> User updated
+        - 400 Bad Request -> Validation error
+        - 404 Not Found -> User not found
+    """
+    db_session = kiskadee_db_session()
+    user = db_session.query(User).filter_by(id=user_id).first()
+
+    if user is None:
+        return make_response(jsonify({'error': 'user not found'}), 404)
+
+    json_data = request.get_json()
+    user_data = UserSchema().dump(user).data
+    user_data.update(json_data)
+
+    validation = UserSchema().load(user_data)
+
+    if bool(validation.errors):
+        return make_response(jsonify({
+            'error': 'Validation error',
+            'validations': validation.errors
+        }), 400)
+
+    password = validation.data.get('validation')
+    if password is not None:
+        user.hash_password(password)
+        del validation.data['password']
+
+    for (key, value) in validation.data.items():
+        setattr(user, key, value)
+
+    db_session.commit()
+
+    result = UserSchema().dump(user)
+    return make_response(jsonify({'user': result.data}), 200)
+
+
+@kiskadee.route('/users/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """Deletes a user
+
+    DELETE /users/:id
+
+    Possible status code:
+        - 204 No Content -> User deleted
+        - 404 Not Found -> User not found
+    """
+    db_session = kiskadee_db_session()
+    user = db_session.query(User).filter_by(id=user_id).first()
+
+    if user is None:
+        return make_response(jsonify({'error': 'user not found'}), 404)
+
+    db_session.delete(user)
+    db_session.commit()
+
+    return make_response(jsonify({}), 204)
 
 
 def kiskadee_db_session():
