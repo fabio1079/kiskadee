@@ -9,7 +9,9 @@ import os
 # We need this to import kiskadee without installing it
 import sys
 import pathlib
-kiskadee_path = pathlib.Path(__file__).parents[1]
+
+# For python < 3.6 str conversion is needed on pathlib.Path
+kiskadee_path = str(pathlib.Path(__file__).parents[1])
 sys.path.insert(0, os.path.abspath(kiskadee_path))
 
 from kiskadee.database import get_database_uri
