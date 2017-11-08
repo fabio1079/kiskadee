@@ -1,13 +1,13 @@
 %define debug_package %{nil}
 
 Name:           kiskadee
-Version:        0.4.0
+Version:        0.4.1
 Release:        1%{?dist}
 Summary:        A continuous static analysis system
 
 License:        GPLv3
 URL:            https://pagure.io/kiskadee
-Source0:        %{name}-%{version}.tar.gz
+Source0:        https://releases.pagure.org/kiskadee/%{name}-%{version}.tar.gz
 
 BuildRequires: openssl-devel
 BuildRequires: python3-devel
@@ -71,5 +71,6 @@ install -m 644 util/kiskadee.conf -D $RPM_BUILD_ROOT%{_sysconfdir}/kiskadee.conf
 %config %{_sysconfdir}/kiskadee.conf
 
 %changelog
-* Wed Oct 25 2017 David Carlos <ddavidcarlos1392@gmail.com>
+* Sun Nov 05 2017 David Carlos <ddavidcarlos1392@gmail.com> - 0.4.0-1
 - Initial packaging work for Fedora
+
