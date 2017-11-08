@@ -1,4 +1,4 @@
-List of supported analyzers
+Supported analyzers
 ===========================
 
 For now, kiskadee supports cppcheck (http://cppcheck.sourceforge.net/),

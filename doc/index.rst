@@ -15,24 +15,20 @@ ranked based on their importance, where critical flaws are ranked first and
 potential false positives are ranked last.
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Documentation
 
    introduction
-   firehose
    architecture
-   monitor
-   runner
    analyzers
    fetchers
    config_file
    installing
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Developer Documentation
+
    development
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

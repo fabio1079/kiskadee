@@ -1,5 +1,5 @@
-Common interface to kiskadee fetchers
-=====================================
+Fetchers - plugins
+==================
 
 The Fetcher class defines a common behavior to all fetchers in kiskadee. This is
 useful to easly define targets to be monitored by kiskadee. A target is a

@@ -26,3 +26,29 @@ decision made by the kiskadee authors.
 ..
 
 *Figure One: kiskadee architecture.*
+
+Monitor - Module to manage kiskadee analysis
+--------------------------------------------
+
+The Monitor class is responsible for dequeuing packages from the
+`packages_queue` and for checking what packages need to be analyzed.
+
+The class defines the following public behaviors:
+
+
+.. autoclass:: kiskadee.monitor.Monitor()
+    :members: monitor
+
+Runner - Module to run static analysis
+--------------------------------------
+
+This module is responsible for running several static analyzers on
+on a given project source code.
+
+The module defines the following public behaviors:
+
+
+.. automodule:: kiskadee.runner
+   :members:
+
+

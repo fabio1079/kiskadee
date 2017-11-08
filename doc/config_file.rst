@@ -1,5 +1,5 @@
-kiskadee configuration file
-=============================
+Configuration file
+==================
 
 kiskadee uses a configuration file to define several parameters used in
 execution time. Database configuration, and some fetchers metadata are defined

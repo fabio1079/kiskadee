@@ -1,5 +1,5 @@
-kiskadee: a continuous static analysis system
-=============================================
+What is kiskadee?
+=================
 
 Static analyzers are computer programs that analyze other computer programs.
 This is generally done by checking source code through static analysis methods.
@@ -37,3 +37,13 @@ context, a warning is a single issue produced by a static analyzer. Finally,
 kiskadee maps software flaws inserted in specific software versions, providing
 developers with a relatively small list of warnings to be investigated in a
 suggested order.
+
+Common static analysis report notation
+----------------------------------------
+
+Since we want to compare and rank static analysis warnings, we want to store
+our static analysis reports in the same notation for each single static
+analyzer we run in a software package. Thus, kiskadee uses `firehose
+<https://github.com/fedora-static-analysis/firehose>`_. All reports stored in
+kiskadee database are in firehose JSON format and each static analyzer run by
+kiskadee must have a parser included in firehose upstream.

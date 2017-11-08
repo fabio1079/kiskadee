@@ -14,6 +14,7 @@
 
 import os
 import re
+from datetime import datetime
 
 kiskadeefile = os.path.join(
     os.path.dirname(__file__), '..', 'kiskadee', '__init__.py')
@@ -60,7 +61,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'kiskadee'
-copyright = u'2017, Athos Ribeiro <athoscr@fedoraproject.org>, David Carlos'
+year = datetime.now().year
+copyright = u'%d, Athos Ribeiro <athoscr@fedoraproject.org>, David Carlos' % year
 author = u'Athos Ribeiro, David Silva'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -96,13 +98,14 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+        }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -165,6 +168,3 @@ texinfo_documents = [
      author, 'kiskadee', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

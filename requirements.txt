@@ -20,3 +20,4 @@ coverage
 nose
 ansible
 alembic
+sphinx-rtd-theme
