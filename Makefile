@@ -28,4 +28,4 @@ deploy:
 	ansible-playbook -i playbook/${INVENTORY} playbook/site.yml -f 10;
 
 clean:
-	rm -rf htmlcov .coverage
+	rm -rf htmlcov .coverage kiskadee.egg-info build dist
