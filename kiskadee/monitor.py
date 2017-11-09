@@ -73,7 +73,7 @@ class Monitor:
         if not self.kiskadee_queue.results_empty():
             pkg = self.kiskadee_queue.dequeue_result()
             kiskadee.logger.debug(
-                    "MONITOR: Dequed result for package : {}_{}"
+                    "MONITOR: Dequed result for package : {}-{}"
                     .format(pkg["name"], pkg["version"])
                 )
             return pkg
@@ -202,7 +202,7 @@ class Monitor:
                 }
             self._save_reports(dict_analysis, pkg, _analyzer.name)
             kiskadee.logger.debug(
-                    "MONITOR: Saved analysis done by {} for package: {}_{}"
+                    "MONITOR: Saved analysis done by {} for package: {}-{}"
                     .format(analyzer, pkg["name"], pkg["version"])
                 )
             return
