@@ -18,6 +18,14 @@ kiskadee, keep in mind that this analyzer must be supported by the firehose
 project. To enable a new analyzer for some fetcher, just add the analyzer name
 in the `/etc/kiskadee.conf` (the analyzer must be installed on the environment).
 
+Frama-C white lists
+-------------------
+
+Frama-C analyses need to be specified in a per-project basis. The white lists
+are implemented in `util/dockerfiles/frama_c/docker-entrypoint.sh`. If you
+want to include new projects for Frama-C runs, we would be happy to accept
+your patches.
+
 The analyzers module
 --------------------
 

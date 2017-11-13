@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+### Changed
+- Use white lists for Frama-C analyses.
 
 ## [0.4.0]
 ### Added
