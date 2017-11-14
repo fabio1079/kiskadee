@@ -92,12 +92,26 @@ class ApiTestCase(unittest.TestCase):
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
         response = self.app.get("/analysis/test/1.0.0")
         response_data = json.loads(response.data.decode("utf-8"))
-        pkg_first_analysis = response_data["analysis"][0]
-        self.assertIsNotNone(pkg_first_analysis["raw"])
-        self.assertIn('report', pkg_first_analysis)
-        self.assertIn('location', pkg_first_analysis["raw"]["results"][0])
-        self.assertIn('cwe', pkg_first_analysis["raw"]["results"][0])
-        self.assertIn('message', pkg_first_analysis["raw"]["results"][0])
+        self.assertTrue(len(response_data) >= 1)
+
+    def test_get_analysis_results(self):
+        def mock_kiskadee_db_session():
+            return self.session
+
+        kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
+        response = self.app.get("/analysis/kiskadee-package/7.23/1/results")
+        response_data = json.loads(response.data.decode("utf-8"))
+        self.assertIn("analysis_results", response_data)
+        self.assertTrue(len(response_data["analysis_results"]) > 0)
+
+    def test_get_analysis_reports(self):
+        def mock_kiskadee_db_session():
+            return self.session
+
+        kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
+        response = self.app.get("/analysis/kiskadee-package/7.23/1/reports")
+        response_data = json.loads(response.data.decode("utf-8"))
+        self.assertIn("analysis_report", response_data)
 
 
 if __name__ == '__main__':
