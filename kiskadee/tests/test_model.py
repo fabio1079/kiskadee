@@ -1,6 +1,7 @@
 import unittest
 from sqlalchemy import exc
 from sqlalchemy.orm import sessionmaker
+import jwt
 
 from kiskadee import model
 from kiskadee.database import Database
@@ -190,6 +191,21 @@ class ModelTestCase(unittest.TestCase):
 
         self.assertTrue(u.verify_password('test'))
         self.assertFalse(u.verify_password('wrong password'))
+
+    def test_it_generates_a_user_auth_token(self):
+        u = model.User(name='test', email='test@email.com')
+        u.hash_password('test')
+
+        self.session.add(u)
+        self.session.commit()
+
+        u = self.session.query(model.User)\
+                .filter_by(email='test@email.com').first()
+        token = u.generate_token()
+        decoded_token = jwt.decode(token, model.TOKEN_SECRET_KEY)
+
+        self.assertGreaterEqual(len(token), 121)
+        self.assertEqual(decoded_token['user_id'], u.id)
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,15 +5,73 @@ from flask_cors import CORS
 from marshmallow.exceptions import ValidationError
 
 from kiskadee.database import Database
-from kiskadee.model import Package, Fetcher, Version, Analysis, User
+from kiskadee.model import Package, Fetcher, Version, Analysis, User,\
+        TOKEN_SECRET_KEY
 from kiskadee.api.serializers import PackageSchema, FetcherSchema,\
         AnalysisSchema, UserSchema
 import json
 from sqlalchemy.orm import eagerload
 
+import jwt
+from functools import wraps
+
 kiskadee = Flask(__name__)
 
 CORS(kiskadee)
+
+
+def token_required(fn):
+    """Token verification decorator. When applyed on a route it will
+    look for the x-access-token on the request header.
+
+    If it is valid, the the route is executed.
+    Else, the token is missing or is invalid or has expired, either way
+    the user receive a 403 status code when invalid.
+
+    Possible status code:
+        - 403 Forbidden ->
+            "Token is missing" or "Token expired" or "Invalid token"
+    """
+    @wraps(fn)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return make_response(jsonify({'error': 'Token is missing'}), 403)
+
+        try:
+            data = jwt.decode(token, TOKEN_SECRET_KEY)
+        except jwt.ExpiredSignatureError:
+            return make_response(jsonify({
+                    'error': 'Token expired'
+                    }), 403)
+        except jwt.InvalidTokenError:
+            return make_response(jsonify({
+                    'error': 'Invalid token'
+                    }), 403)
+
+        params = dict(kwargs, token_data=data)
+        return fn(*args, **params)
+
+    return decorated
+
+@kiskadee.route('/login', methods=['POST'])
+def login():
+    json_data = request.get_json()
+    email, password = [json_data.get('email'), json_data.get('password')]
+
+    if email and password:
+        db_session = kiskadee_db_session()
+        user = db_session.query(User).filter_by(email=email).first()
+
+        if user is not None and user.verify_password(password):
+            token = user.generate_token()
+            return make_response(jsonify({'token': token}), 200)
+
+    return make_response(jsonify({'error': 'Could not verify !'}), 401)
 
 
 @kiskadee.route('/fetchers')
@@ -107,7 +165,8 @@ def analysis_reports(pkg_name, version, analysis_id):
 
 
 @kiskadee.route('/users', methods=['GET'])
-def get_users():
+@token_required
+def get_users(token_data):
     """Get the list of users
 
     GET /users

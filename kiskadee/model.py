@@ -6,8 +6,13 @@ from sqlalchemy import Column, Integer, UnicodeText, UniqueConstraint,\
 from passlib.apps import custom_app_context as pwd_context
 import kiskadee
 
-Base = declarative_base()
+import jwt
+import os
+import datetime
 
+TOKEN_SECRET_KEY = os.getenv('TOKEN_SECRET_KEY', 'default development key')
+
+Base = declarative_base()
 
 class Package(Base):
     """Software packages abstraction.
@@ -128,3 +133,12 @@ class User(Base):
         False if not.
         """
         return pwd_context.verify(password, self.password_hash)
+
+    def generate_token(self):
+        """Generates user auth token and returns it"""
+        token = jwt.encode({
+            'user_id': self.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        }, TOKEN_SECRET_KEY)
+
+        return token.decode('UTF-8')

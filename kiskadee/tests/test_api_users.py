@@ -53,7 +53,11 @@ class ApiUsersTestCase(unittest.TestCase):
 
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
-        response = self.app.get("/users")
+        user = self.session.query(User).first()
+        user_token = user.generate_token()
+
+        response = self.app.get("/users",
+                                headers={'x-access-token': user_token})
         data = json.loads(response.data.decode("utf-8"))
         total_users_count = self.session.query(User).count()
 
