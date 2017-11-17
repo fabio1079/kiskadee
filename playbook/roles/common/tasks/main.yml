@@ -1,7 +1,3 @@
-- name: install yum
-  dnf:
-    name: yum
-
 - name: install fedora dependencies
   dnf: name={{ item }} state=installed
   with_items:

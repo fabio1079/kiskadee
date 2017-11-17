@@ -1,3 +1,9 @@
+- name: Create kiskadee user
+  user:
+    name: kiskadee
+    group: wheel
+    shell: /bin/bash
+
 - name: Enable postgresql
   service:
     name: postgresql

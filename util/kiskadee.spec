@@ -1,8 +1,8 @@
 %define debug_package %{nil}
 
 Name:           kiskadee
-Version:        0.4.1
-Release:        1%{?dist}
+Version:        0.4.2
+Release:        2%{?dist}
 Summary:        A continuous static analysis system
 
 License:        GPLv3
@@ -60,6 +60,8 @@ ranked first and potential false positives are ranked last.
 %install
 %py3_install
 install -m 644 util/kiskadee.conf -D $RPM_BUILD_ROOT%{_sysconfdir}/kiskadee.conf
+install -m 644 util/base.py -D $RPM_BUILD_ROOT%{_sysconfdir}/fedmsg.d/base.py
+install -m 644 util/anityaconsumer.py -D $RPM_BUILD_ROOT%{_sysconfdir}/fedmsg.d/anityaconsumer.py
 
 %files
 %license LICENSE
@@ -68,9 +70,17 @@ install -m 644 util/kiskadee.conf -D $RPM_BUILD_ROOT%{_sysconfdir}/kiskadee.conf
 %{_bindir}/%{name}_api
 %{python3_sitelib}/%{name}/
 %{python3_sitelib}/%{name}*.egg-info/
-%config %{_sysconfdir}/kiskadee.conf
+%config(noreplace) %{_sysconfdir}/kiskadee.conf
+%config(noreplace) %{_sysconfdir}/fedmsg.d/base.py*
+%config(noreplace) %{_sysconfdir}/fedmsg.d/anityaconsumer.py*
 
 %changelog
-* Sun Nov 05 2017 David Carlos <ddavidcarlos1392@gmail.com> - 0.4.0-1
+* Sat Nov 11 2017 David Carlos <ddavidcarlos1392@gmail.com> - 0.4.2-2
+- Add fedmsg config files on /etc/fedmsg.d/ directory
+
+* Sat Nov 11 2017 David Carlos <ddavidcarlos1392@gmail.com> - 0.4.2-1
+- Fix kiskadee.conf path
+
+* Sun Nov 05 2017 David Carlos <ddavidcarlos1392@gmail.com> - 0.4.1-1
 - Initial packaging work for Fedora
 

@@ -26,3 +26,9 @@ doc/kiskadee
 # tests coverage files
 htmlcov
 .coverage
+
+# vagrant
+.vagrant
+
+# ansible
+playbook/site.retry
