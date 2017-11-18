@@ -1,0 +1,14 @@
+[Unit]
+Description=kiskadee_api service
+After=network.target postgresql.service
+Documentation=https://docs.pagure.org/kiskadee
+
+[Service]
+ExecStart=/usr/bin/kiskadee_api
+Type=simple
+User=kiskadee
+Group=kiskadee
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
