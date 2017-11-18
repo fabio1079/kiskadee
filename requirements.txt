@@ -4,15 +4,11 @@ firehose>=0.5
 sqlalchemy
 chardet
 fedmsg
+fedmsg[consumers]
 packaging
 pyyaml
 flask
 flask_cors
 Flask-Restless
 marshmallow
-flask-cors
-coverage
-nose
-ansible
 alembic
-sphinx-rtd-theme

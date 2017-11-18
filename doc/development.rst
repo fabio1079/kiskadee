@@ -281,12 +281,13 @@ To check kiskadee coverage open the file *covhtml/index.html*.
 building docs
 --------------------
 
-To build the documentation just run
+To build the documentation you need `sphinx` and `sphinx-rtd-theme` installed.
+Then, just run
 
 .. code-block:: bash
 
   $ cd doc
-  $ make check
+  $ make release
 
 Note that you must be in the `doc` directory
 
