@@ -60,7 +60,7 @@ def load_fetchers():
 
 # Load kiskadee configurations
 _config_file_name = 'kiskadee.conf'
-_sys_config_file = os.path.abspath(os.path.join('etc', _config_file_name))
+_sys_config_file = os.path.join('/etc', _config_file_name)
 _dev_config_file = os.path.join(os.path.dirname(_my_path),  # go up a dir
                                 'util', _config_file_name)
 _doc_config_file = os.path.join(os.path.dirname(_my_path),

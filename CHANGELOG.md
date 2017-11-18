@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+### Fixed
+- Configuration file system path
 
 ## [0.4.2] - 2017-11-18
 ### Added
