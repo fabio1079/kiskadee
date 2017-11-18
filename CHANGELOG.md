@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.4.2] - 2017-11-18
+### Added
+- systemd units for kiskadee and kiskadee_api.
+- kiskadee rpm package.
+### Changed
+- Major changes on playbook and Vagrantfile.
+
 ## [0.4.1] - 2017-11-18
 ### Changed
 - Use white lists for Frama-C analyses.
