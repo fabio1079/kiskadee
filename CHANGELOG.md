@@ -1,5 +1,7 @@
 # Change Log
 
+## [Unreleased]
+
 ## [0.4.2] - 2017-11-18
 ### Added
 - systemd units for kiskadee and kiskadee_api.
@@ -11,7 +13,7 @@
 ### Changed
 - Use white lists for Frama-C analyses.
 
-## [0.4.0]
+## [0.4.0] - 2017-11-05
 ### Added
 - Several API improvements.
 - Include ansible playbooks for easy deploy.
