@@ -1,19 +1,14 @@
-%define debug_package %{nil}
-
 Name:           kiskadee
-Version:        0.4.2
-Release:        2%{?dist}
+Version:        0.4.3
+Release:        0.1.20171120git5b3c751%{?dist}
 Summary:        A continuous static analysis system
 
-License:        GPLv3
+License:        AGPLv3+
 URL:            https://pagure.io/kiskadee
 Source0:        https://releases.pagure.org/kiskadee/%{name}-%{version}.tar.gz
+BuildArch:      noarch
 
-BuildRequires: openssl-devel
 BuildRequires: python3-devel
-BuildRequires: python2-devel
-BuildRequires: gcc
-BuildRequires: redhat-rpm-config
 BuildRequires: python3-psutil
 BuildRequires: python3-psycopg2
 BuildRequires: python3-firehose
@@ -26,6 +21,7 @@ BuildRequires: python3-flask-restless
 BuildRequires: python3-marshmallow
 BuildRequires: python3-nose
 BuildRequires: python3-fedmsg
+BuildRequires: python3-alembic
 
 Requires: python3-psutil
 Requires: python3-psycopg2
@@ -39,9 +35,9 @@ Requires: python3-flask-restless
 Requires: python3-marshmallow
 Requires: python3-nose
 Requires: python3-fedmsg
-
 # BUG: https://bugzilla.redhat.com/show_bug.cgi?id=1114413
-#Requires: python3-flask-cors
+Requires: python3-flask-cors
+Requires: python3-alembic
 
 %description
 kiskadee is a system to support static analysis usage during software
@@ -75,6 +71,17 @@ install -m 644 util/anityaconsumer.py -D $RPM_BUILD_ROOT%{_sysconfdir}/fedmsg.d/
 %config(noreplace) %{_sysconfdir}/fedmsg.d/anityaconsumer.py*
 
 %changelog
+* Sat Nov 18 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.3-0.1.20171120git5b3c751
+- Update version
+- Requires and BRs python3-alembic
+
+* Sat Nov 18 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.2-3
+- Fix version-release
+- Add Requires for python3-flask-cors
+- Fix BRs
+- Set proper License tag
+- Set target architecture as noarch
+
 * Sat Nov 11 2017 David Carlos <ddavidcarlos1392@gmail.com> - 0.4.2-2
 - Add fedmsg config files on /etc/fedmsg.d/ directory
 
