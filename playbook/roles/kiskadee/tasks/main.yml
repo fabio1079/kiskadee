@@ -1,7 +1,13 @@
+- name: Create kiskadee group
+  group:
+    name: kiskadee
+    state: present
+
 - name: Create kiskadee user
   user:
     name: kiskadee
-    group: wheel
+    groups: kiskadee, wheel
+    append: yes
     shell: /bin/bash
 
 # TODO: do not turn selinux off. Add rules instead
@@ -13,7 +19,7 @@
   copy: src=davidcarlos-kiskadee-fedora-27.repo dest=/etc/yum.repos.d/kiskadee.repo
 
 - name: Install kiskadee
-  dnf: name={{ item }} state=installed
+  dnf: name={{ item }} state=latest
   with_items:
     - kiskadee
 
@@ -29,12 +35,22 @@
     chdir: /tmp/kiskadee
     target: analyzers
 
-#- name: Enable kiskadee
-  #service:
-    #name: kiskadee
-    #enabled: yes
+- name: Enable kiskadee
+  service:
+    name: kiskadee
+    enabled: yes
 
-#- name: Start kiskadee
-  #service:
-    #name: kiskadee
-    #state: started
+- name: Start kiskadee
+  service:
+    name: kiskadee
+    state: started
+
+- name: Enable kiskadee_api
+  service:
+    name: kiskadee_api
+    enabled: yes
+
+- name: Start kiskadee_api
+  service:
+    name: kiskadee_api
+    state: started
