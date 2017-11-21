@@ -1,8 +1,8 @@
 [kiskadee-core]
-kiskadee-core ansible_host=10.18.0.115
+core-host ansible_host=10.18.0.115
 
 [kiskadee-frontend]
-kiskadee-frontend ansible_host=10.18.0.116
+frontend-host ansible_host=10.18.0.116
 
 [kiskadee-ci]
-kiskadee-ci ansible_host=10.18.0.117
+ci-host ansible_host=10.18.0.117

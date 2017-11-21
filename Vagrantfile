@@ -9,11 +9,11 @@ vms_inventory = "playbook/hosts.local"
 ips = {}
 File.open(vms_inventory, "r") do |f|
   f.each_line do |l|
-    if ip = /kiskadee-core ansible_host=(.+)/.match(l)
+    if ip = /core-host ansible_host=(.+)/.match(l)
       ips[:core] = ip[1]
-    elsif ip = /kiskadee-frontend ansible_host=(.+)/.match(l)
+    elsif ip = /frontend-host ansible_host=(.+)/.match(l)
       ips[:frontend] = ip[1]
-    elsif ip = /kiskadee-ci ansible_host=(.+)/.match(l)
+    elsif ip = /ci-host ansible_host=(.+)/.match(l)
       ips[:ci] = ip[1]
     end
   end
@@ -28,7 +28,7 @@ Vagrant.configure(2) do |config|
     core.vm.box = "fedora/27-cloud-base"
     core.vm.network "private_network", ip: ips[:core]
     core.vm.provider "libvirt" do |v|
-      v.memory = 1024
+      v.memory = 2048
     end
   end
 
