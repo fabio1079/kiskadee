@@ -1,6 +1,6 @@
 Name:           kiskadee
 Version:        0.4.3
-Release:        0.1.20171120git5b3c751%{?dist}
+Release:        0.2.20171118git5b3c751%{?dist}
 Summary:        A continuous static analysis system
 
 License:        AGPLv3+
@@ -22,6 +22,9 @@ BuildRequires: python3-marshmallow
 BuildRequires: python3-nose
 BuildRequires: python3-fedmsg
 BuildRequires: python3-alembic
+
+BuildRequires: systemd
+%{?systemd_requires}
 
 Requires: python3-psutil
 Requires: python3-psycopg2
@@ -55,23 +58,52 @@ ranked first and potential false positives are ranked last.
 
 %install
 %py3_install
-install -m 644 util/kiskadee.conf -D $RPM_BUILD_ROOT%{_sysconfdir}/kiskadee.conf
-install -m 644 util/base.py -D $RPM_BUILD_ROOT%{_sysconfdir}/fedmsg.d/base.py
-install -m 644 util/anityaconsumer.py -D $RPM_BUILD_ROOT%{_sysconfdir}/fedmsg.d/anityaconsumer.py
+# install config file
+mkdir -p %{buildroot}%{_sysconfdir}
+install -p -m 644 util/kiskadee.conf %{buildroot}%{_sysconfdir}
+
+# install fedmsg consumers
+mkdir -p %{buildroot}%{_sysconfdir}/fedmsg.d
+install -p -m 644 util/base.py %{buildroot}%{_sysconfdir}/fedmsg.d/base.py
+install -p -m 644 util/anityaconsumer.py %{buildroot}%{_sysconfdir}/fedmsg.d/anityaconsumer.py
+
+# install systemd units
+mkdir -p %{buildroot}%{_unitdir}
+install -p -m 644 util/kiskadee.service %{buildroot}%{_unitdir}/kiskadee.service
+install -p -m 644 util/kiskadee_api.service %{buildroot}%{_unitdir}/kiskadee_api.service
+
+%check
+# We skip tests since they are running docker containers for now.
+
+%post
+%systemd_post kiskadee.service kiskadee_api.service
+
+%preun
+%systemd_preun kiskadee.service kiskadee_api.service
+
+%postun
+%systemd_postun_with_restart kiskadee.service kiskadee_api.service
 
 %files
 %license LICENSE
 %doc doc
 %{_bindir}/%{name}
 %{_bindir}/%{name}_api
-%{python3_sitelib}/%{name}/
-%{python3_sitelib}/%{name}*.egg-info/
+%{python3_sitelib}/%{name}
+%{python3_sitelib}/%{name}*.egg-info
+%{_unitdir}/kiskadee.service
+%{_unitdir}/kiskadee_api.service
 %config(noreplace) %{_sysconfdir}/kiskadee.conf
 %config(noreplace) %{_sysconfdir}/fedmsg.d/base.py*
 %config(noreplace) %{_sysconfdir}/fedmsg.d/anityaconsumer.py*
 
 %changelog
-* Sat Nov 18 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.3-0.1.20171120git5b3c751
+* Tue Nov 21 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.3-0.2.20171118git5b3c751
+- Install systemd units
+- Minor improvements (refactoring)
+- Fix bogus date on Release VCS timestamp
+
+* Mon Nov 18 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.3-0.1.20171118git5b3c751
 - Update version
 - Requires and BRs python3-alembic
 
