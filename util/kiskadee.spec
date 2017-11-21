@@ -103,7 +103,7 @@ install -p -m 644 util/kiskadee_api.service %{buildroot}%{_unitdir}/kiskadee_api
 - Minor improvements (refactoring)
 - Fix bogus date on Release VCS timestamp
 
-* Mon Nov 18 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.3-0.1.20171118git5b3c751
+* Sat Nov 18 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.3-0.1.20171118git5b3c751
 - Update version
 - Requires and BRs python3-alembic
 
