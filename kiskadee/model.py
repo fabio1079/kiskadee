@@ -132,7 +132,10 @@ class User(Base):
         True if the password is correct
         False if not.
         """
-        return pwd_context.verify(password, self.password_hash)
+        try:
+            return pwd_context.verify(password, self.password_hash)
+        except ValueError:
+            return False
 
     def generate_token(self):
         """Generates user auth token and returns it"""

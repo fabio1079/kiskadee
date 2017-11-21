@@ -46,6 +46,66 @@ class ApiUsersTestCase(unittest.TestCase):
         self.session.close()
         kiskadee.model.Base.metadata.drop_all()
 
+    # POST /login -> 200 Ok
+    def test_get_user_token_on_login(self):
+        kiskadee.api.app.kiskadee_db_session = lambda: self.session
+
+        user_data = {
+            'name': 'login',
+            'email': 'login@email.com',
+            'password':'login'
+        }
+
+        # Creating a user as user.verify_password inside login route
+        # gives ValueError with users created with mock_hash_password
+        user = UserSchema.create(**user_data)
+        self.session.add(user)
+        self.session.commit()
+
+        login_data = {
+            'email': user_data['email'],
+            'password': user_data['password']
+        }
+
+        response = self.app.post("/login",
+                                 data=json.dumps(login_data),
+                                 content_type='application/json')
+
+        data = json.loads(response.data.decode("utf-8"))
+
+        self.assertIn("token", data)
+        self.assertEqual(200, response.status_code)
+
+    # POST /login -> 401 Unauthorized
+    def test_wrong_data_on_user_login_gives_unauthorized_response(self):
+        kiskadee.api.app.kiskadee_db_session = lambda: self.session
+
+        user_data = {
+            'name': 'login',
+            'email': 'login@email.com',
+            'password':'login'
+        }
+
+        user = UserSchema.create(**user_data)
+        self.session.add(user)
+        self.session.commit()
+
+        login_data = {
+            'email': user_data['email'],
+            'password': 'not my password'
+        }
+
+        response = self.app.post("/login",
+                                 data=json.dumps(login_data),
+                                 content_type='application/json')
+
+        data = json.loads(response.data.decode("utf-8"))
+
+        self.assertIn("error", data)
+        self.assertEqual(data["error"], "Could not verify !")
+        self.assertEqual(401, response.status_code)
+
+
     # GET /users -> 200 ok
     def test_get_users(self):
         def mock_kiskadee_db_session():
@@ -160,8 +220,10 @@ class ApiUsersTestCase(unittest.TestCase):
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
         user = self.session.query(User).first()
+        user_token = user.generate_token()
 
-        response = self.app.get("/users/%d" % user.id)
+        response = self.app.get("/users/%d" % user.id,
+                                headers={'x-access-token': user_token})
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("user", data)
@@ -179,7 +241,11 @@ class ApiUsersTestCase(unittest.TestCase):
 
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
-        response = self.app.get("/users/%d" % 123456789)
+        user = self.session.query(User).first()
+        user_token = user.generate_token()
+
+        response = self.app.get("/users/%d" % 123456789,
+                                headers={'x-access-token': user_token})
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("error", data)
@@ -195,10 +261,13 @@ class ApiUsersTestCase(unittest.TestCase):
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
         user = self.session.query(User).first()
+        user_token = user.generate_token()
+
         response = self.app.put("/users/{}".format(user.id),
                                  data=json.dumps({'email': 'another@email.com',
                                                   'password': 'password'}),
-                                 content_type='application/json')
+                                 content_type='application/json',
+                                 headers={'x-access-token': user_token})
 
         data = json.loads(response.data.decode("utf-8"))
 
@@ -222,9 +291,12 @@ class ApiUsersTestCase(unittest.TestCase):
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
         user = self.session.query(User).first()
+        user_token = user.generate_token()
+
         response = self.app.put("/users/{}".format(user.id),
                                  data=json.dumps({'password_hash': 'ignome_me'}),
-                                 content_type='application/json')
+                                 content_type='application/json',
+                                 headers={'x-access-token': user_token})
 
         data = json.loads(response.data.decode("utf-8"))
 
@@ -246,10 +318,13 @@ class ApiUsersTestCase(unittest.TestCase):
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
         user = self.session.query(User).first()
+        user_token = user.generate_token()
+
         response = self.app.put("/users/{}".format(user.id),
                                  data=json.dumps({'password': 'foo',
                                                   'email': 'not an email'}),
-                                 content_type='application/json')
+                                 content_type='application/json',
+                                 headers={'x-access-token': user_token})
 
         data = json.loads(response.data.decode("utf-8"))
 
@@ -266,6 +341,43 @@ class ApiUsersTestCase(unittest.TestCase):
 
         self.assertNotEqual(updated_user.email, 'not an email')
 
+    # PUT /users/:id -> 403 Forbidden
+    @patch.object(User, 'hash_password', mock_hash_password)
+    def test_only_the_token_user_can_updates_its_data(self):
+        def mock_kiskadee_db_session():
+            return self.session
+
+        def send_request(user, data, token):
+            return self.app.put("/users/{}".format(user.id),
+                                data=json.dumps(data),
+                                content_type='application/json',
+                                headers={'x-access-token': token})
+
+        kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
+
+        user = self.session.query(User).first()
+        user_token = user.generate_token()
+
+        user_to_update = self.session.query(User).\
+                            order_by(User.id.desc()).\
+                            first()
+
+        response = send_request(user_to_update, {'name': 'test'}, user_token)
+        data = json.loads(response.data.decode("utf-8"))
+
+        self.assertIn("error", data)
+        self.assertEqual(data['error'],
+            'token user does not match to requested user')
+        self.assertEqual(403, response.status_code)
+
+        token = user_to_update.generate_token()
+        response = send_request(user_to_update, {'name': 'new name'}, token)
+        data = json.loads(response.data.decode("utf-8"))
+
+        self.assertIn("user", data)
+        self.assertEqual(data['user']['id'], user_to_update.id)
+        self.assertEqual(data['user']['name'], 'new name')
+        self.assertEqual(200, response.status_code)
 
     # PUT /users/:id -> 404 Not Found
     def test_not_found_update_user(self):
@@ -274,9 +386,13 @@ class ApiUsersTestCase(unittest.TestCase):
 
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
+        user = self.session.query(User).first()
+        user_token = user.generate_token()
+
         response = self.app.put("/users/{}".format(123456789),
                                  data=json.dumps({'password': 'not found ?'}),
-                                 content_type='application/json')
+                                 content_type='application/json',
+                                 headers={'x-access-token': user_token})
 
         data = json.loads(response.data.decode("utf-8"))
 
@@ -292,8 +408,10 @@ class ApiUsersTestCase(unittest.TestCase):
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
         user = self.session.query(User).first()
+        user_token = user.generate_token()
 
-        response = self.app.delete("/users/{}".format(user.id))
+        response = self.app.delete("/users/{}".format(user.id),
+                                    headers={'x-access-token': user_token})
 
         self.assertEqual(response.data, b'')
         self.assertEqual(204, response.status_code)
@@ -302,6 +420,28 @@ class ApiUsersTestCase(unittest.TestCase):
 
         self.assertIsNone(deleted_user)
 
+    # DELETE /users/:id -> 403 Forbidden
+    def test_only_the_token_user_can_delete_it_self(self):
+        def mock_kiskadee_db_session():
+            return self.session
+
+        kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
+
+        user = self.session.query(User).first()
+        user_token = user.generate_token()
+
+        other_user = self.session.query(User).order_by(User.id.desc()).first()
+
+        response = self.app.delete("/users/{}".format(other_user.id),
+                                    headers={'x-access-token': user_token})
+
+        data = json.loads(response.data.decode("utf-8"))
+
+        self.assertIn("error", data)
+        self.assertEqual(data['error'],
+            'token user does not match to requested user')
+        self.assertEqual(403, response.status_code)
+
     # DELETE /users/:id -> 404 Not Found
     def test_not_found_delete_user(self):
         def mock_kiskadee_db_session():
@@ -309,7 +449,11 @@ class ApiUsersTestCase(unittest.TestCase):
 
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
-        response = self.app.delete("/users/{}".format(123456789))
+        user = self.session.query(User).first()
+        user_token = user.generate_token()
+
+        response = self.app.delete("/users/{}".format(123456789),
+                                    headers={'x-access-token': user_token})
 
         data = json.loads(response.data.decode("utf-8"))
 

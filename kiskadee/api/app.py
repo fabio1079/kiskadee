@@ -45,13 +45,9 @@ def token_required(fn):
         try:
             data = jwt.decode(token, TOKEN_SECRET_KEY)
         except jwt.ExpiredSignatureError:
-            return make_response(jsonify({
-                    'error': 'Token expired'
-                    }), 403)
+            return make_response(jsonify({'error': 'Token expired'}), 403)
         except jwt.InvalidTokenError:
-            return make_response(jsonify({
-                    'error': 'Invalid token'
-                    }), 403)
+            return make_response(jsonify({'error': 'Invalid token'}), 403)
 
         params = dict(kwargs, token_data=data)
         return fn(*args, **params)
@@ -60,6 +56,14 @@ def token_required(fn):
 
 @kiskadee.route('/login', methods=['POST'])
 def login():
+    """Token based login
+
+    POST /login
+
+    Possible status code:
+        - 200 Ok -> User token
+        - 401 Unauthorized -> Could not log user
+    """
     json_data = request.get_json()
     email, password = [json_data.get('email'), json_data.get('password')]
 
@@ -221,8 +225,9 @@ def create_user():
     return make_response(jsonify({'user': result.data}), 201)
 
 
-@kiskadee.route('/users/<user_id>', methods=['GET'])
-def get_user_data(user_id):
+@kiskadee.route('/users/<int:user_id>', methods=['GET'])
+@token_required
+def get_user_data(token_data, user_id):
     """Get the user data
 
     GET /users/:id
@@ -243,8 +248,9 @@ def get_user_data(user_id):
     return make_response(jsonify({'user': result.data}), 200)
 
 
-@kiskadee.route('/users/<user_id>', methods=['PUT'])
-def update_user(user_id):
+@kiskadee.route('/users/<int:user_id>', methods=['PUT'])
+@token_required
+def update_user(token_data, user_id):
     """Updates a user
 
     PUT /users/:id
@@ -252,6 +258,7 @@ def update_user(user_id):
     Possible status code:
         - 200 Ok -> User updated
         - 400 Bad Request -> Validation error
+        - 403 Forbidden -> Token user does not match to requested user
         - 404 Not Found -> User not found
     """
     db_session = kiskadee_db_session()
@@ -259,6 +266,11 @@ def update_user(user_id):
 
     if user is None:
         return make_response(jsonify({'error': 'user not found'}), 404)
+
+    if token_data['user_id'] != user_id:
+        return make_response(jsonify({
+            'error': 'token user does not match to requested user'
+            }), 403)
 
     json_data = request.get_json()
     user_data = UserSchema().dump(user).data
@@ -286,14 +298,16 @@ def update_user(user_id):
     return make_response(jsonify({'user': result.data}), 200)
 
 
-@kiskadee.route('/users/<user_id>', methods=['DELETE'])
-def delete_user(user_id):
+@kiskadee.route('/users/<int:user_id>', methods=['DELETE'])
+@token_required
+def delete_user(token_data, user_id):
     """Deletes a user
 
     DELETE /users/:id
 
     Possible status code:
         - 204 No Content -> User deleted
+        - 403 Forbidden -> Token user does not match to requested user
         - 404 Not Found -> User not found
     """
     db_session = kiskadee_db_session()
@@ -301,6 +315,11 @@ def delete_user(user_id):
 
     if user is None:
         return make_response(jsonify({'error': 'user not found'}), 404)
+
+    if token_data['user_id'] != user_id:
+        return make_response(jsonify({
+            'error': 'token user does not match to requested user'
+            }), 403)
 
     db_session.delete(user)
     db_session.commit()
