@@ -141,7 +141,7 @@ class User(Base):
         """Generates user auth token and returns it"""
         token = jwt.encode({
             'user_id': self.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=48)
         }, TOKEN_SECRET_KEY)
 
         return token.decode('UTF-8')
