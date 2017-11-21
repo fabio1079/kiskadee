@@ -74,6 +74,8 @@ class ApiUsersTestCase(unittest.TestCase):
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("token", data)
+        self.assertIn("user_id", data)
+        self.assertEqual(user.id, data['user_id'])
         self.assertEqual(200, response.status_code)
 
     # POST /login -> 401 Unauthorized
