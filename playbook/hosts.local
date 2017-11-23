@@ -6,3 +6,6 @@ frontend-host ansible_host=10.18.0.116
 
 [kiskadee-ci]
 ci-host ansible_host=10.18.0.117
+
+[kiskadee-core:vars]
+ansible_python_interpreter=/usr/bin/python3
