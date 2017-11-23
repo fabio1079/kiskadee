@@ -223,7 +223,9 @@ def create_user():
     user_schema = UserSchema()
     result = user_schema.dump(user)
 
-    return make_response(jsonify({'user': result.data}), 201)
+    token = user.generate_token()
+
+    return make_response(jsonify({'user': result.data, 'token': token}), 201)
 
 
 @kiskadee.route('/users/<int:user_id>', methods=['GET'])

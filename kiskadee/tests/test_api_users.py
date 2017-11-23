@@ -156,6 +156,7 @@ class ApiUsersTestCase(unittest.TestCase):
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("user", data)
+        self.assertIn("token", data)
         self.assertEqual(total_users_after_creation, total_users_before_creation + 1)
         self.assertEqual(data['user']['email'], new_user_data['email'])
         self.assertEqual(201, response.status_code)
