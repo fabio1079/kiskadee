@@ -23,6 +23,13 @@
   with_items:
     - kiskadee
 
+- name: Install kiskadee configuration file
+  template:
+    src: kiskadee.conf
+    dest: /etc/kiskadee.conf
+    force: yes
+    mode: 0644
+
 # We now build the docker images
 - name: Clone kiskadee repository
   git:
@@ -34,6 +41,16 @@
   make:
     chdir: /tmp/kiskadee
     target: analyzers
+
+- name: Enable fedmsg-hub
+  service:
+    name: fedmsg-hub-3
+    enabled: yes
+
+- name: Start fedmsg-hub
+  service:
+    name: fedmsg-hub-3
+    state: started
 
 - name: Enable kiskadee
   service:
