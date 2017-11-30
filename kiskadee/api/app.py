@@ -73,7 +73,7 @@ def login():
 
         if user is not None and user.verify_password(password):
             token = user.generate_token()
-            response = {'token': token, 'user_id': user.id}
+            response = {'token': token, 'user': {'id': user.id, 'name': user.name, 'email': user.email}}
             return make_response(jsonify(response), 200)
 
     return make_response(jsonify({'error': 'Could not verify !'}), 401)
