@@ -6,9 +6,9 @@ from marshmallow.exceptions import ValidationError
 
 from kiskadee.database import Database
 from kiskadee.model import Package, Fetcher, Version, Analysis, User,\
-        TOKEN_SECRET_KEY
+    TOKEN_SECRET_KEY
 from kiskadee.api.serializers import PackageSchema, FetcherSchema,\
-        AnalysisSchema, UserSchema
+    AnalysisSchema, UserSchema
 import json
 from sqlalchemy.orm import eagerload
 
@@ -16,6 +16,8 @@ import jwt
 from functools import wraps
 
 kiskadee = Flask(__name__)
+
+from . import mail
 
 CORS(kiskadee)
 
@@ -54,6 +56,7 @@ def token_required(fn):
 
     return decorated
 
+
 @kiskadee.route('/login', methods=['POST'])
 def login():
     """Token based login
@@ -73,7 +76,8 @@ def login():
 
         if user is not None and user.verify_password(password):
             token = user.generate_token()
-            response = {'token': token, 'user': {'id': user.id, 'name': user.name, 'email': user.email}}
+            response = {'token': token, 'user': {
+                'id': user.id, 'name': user.name, 'email': user.email}}
             return make_response(jsonify(response), 200)
 
     return make_response(jsonify({'error': 'Could not verify !'}), 401)
@@ -203,7 +207,8 @@ def create_user():
 
     # Verify is user already exists
     if data.get('email'):
-        user = db_session.query(User).filter_by(email=data.get('email')).first()
+        user = db_session.query(User).filter_by(
+            email=data.get('email')).first()
 
         if user is not None:
             return make_response(jsonify({'error': 'user already exists'}), 403)
@@ -273,7 +278,7 @@ def update_user(token_data, user_id):
     if token_data['user_id'] != user_id:
         return make_response(jsonify({
             'error': 'token user does not match to requested user'
-            }), 403)
+        }), 403)
 
     json_data = request.get_json()
     user_data = UserSchema().dump(user).data
@@ -322,7 +327,7 @@ def delete_user(token_data, user_id):
     if token_data['user_id'] != user_id:
         return make_response(jsonify({
             'error': 'token user does not match to requested user'
-            }), 403)
+        }), 403)
 
     db_session.delete(user)
     db_session.commit()

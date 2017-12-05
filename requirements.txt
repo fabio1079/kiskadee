@@ -16,3 +16,4 @@ python-debian
 passlib
 bcrypt
 pyjwt
+Flask-Mail
