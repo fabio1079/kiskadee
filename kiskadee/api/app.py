@@ -8,6 +8,7 @@ from kiskadee.model import Package, Fetcher, Version, Analysis
 from kiskadee.api.serializers import PackageSchema, FetcherSchema,\
         AnalysisSchema
 import json
+from sqlalchemy.orm import eagerload
 
 kiskadee = Flask(__name__)
 
@@ -36,14 +37,6 @@ def packages():
             exclude=['versions.analysis', 'versions.package_id']
         )
         data, errors = package_schema.dump(packages)
-        # TODO: get the last version using sequelize
-        for item in data:
-            item['version'] = sorted(
-                item['versions'],
-                key=lambda k: k['number'],
-                reverse=True
-            )[0]['number'] # only the last version
-            item.pop('versions', None)
         return jsonify({'packages': data})
 
 
@@ -62,20 +55,15 @@ def package_analysis_overview(pkg_name, version):
         )
     analysis = (
             db_session.query(Analysis)
-            .filter(Analysis.version_id == version_id).all()
+            .options(
+                eagerload(Analysis.analyzers, innerjoin=True)
+            )
+            .filter(Analysis.version_id == version_id)
+            .all()
         )
-    analysis_schema = AnalysisSchema(many=True)
-    results = analysis_schema.dump(analysis)
-    result_data = []
-    for result in results.data:
-        current_data = {
-            'analyzer_id': result['analyzer_id'],
-            'id': result['id'],
-            'version': result['raw']['metadata']['generator']['version'],
-            'name': result['raw']['metadata']['generator']['name']
-        }
-        result_data.append(current_data)
-    return jsonify(result_data)
+    analysis_schema = AnalysisSchema(many=True, exclude=['raw', 'report'])
+    data, errors = analysis_schema.dump(analysis)
+    return jsonify(data)
 
 
 @kiskadee.route(
@@ -89,9 +77,9 @@ def analysis_results(pkg_name, version, analysis_id):
             db_session.query(Analysis)
             .get(analysis_id)
         )
-    analysis_schema = AnalysisSchema()
-    results = analysis_schema.dump(analysis)
-    response = results.data['raw']['results']
+    analysis_schema = AnalysisSchema(only=['raw'])
+    data, errors = analysis_schema.dump(analysis)
+    response = data['raw']['results']
     return jsonify({'analysis_results': response})
 
 
@@ -106,9 +94,9 @@ def analysis_reports(pkg_name, version, analysis_id):
             db_session.query(Analysis)
             .get(analysis_id)
         )
-    analysis_schema = AnalysisSchema()
-    results = analysis_schema.dump(analysis)
-    report = results.data['report']
+    analysis_schema = AnalysisSchema(only=['report'])
+    data, errors = analysis_schema.dump(analysis)
+    report = data['report']
     if (report is not None) and\
         ('results' in report.keys()) and\
             report['results'] is not None:
