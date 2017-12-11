@@ -21,7 +21,7 @@ def token_vefirication(token, verification_key):
         {'error': 'Invalid token'}
     """
     try:
-        data = jwt.decode(token, verification_key)
+        data = jwt.decode(token, verification_key, algorithms=['HS256'])
         return {'data': data}
     except jwt.ExpiredSignatureError:
         return {'error': 'Token expired'}

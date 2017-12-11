@@ -9,6 +9,7 @@ import kiskadee.api.app
 from kiskadee.model import User
 from kiskadee.api.serializers import UserSchema
 
+
 def mock_hash_password(self, password):
     """Mock for User model hash_password method.
     It is too slow for the tests.
@@ -17,7 +18,6 @@ def mock_hash_password(self, password):
 
 
 class ApiUsersTestCase(unittest.TestCase):
-
     def setUp(self):
         kiskadee.api.app.kiskadee.testing = True
         self.engine = kiskadee.database.Database('db_test').engine
@@ -30,11 +30,22 @@ class ApiUsersTestCase(unittest.TestCase):
 
     @patch.object(User, 'hash_password', mock_hash_password)
     def _setup_mock_users(self):
-        mock_users_data = [
-            {'name': 'test 1', 'email': 'test@user1.com', 'password': 'test'},
-            {'name': 'test 2', 'email': 'test@user2.com', 'password': 'test'},
-            {'name': 'test 3', 'email': 'test@user3.com', 'password': 'test'}
-        ]
+        mock_users_data = [{
+            'name': 'test 1',
+            'email': 'test@user1.com',
+            'password': 'test',
+            'is_active': True
+        }, {
+            'name': 'test 2',
+            'email': 'test@user2.com',
+            'password': 'test',
+            'is_active': True
+        }, {
+            'name': 'test 3',
+            'email': 'test@user3.com',
+            'password': 'test',
+            'is_active': True
+        }]
 
         for mock_data in mock_users_data:
             user = UserSchema.create(**mock_data)
@@ -53,7 +64,8 @@ class ApiUsersTestCase(unittest.TestCase):
         user_data = {
             'name': 'login',
             'email': 'login@email.com',
-            'password':'login'
+            'password': 'login',
+            'is_active': True
         }
 
         # Creating a user as user.verify_password inside login route
@@ -67,16 +79,48 @@ class ApiUsersTestCase(unittest.TestCase):
             'password': user_data['password']
         }
 
-        response = self.app.post("/login",
-                                 data=json.dumps(login_data),
-                                 content_type='application/json')
+        response = self.app.post(
+            "/login",
+            data=json.dumps(login_data),
+            content_type='application/json')
 
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("token", data)
-        self.assertIn("user_id", data)
-        self.assertEqual(user.id, data['user_id'])
+        self.assertIn("user", data)
+        self.assertEqual(user.id, data['user']['id'])
         self.assertEqual(200, response.status_code)
+
+    # POST /login -> 403 User email not confirmed
+    def test_unconfirmed_user_cant_login(self):
+        kiskadee.api.app.kiskadee_db_session = lambda: self.session
+
+        user_data = {
+            'name': 'login',
+            'email': 'login@email.com',
+            'password': 'login',
+            'is_active': False
+        }
+
+        user = UserSchema.create(**user_data)
+        self.session.add(user)
+        self.session.commit()
+
+        login_data = {
+            'email': user_data['email'],
+            'password': user_data['password']
+        }
+
+        response = self.app.post(
+            "/login",
+            data=json.dumps(login_data),
+            content_type='application/json')
+
+        data = json.loads(response.data.decode("utf-8"))
+
+        self.assertIn("error", data)
+        self.assertEqual("User email not confirmed", data['error'])
+        self.assertEqual(403, response.status_code)
 
     # POST /login -> 401 Unauthorized
     def test_wrong_data_on_user_login_gives_unauthorized_response(self):
@@ -85,7 +129,8 @@ class ApiUsersTestCase(unittest.TestCase):
         user_data = {
             'name': 'login',
             'email': 'login@email.com',
-            'password':'login'
+            'password': 'login',
+            'is_active': True
         }
 
         user = UserSchema.create(**user_data)
@@ -97,16 +142,17 @@ class ApiUsersTestCase(unittest.TestCase):
             'password': 'not my password'
         }
 
-        response = self.app.post("/login",
-                                 data=json.dumps(login_data),
-                                 content_type='application/json')
+        response = self.app.post(
+            "/login",
+            data=json.dumps(login_data),
+            content_type='application/json')
 
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("error", data)
-        self.assertEqual(data["error"], "Could not verify !")
+        self.assertEqual(data["error"],
+                         "Unauthorized, invalid user credentials")
         self.assertEqual(401, response.status_code)
-
 
     # GET /users -> 200 ok
     def test_get_users(self):
@@ -118,8 +164,10 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.get("/users",
-                                headers={'x-access-token': user_token})
+        response = self.app.get(
+            "/users", headers={
+                'x-access-token': user_token
+            })
         data = json.loads(response.data.decode("utf-8"))
         total_users_count = self.session.query(User).count()
 
@@ -131,7 +179,6 @@ class ApiUsersTestCase(unittest.TestCase):
         user = data['users'][0]
         self.assertIsNone(user.get('password'))
         self.assertIsNone(user.get('password_hash'))
-
 
     # POST /users -> 201 created
     @patch.object(User, 'hash_password', mock_hash_password)
@@ -148,16 +195,18 @@ class ApiUsersTestCase(unittest.TestCase):
         }
 
         total_users_before_creation = self.session.query(User).count()
-        response = self.app.post("/users",
-                                 data=json.dumps(new_user_data),
-                                 content_type='application/json')
+        response = self.app.post(
+            "/users",
+            data=json.dumps(new_user_data),
+            content_type='application/json')
         total_users_after_creation = self.session.query(User).count()
 
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("user", data)
         self.assertIn("token", data)
-        self.assertEqual(total_users_after_creation, total_users_before_creation + 1)
+        self.assertEqual(total_users_after_creation,
+                         total_users_before_creation + 1)
         self.assertEqual(data['user']['email'], new_user_data['email'])
         self.assertEqual(201, response.status_code)
 
@@ -168,22 +217,21 @@ class ApiUsersTestCase(unittest.TestCase):
 
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
-        new_user_data = {
-            'name': 'new user',
-            'password': 'new user'
-        }
+        new_user_data = {'name': 'new user', 'password': 'new user'}
 
         total_users_before_creation = self.session.query(User).count()
-        response = self.app.post("/users",
-                                 data=json.dumps(new_user_data),
-                                 content_type='application/json')
+        response = self.app.post(
+            "/users",
+            data=json.dumps(new_user_data),
+            content_type='application/json')
         total_users_after_creation = self.session.query(User).count()
 
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("error", data)
         self.assertIn("validations", data)
-        self.assertEqual(total_users_after_creation, total_users_before_creation)
+        self.assertEqual(total_users_after_creation,
+                         total_users_before_creation)
         self.assertEqual(data['error'], 'Validation error')
         self.assertEqual(data['validations']['email'][0],
                          'Missing data for required field.')
@@ -203,15 +251,17 @@ class ApiUsersTestCase(unittest.TestCase):
         }
 
         total_users_before_creation = self.session.query(User).count()
-        response = self.app.post("/users",
-                                 data=json.dumps(new_user_data),
-                                 content_type='application/json')
+        response = self.app.post(
+            "/users",
+            data=json.dumps(new_user_data),
+            content_type='application/json')
         total_users_after_creation = self.session.query(User).count()
 
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("error", data)
-        self.assertEqual(total_users_after_creation, total_users_before_creation)
+        self.assertEqual(total_users_after_creation,
+                         total_users_before_creation)
         self.assertEqual(data['error'], 'user already exists')
         self.assertEqual(403, response.status_code)
 
@@ -225,8 +275,10 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.get("/users/%d" % user.id,
-                                headers={'x-access-token': user_token})
+        response = self.app.get(
+            "/users/%d" % user.id, headers={
+                'x-access-token': user_token
+            })
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("user", data)
@@ -247,8 +299,10 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.get("/users/%d" % 123456789,
-                                headers={'x-access-token': user_token})
+        response = self.app.get(
+            "/users/%d" % 123456789, headers={
+                'x-access-token': user_token
+            })
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("error", data)
@@ -266,11 +320,16 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.put("/users/{}".format(user.id),
-                                 data=json.dumps({'email': 'another@email.com',
-                                                  'password': 'password'}),
-                                 content_type='application/json',
-                                 headers={'x-access-token': user_token})
+        response = self.app.put(
+            "/users/{}".format(user.id),
+            data=json.dumps({
+                'email': 'another@email.com',
+                'password': 'password'
+            }),
+            content_type='application/json',
+            headers={
+                'x-access-token': user_token
+            })
 
         data = json.loads(response.data.decode("utf-8"))
 
@@ -296,10 +355,15 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.put("/users/{}".format(user.id),
-                                 data=json.dumps({'password_hash': 'ignome_me'}),
-                                 content_type='application/json',
-                                 headers={'x-access-token': user_token})
+        response = self.app.put(
+            "/users/{}".format(user.id),
+            data=json.dumps({
+                'password_hash': 'ignome_me'
+            }),
+            content_type='application/json',
+            headers={
+                'x-access-token': user_token
+            })
 
         data = json.loads(response.data.decode("utf-8"))
 
@@ -323,11 +387,16 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.put("/users/{}".format(user.id),
-                                 data=json.dumps({'password': 'foo',
-                                                  'email': 'not an email'}),
-                                 content_type='application/json',
-                                 headers={'x-access-token': user_token})
+        response = self.app.put(
+            "/users/{}".format(user.id),
+            data=json.dumps({
+                'password': 'foo',
+                'email': 'not an email'
+            }),
+            content_type='application/json',
+            headers={
+                'x-access-token': user_token
+            })
 
         data = json.loads(response.data.decode("utf-8"))
 
@@ -351,10 +420,13 @@ class ApiUsersTestCase(unittest.TestCase):
             return self.session
 
         def send_request(user, data, token):
-            return self.app.put("/users/{}".format(user.id),
-                                data=json.dumps(data),
-                                content_type='application/json',
-                                headers={'x-access-token': token})
+            return self.app.put(
+                "/users/{}".format(user.id),
+                data=json.dumps(data),
+                content_type='application/json',
+                headers={
+                    'x-access-token': token
+                })
 
         kiskadee.api.app.kiskadee_db_session = mock_kiskadee_db_session
 
@@ -370,7 +442,7 @@ class ApiUsersTestCase(unittest.TestCase):
 
         self.assertIn("error", data)
         self.assertEqual(data['error'],
-            'token user does not match to requested user')
+                         'token user does not match to requested user')
         self.assertEqual(403, response.status_code)
 
         token = user_to_update.generate_token()
@@ -392,10 +464,15 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.put("/users/{}".format(123456789),
-                                 data=json.dumps({'password': 'not found ?'}),
-                                 content_type='application/json',
-                                 headers={'x-access-token': user_token})
+        response = self.app.put(
+            "/users/{}".format(123456789),
+            data=json.dumps({
+                'password': 'not found ?'
+            }),
+            content_type='application/json',
+            headers={
+                'x-access-token': user_token
+            })
 
         data = json.loads(response.data.decode("utf-8"))
 
@@ -413,8 +490,11 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.delete("/users/{}".format(user.id),
-                                    headers={'x-access-token': user_token})
+        response = self.app.delete(
+            "/users/{}".format(user.id),
+            headers={
+                'x-access-token': user_token
+            })
 
         self.assertEqual(response.data, b'')
         self.assertEqual(204, response.status_code)
@@ -435,14 +515,17 @@ class ApiUsersTestCase(unittest.TestCase):
 
         other_user = self.session.query(User).order_by(User.id.desc()).first()
 
-        response = self.app.delete("/users/{}".format(other_user.id),
-                                    headers={'x-access-token': user_token})
+        response = self.app.delete(
+            "/users/{}".format(other_user.id),
+            headers={
+                'x-access-token': user_token
+            })
 
         data = json.loads(response.data.decode("utf-8"))
 
         self.assertIn("error", data)
         self.assertEqual(data['error'],
-            'token user does not match to requested user')
+                         'token user does not match to requested user')
         self.assertEqual(403, response.status_code)
 
     # DELETE /users/:id -> 404 Not Found
@@ -455,8 +538,11 @@ class ApiUsersTestCase(unittest.TestCase):
         user = self.session.query(User).first()
         user_token = user.generate_token()
 
-        response = self.app.delete("/users/{}".format(123456789),
-                                    headers={'x-access-token': user_token})
+        response = self.app.delete(
+            "/users/{}".format(123456789),
+            headers={
+                'x-access-token': user_token
+            })
 
         data = json.loads(response.data.decode("utf-8"))
 

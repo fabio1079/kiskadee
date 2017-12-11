@@ -202,7 +202,7 @@ class ModelTestCase(unittest.TestCase):
         u = self.session.query(model.User)\
                 .filter_by(email='test@email.com').first()
         token = u.generate_token()
-        decoded_token = jwt.decode(token, model.TOKEN_SECRET_KEY)
+        decoded_token = jwt.decode(token, model.TOKEN_SECRET_KEY, algorithms=['HS256'])
 
         self.assertGreaterEqual(len(token), 121)
         self.assertEqual(decoded_token['user_id'], u.id)

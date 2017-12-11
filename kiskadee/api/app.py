@@ -27,7 +27,8 @@ def login():
 
     Possible status code:
         - 200 Ok -> User token
-        - 401 Unauthorized -> Could not log user
+        - 401 Unauthorized -> Unauthorized, invalid user credentials
+        - 403 Forbidden -> User email not confirmed
     """
     json_data = request.get_json()
     email, password = [json_data.get('email'), json_data.get('password')]
@@ -36,19 +37,16 @@ def login():
         db_session = kiskadee_db_session()
         user = db_session.query(User).filter_by(email=email).first()
 
+        if user is not None and not user.is_active:
+            return make_response(jsonify({'error': 'User email not confirmed'}), 403)
+
         if user is not None and user.verify_password(password):
             token = user.generate_token()
-            response = {
-                'token': token,
-                'user': {
-                    'id': user.id,
-                    'name': user.name,
-                    'email': user.email
-                }
-            }
+
+            response = {'token': token, 'user': UserSchema().dump(user).data}
             return make_response(jsonify(response), 200)
 
-    return make_response(jsonify({'error': 'Could not verify !'}), 401)
+    return make_response(jsonify({'error': 'Unauthorized, invalid user credentials'}), 401)
 
 
 @kiskadee.route('/fetchers')
@@ -196,13 +194,12 @@ def create_user():
 
     db_session.add(user)
     db_session.commit()
+    mail.send_confirmation_email(user)
 
     user_schema = UserSchema()
     result = user_schema.dump(user)
 
     token = user.generate_token()
-
-    mail.send_confirmation_email(user)
 
     return make_response(jsonify({'user': result.data, 'token': token}), 201)
 
@@ -319,4 +316,7 @@ def kiskadee_db_session():
 
 def main():
     """Initialize the kiskadee API."""
+    cleaner = mail.UnconfirmedEmailsCleaner()
+    cleaner.start()
+
     kiskadee.run('0.0.0.0')

@@ -101,6 +101,7 @@ class UserSchema(Schema):
                   validate.Length(min=4, max=255)])
     password = fields.Str(load_only=True,
                           validate=validate.Length(min=4, max=255))
+    is_active = fields.Bool(default=False)
 
     def make_object(self, data):
         """Serialize a User object."""
