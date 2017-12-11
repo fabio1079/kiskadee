@@ -5,56 +5,18 @@ from flask_cors import CORS
 from marshmallow.exceptions import ValidationError
 
 from kiskadee.database import Database
-from kiskadee.model import Package, Fetcher, Version, Analysis, User,\
-    TOKEN_SECRET_KEY
+from kiskadee.model import Package, Fetcher, Version, Analysis, User
 from kiskadee.api.serializers import PackageSchema, FetcherSchema,\
     AnalysisSchema, UserSchema
+from kiskadee.api.token import token_required
 import json
 from sqlalchemy.orm import eagerload
-
-import jwt
-from functools import wraps
 
 kiskadee = Flask(__name__)
 
 from . import mail
 
 CORS(kiskadee)
-
-
-def token_required(fn):
-    """Token verification decorator. When applyed on a route it will
-    look for the x-access-token on the request header.
-
-    If it is valid, the the route is executed.
-    Else, the token is missing or is invalid or has expired, either way
-    the user receive a 403 status code when invalid.
-
-    Possible status code:
-        - 403 Forbidden ->
-            "Token is missing" or "Token expired" or "Invalid token"
-    """
-    @wraps(fn)
-    def decorated(*args, **kwargs):
-        token = None
-
-        if 'x-access-token' in request.headers:
-            token = request.headers['x-access-token']
-
-        if not token:
-            return make_response(jsonify({'error': 'Token is missing'}), 403)
-
-        try:
-            data = jwt.decode(token, TOKEN_SECRET_KEY)
-        except jwt.ExpiredSignatureError:
-            return make_response(jsonify({'error': 'Token expired'}), 403)
-        except jwt.InvalidTokenError:
-            return make_response(jsonify({'error': 'Invalid token'}), 403)
-
-        params = dict(kwargs, token_data=data)
-        return fn(*args, **params)
-
-    return decorated
 
 
 @kiskadee.route('/login', methods=['POST'])
@@ -76,8 +38,14 @@ def login():
 
         if user is not None and user.verify_password(password):
             token = user.generate_token()
-            response = {'token': token, 'user': {
-                'id': user.id, 'name': user.name, 'email': user.email}}
+            response = {
+                'token': token,
+                'user': {
+                    'id': user.id,
+                    'name': user.name,
+                    'email': user.email
+                }
+            }
             return make_response(jsonify(response), 200)
 
     return make_response(jsonify({'error': 'Could not verify !'}), 401)
@@ -211,16 +179,20 @@ def create_user():
             email=data.get('email')).first()
 
         if user is not None:
-            return make_response(jsonify({'error': 'user already exists'}), 403)
+            return make_response(
+                jsonify({
+                    'error': 'user already exists'
+                }), 403)
 
     # Try to create user
     try:
         user = UserSchema.create(**data)
     except ValidationError as error:
-        return make_response(jsonify({
-            'error': 'Validation error',
-            'validations': error.args[0]
-        }), 400)
+        return make_response(
+            jsonify({
+                'error': 'Validation error',
+                'validations': error.args[0]
+            }), 400)
 
     db_session.add(user)
     db_session.commit()
@@ -229,6 +201,8 @@ def create_user():
     result = user_schema.dump(user)
 
     token = user.generate_token()
+
+    mail.send_confirmation_email(user)
 
     return make_response(jsonify({'user': result.data, 'token': token}), 201)
 
@@ -276,9 +250,10 @@ def update_user(token_data, user_id):
         return make_response(jsonify({'error': 'user not found'}), 404)
 
     if token_data['user_id'] != user_id:
-        return make_response(jsonify({
-            'error': 'token user does not match to requested user'
-        }), 403)
+        return make_response(
+            jsonify({
+                'error': 'token user does not match to requested user'
+            }), 403)
 
     json_data = request.get_json()
     user_data = UserSchema().dump(user).data
@@ -287,10 +262,11 @@ def update_user(token_data, user_id):
     validation = UserSchema().load(user_data)
 
     if bool(validation.errors):
-        return make_response(jsonify({
-            'error': 'Validation error',
-            'validations': validation.errors
-        }), 400)
+        return make_response(
+            jsonify({
+                'error': 'Validation error',
+                'validations': validation.errors
+            }), 400)
 
     password = validation.data.get('validation')
     if password is not None:
@@ -325,9 +301,10 @@ def delete_user(token_data, user_id):
         return make_response(jsonify({'error': 'user not found'}), 404)
 
     if token_data['user_id'] != user_id:
-        return make_response(jsonify({
-            'error': 'token user does not match to requested user'
-        }), 403)
+        return make_response(
+            jsonify({
+                'error': 'token user does not match to requested user'
+            }), 403)
 
     db_session.delete(user)
     db_session.commit()
