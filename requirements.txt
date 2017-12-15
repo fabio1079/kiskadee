@@ -12,3 +12,4 @@ flask_cors
 Flask-Restless
 marshmallow
 alembic
+python-debian
