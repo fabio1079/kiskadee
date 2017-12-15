@@ -35,13 +35,13 @@ pipeline {
 	}
     }
 
-    stage('Deploy') {
+    /* stage('Deploy') {
 	steps {
 	  sh "if [ '${env.BRANCH_NAME}' = 'master' ] \
 	  || [ '${env.BRANCH_NAME}' = 'continuos_dep' ]; then \
 	  source bin/activate && make deploy INVENTORY=production; \
 	  fi"
 	}
-    }
+    } */
  }
 }
