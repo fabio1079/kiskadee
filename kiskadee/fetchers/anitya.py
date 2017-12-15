@@ -56,7 +56,7 @@ class Fetcher(kiskadee.fetchers.Fetcher):
         try:
             backend = Backends()
             return getattr(backend, backend_name)
-        except Exception as err:
+        except Exception:
             kiskadee.logger.debug(
                     "Backend not suported: {}".format(str(backend_name))
             )
