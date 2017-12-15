@@ -18,7 +18,7 @@ pipeline {
 
     stage('Run Tests') {
       steps {
-        sh "source bin/activate && make check"
+        sh "source bin/activate && pip install coverage && make check"
       }
 	post {
 		success {
