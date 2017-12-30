@@ -31,7 +31,7 @@
     mode: 0644
 
 - name: Install fedmsg configuration file
-  template:
+  copy:
     src: endpoints.py
     dest: /etc/fedmsg.d/endpoints.py
     force: yes
