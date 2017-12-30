@@ -30,6 +30,13 @@
     force: yes
     mode: 0644
 
+- name: Install fedmsg configuration file
+  template:
+    src: endpoints.py
+    dest: /etc/fedmsg.d/endpoints.py
+    force: yes
+    mode: 0644
+
 # We now build the docker images
 - name: Clone kiskadee repository
   git:

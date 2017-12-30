@@ -1,6 +1,6 @@
 Name:           kiskadee
 Version:        0.4.3
-Release:        0.3.20171118git5b3c751%{?dist}
+Release:        0.4.20171118git5b3c751%{?dist}
 Summary:        A continuous static analysis system
 
 License:        AGPLv3+
@@ -66,7 +66,6 @@ install -p -m 644 util/kiskadee.conf %{buildroot}%{_sysconfdir}
 mkdir -p %{buildroot}%{_sysconfdir}/fedmsg.d
 install -p -m 644 util/base.py %{buildroot}%{_sysconfdir}/fedmsg.d/base.py
 install -p -m 644 util/anityaconsumer.py %{buildroot}%{_sysconfdir}/fedmsg.d/anityaconsumer.py
-install -p -m 644 util/endpoints.py %{buildroot}%{_sysconfdir}/fedmsg.d/endpoints.py
 
 # install systemd units
 mkdir -p %{buildroot}%{_unitdir}
@@ -97,9 +96,11 @@ install -p -m 644 util/kiskadee_api.service %{buildroot}%{_unitdir}/kiskadee_api
 %config(noreplace) %{_sysconfdir}/kiskadee.conf
 %config(noreplace) %{_sysconfdir}/fedmsg.d/base.py*
 %config(noreplace) %{_sysconfdir}/fedmsg.d/anityaconsumer.py*
-%config(noreplace) %{_sysconfdir}/fedmsg.d/endpoints.py*
 
 %changelog
+* Sat Dec 30 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.3-0.4.20171118git5b3c751
+- Remove conflicting anitya endpoints config file from fedmsg directory
+
 * Tue Dec 05 2017 Athos Ribeiro <athoscr@fedoraproject.org> - 0.4.3-0.3.20171118git5b3c751
 - Install anitya endpoint for fedmsg
 
